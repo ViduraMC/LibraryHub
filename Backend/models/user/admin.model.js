@@ -9,16 +9,11 @@ const adminSchema = new mongoose.Schema({
 });
 
 // Auto-generate adminId before saving (ADM-001, ADM-002...)
-adminSchema.pre("save", async function (next) {
-    if (this.adminId) return next();
+adminSchema.pre("save", async function () {
+    if (this.adminId) return;
 
-    try {
-        const count = await Admin.countDocuments();
-        this.adminId = `ADM-${String(count + 1).padStart(3, "0")}`;
-        next();
-    } catch (error) {
-        next(error);
-    }
+    const count = await Admin.countDocuments();
+    this.adminId = `ADM-${String(count + 1).padStart(3, "0")}`;
 });
 
 const Admin = User.discriminator("admin", adminSchema);
