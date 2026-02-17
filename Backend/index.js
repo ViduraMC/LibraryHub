@@ -6,6 +6,7 @@ import cors from "cors";
 
 // routes
 import authRoutes from "./routes/auth.routes.js";
+import adminRoutes from "./routes/admin.routes.js";
 
 
 const app = express();
@@ -18,6 +19,7 @@ app.use(cors());
 
 // api routes
 app.use("/api/auth", authRoutes);
+app.use("/api/admin", adminRoutes);
 
 app.get("/", (req, res) => {
   res.send("API working");
