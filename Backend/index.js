@@ -1,21 +1,36 @@
 import express from "express";
 import connectDB from "./config/mongodb.js"
+import seedAdmin from "./config/adminSeed.js";
 import "dotenv/config";
 import cors from "cors";
 
+// routes
+import authRoutes from "./routes/auth.routes.js";
+import adminRoutes from "./routes/admin.routes.js";
+import schoolListRoutes from "./routes/schoolList.routes.js";
+import membershipRequestRoutes from "./routes/membershipRequest.routes.js";
 
-const app= express();
 
-connectDB();
+const app = express();
+
+connectDB().then(() => {
+  seedAdmin();
+});
 app.use(express.json());
 app.use(cors());
 
-app.get("/", (req,res)=>{
+// api routes
+app.use("/api/auth", authRoutes);
+app.use("/api/admin", adminRoutes);
+app.use("/api/school-list", schoolListRoutes);
+app.use("/api/membership-request", membershipRequestRoutes);
+
+app.get("/", (req, res) => {
   res.send("API working");
 });
 
 
-const PORT= process.env.PORT || 3000;
-app.listen(PORT, ()=> {
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
   console.log(`Server running on port: ${PORT}`);
 });
