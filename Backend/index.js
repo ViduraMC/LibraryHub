@@ -4,6 +4,9 @@ import seedAdmin from "./config/adminSeed.js";
 import "dotenv/config";
 import cors from "cors";
 
+// routes
+import authRoutes from "./routes/auth.routes.js";
+
 
 const app = express();
 
@@ -12,6 +15,9 @@ connectDB().then(() => {
 });
 app.use(express.json());
 app.use(cors());
+
+// api routes
+app.use("/api/auth", authRoutes);
 
 app.get("/", (req, res) => {
   res.send("API working");
