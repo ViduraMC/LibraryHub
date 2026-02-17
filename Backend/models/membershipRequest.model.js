@@ -114,16 +114,6 @@ const membershipRequestSchema = new mongoose.Schema(
 // Index for quick lookup by status (librarian dashboard queries)
 membershipRequestSchema.index({ status: 1 });
 
-// Index for preventing duplicate requests from same school ID
-membershipRequestSchema.index(
-    { applicantType: 1, studentId: 1 },
-    { unique: true, sparse: true }
-);
-membershipRequestSchema.index(
-    { applicantType: 1, teacherId: 1 },
-    { unique: true, sparse: true }
-);
-
 const MembershipRequest = mongoose.model(
     "MembershipRequest",
     membershipRequestSchema

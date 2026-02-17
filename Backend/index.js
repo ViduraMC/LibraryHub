@@ -8,6 +8,7 @@ import cors from "cors";
 import authRoutes from "./routes/auth.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
 import schoolListRoutes from "./routes/schoolList.routes.js";
+import membershipRequestRoutes from "./routes/membershipRequest.routes.js";
 
 
 const app = express();
@@ -22,6 +23,7 @@ app.use(cors());
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/school-list", schoolListRoutes);
+app.use("/api/membership-request", membershipRequestRoutes);
 
 app.get("/", (req, res) => {
   res.send("API working");
