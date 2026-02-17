@@ -1,5 +1,8 @@
 import jwt from "jsonwebtoken";
 import User from "../models/user/user.model.js";
+import Student from "../models/user/student.model.js";
+import Teacher from "../models/user/teacher.model.js";
+import MembershipRequest from "../models/membershipRequest.model.js";
 
 // generate jwt token
 const generateToken = (user) => {
@@ -86,6 +89,105 @@ export const login = async (req, res) => {
         });
     } catch (error) {
         console.error("Login error:", error.message);
+        res.status(500).json({
+            success: false,
+            message: "Server error",
+        });
+    }
+};
+
+// set password for newly approved members
+// called when student/teacher clicks the link in their approval email
+export const setPassword = async (req, res) => {
+    try {
+        const { token, password } = req.body;
+
+        // validate input
+        if (!token || !password) {
+            return res.status(400).json({
+                success: false,
+                message: "Token and password are required",
+            });
+        }
+
+        // password strength check
+        if (password.length < 6) {
+            return res.status(400).json({
+                success: false,
+                message: "Password must be at least 6 characters",
+            });
+        }
+
+        // find the membership request with this token
+        const request = await MembershipRequest.findOne({
+            passwordSetToken: token,
+            status: "approved",
+        });
+
+        if (!request) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid or expired token",
+            });
+        }
+
+        // check if token has expired
+        if (request.passwordSetTokenExpiry < new Date()) {
+            return res.status(400).json({
+                success: false,
+                message: "Token has expired. Please contact the librarian for a new approval",
+            });
+        }
+
+        // create actual user account based on applicant type
+        let newUser;
+
+        if (request.applicantType === "student") {
+            newUser = await Student.create({
+                fullName: request.fullName,
+                email: request.email,
+                password: password,
+                phone: request.phone || "",
+                address: request.address || "",
+                role: "student",
+                studentId: request.studentId,
+                membershipId: request.membershipId,
+                grade: request.grade || "",
+                classRoom: request.classRoom || "",
+                guardianName: request.guardianName || "",
+                guardianPhone: request.guardianPhone || "",
+            });
+        } else {
+            newUser = await Teacher.create({
+                fullName: request.fullName,
+                email: request.email,
+                password: password,
+                phone: request.phone || "",
+                address: request.address || "",
+                role: "teacher",
+                teacherId: request.teacherId,
+                membershipId: request.membershipId,
+                subject: request.subject || "",
+            });
+        }
+
+        // mark request as active and clear token
+        request.status = "active";
+        request.passwordSetToken = undefined;
+        request.passwordSetTokenExpiry = undefined;
+        await request.save();
+
+        // remove password from response
+        const userResponse = newUser.toObject();
+        delete userResponse.password;
+
+        res.status(201).json({
+            success: true,
+            message: "Password set successfully. You can now login with your membership ID",
+            user: userResponse,
+        });
+    } catch (error) {
+        console.error("Set password error:", error.message);
         res.status(500).json({
             success: false,
             message: "Server error",
