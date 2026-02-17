@@ -57,15 +57,15 @@ export const submitRequest = async (req, res) => {
             schoolId: schoolId,
         });
 
-        let status = "pending";
-        let verifiedAt = null;
-
-        if (schoolRecord) {
-            // found in school list - auto verify
-            status = "verified";
-            verifiedAt = new Date();
+        // if ID not found in school list, reject immediately
+        if (!schoolRecord) {
+            return res.status(400).json({
+                success: false,
+                message: `${applicantType === "student" ? "Student" : "Teacher"} ID "${schoolId}" not found in school records. Registration denied`,
+            });
         }
 
+        // ID found in school list - create verified request
         // build request data (only include relevant ID field to avoid sparse index conflicts)
         const requestData = {
             applicantType,
@@ -74,8 +74,8 @@ export const submitRequest = async (req, res) => {
             phone,
             address,
             profileImageURL,
-            status,
-            verifiedAt,
+            status: "verified",
+            verifiedAt: new Date(),
         };
 
         // add type-specific fields
@@ -95,9 +95,7 @@ export const submitRequest = async (req, res) => {
 
         res.status(201).json({
             success: true,
-            message: schoolRecord
-                ? "Request submitted and auto-verified. Waiting for librarian approval"
-                : "Request submitted. ID not found in school records - pending manual review",
+            message: "Request submitted and verified. Waiting for librarian approval",
             request,
         });
     } catch (error) {
