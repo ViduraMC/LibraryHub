@@ -224,3 +224,87 @@ export const renewBook = async (req, res) => {
         });
     }
 };
+
+// get my own transaction history (student/teacher)
+export const getMyTransactions = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const { status } = req.query;
+
+        const filter = { userId };
+        if (status) filter.status = status;
+
+        const transactions = await BookTransaction.find(filter)
+            .populate("bookId", "bookId name author grade type")
+            .sort({ createdAt: -1 });
+
+        res.status(200).json({
+            success: true,
+            count: transactions.length,
+            transactions,
+        });
+    } catch (error) {
+        console.error("Get my transactions error:", error.message);
+        res.status(500).json({
+            success: false,
+            message: "Server error while fetching transactions",
+        });
+    }
+};
+
+// get all transactions (librarian/admin)
+export const getAllTransactions = async (req, res) => {
+    try {
+        const { status, userId } = req.query;
+
+        const filter = {};
+        if (status) filter.status = status;
+        if (userId) filter.userId = userId;
+
+        const transactions = await BookTransaction.find(filter)
+            .populate("bookId", "bookId name author grade")
+            .populate("userId", "fullName email role")
+            .sort({ createdAt: -1 });
+
+        res.status(200).json({
+            success: true,
+            count: transactions.length,
+            transactions,
+        });
+    } catch (error) {
+        console.error("Get all transactions error:", error.message);
+        res.status(500).json({
+            success: false,
+            message: "Server error while fetching transactions",
+        });
+    }
+};
+
+// get single transaction by ID
+export const getSingleTransaction = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const transaction = await BookTransaction.findById(id)
+            .populate("bookId", "bookId name author grade type value")
+            .populate("userId", "fullName email role");
+
+        if (!transaction) {
+            return res.status(404).json({
+                success: false,
+                message: "Transaction not found",
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            transaction,
+        });
+    } catch (error) {
+        console.error("Get single transaction error:", error.message);
+        res.status(500).json({
+            success: false,
+            message: "Server error while fetching transaction",
+        });
+    }
+};
