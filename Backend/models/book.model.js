@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from "mongoose";
 const { Schema } = mongoose;
 
 const BookSchema = new Schema(
@@ -66,4 +66,4 @@ BookSchema.pre(['updateOne', 'findOneAndUpdate', 'updateMany'], function (next) 
     next();
 });
 
-module.exports = mongoose.model('Book', BookSchema);
+export default mongoose.model('Book', BookSchema);
