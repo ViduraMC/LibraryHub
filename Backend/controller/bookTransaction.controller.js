@@ -164,3 +164,63 @@ export const returnBook = async (req, res) => {
         });
     }
 };
+
+// renew a borrow (student/teacher — 1 time only, +2 days)
+export const renewBook = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const userId = req.user._id;
+
+        const transaction = await BookTransaction.findById(id);
+        if (!transaction) {
+            return res.status(404).json({
+                success: false,
+                message: "Transaction not found",
+            });
+        }
+
+        // only the borrower can renew their own book
+        if (transaction.userId.toString() !== userId.toString()) {
+            return res.status(403).json({
+                success: false,
+                message: "You can only renew your own borrowed books",
+            });
+        }
+
+        if (transaction.status !== "active") {
+            return res.status(400).json({
+                success: false,
+                message: `Cannot renew — transaction status is "${transaction.status}"`,
+            });
+        }
+
+        // only 1 renewal allowed
+        if (transaction.renewed) {
+            return res.status(400).json({
+                success: false,
+                message: "This book has already been renewed. Renewal is allowed only once",
+            });
+        }
+
+        // extend dueDate by +2 days
+        const newDueDate = new Date(transaction.dueDate);
+        newDueDate.setDate(newDueDate.getDate() + 2);
+
+        transaction.dueDate = newDueDate;
+        transaction.renewed = true;
+        transaction.renewedAt = new Date();
+        await transaction.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Book renewed successfully. New due date: " + newDueDate.toDateString(),
+            transaction,
+        });
+    } catch (error) {
+        console.error("Renew book error:", error.message);
+        res.status(500).json({
+            success: false,
+            message: "Server error while renewing book",
+        });
+    }
+};
