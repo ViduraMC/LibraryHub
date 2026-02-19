@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const fineSchema = new mongoose.Schema(
     {
-        bookTransactionId:{
+        bookTransactionId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "BookTransaction",
             required: [true, "Book Transaction ID is required"],
@@ -50,7 +50,7 @@ const fineSchema = new mongoose.Schema(
             default: null,
         },
 
-        bookId : {
+        bookId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Book",
             required: [true, "Book ID is required"],
@@ -58,9 +58,13 @@ const fineSchema = new mongoose.Schema(
 
         },
 
-},
-{
-    timestamps: true,
-}
+    },
+    {
+        timestamps: true,
+    }
 
 );
+
+const Fine = mongoose.model("Fine", fineSchema);
+
+export default Fine;
