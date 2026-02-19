@@ -102,3 +102,65 @@ export const borrowBook = async (req, res) => {
         });
     }
 };
+
+// return a book (librarian processes the return)
+export const returnBook = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // find the active transaction
+        const transaction = await BookTransaction.findById(id);
+        if (!transaction) {
+            return res.status(404).json({
+                success: false,
+                message: "Transaction not found",
+            });
+        }
+
+        if (transaction.status !== "active" && transaction.status !== "overdue") {
+            return res.status(400).json({
+                success: false,
+                message: `Cannot return — transaction status is "${transaction.status}"`,
+            });
+        }
+
+        // set return date and check if late
+        const returnDate = new Date();
+        const isLate = returnDate > transaction.dueDate;
+
+        transaction.returnDate = returnDate;
+        transaction.status = "returned";
+        transaction.isLate = isLate;
+        await transaction.save();
+
+        // increment book availability (native driver)
+        const booksCollection = mongoose.connection.db.collection("books");
+        await booksCollection.updateOne(
+            { _id: new mongoose.Types.ObjectId(transaction.bookId) },
+            {
+                $inc: { availableCopies: 1 },
+                $set: { available: true },
+            }
+        );
+
+        // decrement user's borrowed count
+        await User.updateOne(
+            { _id: transaction.userId },
+            { $inc: { noOfBorrowedBooks: -1 } }
+        );
+
+        res.status(200).json({
+            success: true,
+            message: isLate
+                ? "Book returned (overdue — returned after due date)"
+                : "Book returned successfully",
+            transaction,
+        });
+    } catch (error) {
+        console.error("Return book error:", error.message);
+        res.status(500).json({
+            success: false,
+            message: "Server error while returning book",
+        });
+    }
+};
