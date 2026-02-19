@@ -1,4 +1,6 @@
-const ComputerSchema= new Schema({
+import mongoose from "mongoose";
+
+const computerSchema= new mongoose.Schema({
   computerNumber:{
     type: Number,
     unique: true,
@@ -18,3 +20,6 @@ const ComputerSchema= new Schema({
 },{
   timestamps:true
 });
+
+const Computer = mongoose.model("Computer", computerSchema);
+export default Computer;
