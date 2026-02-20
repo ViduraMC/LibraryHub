@@ -36,6 +36,39 @@ export const getAllComputers = async (req, res)=>{
   }
 };
 
+export const getComputerById= async (req, res)=>{
+  try {
+    const {id}= req.params;
+    const computer= await Computer.findById(id);
+
+    if(!computer){
+      return res.status(404).json({message: "Computer not found"});
+    }
+
+    return res.status(200).json(computer);
+  } catch (error) {
+    if(error.kind === "ObjectId"){
+      return res.status(400).json({message: "Invalid computer ID format"});
+    }
+    return res.status(500).json({message: "Unable to fetch computer", error});
+  }
+};
+
+export const getComputerByName= async (req, res)=>{
+  try {
+    const {pcNumber}= req.params;
+    const computer = await Computer.findOne({computerNumber: pcNumber});
+
+    if(!computer){
+      return res.status(404).json({message: `Computer #${pcNumber} not found`});
+    }
+
+    return res.status(200).json(computer);
+  } catch (error) {
+    return res.status(500).json({message: "Unable to fetch computer with given number", error});
+  }
+};
+
 export const updateComputer = async(req, res)=> {
   try {
     const {id}= req.params;
