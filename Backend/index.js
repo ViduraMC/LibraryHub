@@ -11,6 +11,7 @@ import adminRoutes from "./routes/admin.routes.js";
 import schoolListRoutes from "./routes/schoolList.routes.js";
 import membershipRequestRoutes from "./routes/membershipRequest.routes.js";
 import bookTransactionRoutes from "./routes/bookTransaction.routes.js";
+import computerRoutes from "./routes/computer.routes.js";
 
 
 const app = express();
@@ -28,6 +29,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/school-list", schoolListRoutes);
 app.use("/api/membership-request", membershipRequestRoutes);
 app.use("/api/transactions", bookTransactionRoutes);
+app.use("/api/computer", computerRoutes);
 
 app.get("/", (req, res) => {
   res.send("API working");

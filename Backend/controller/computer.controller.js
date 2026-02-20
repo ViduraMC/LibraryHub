@@ -1,4 +1,4 @@
-import Computer from "../models/user/computer.model";
+import Computer from "../models/user/computer.model.js";
 
 export const addComputer = async (req, res)=> {
   try {
@@ -77,7 +77,7 @@ export const updateComputer = async(req, res)=> {
     const updatedPC= await Computer.findByIdAndUpdate(
       id,
       {computerNumber, status},
-      {new: true, runValidators: true}
+      {returnDocument: 'after', runValidators: true}
     );
 
     if(!updatedPC) return res.status(404).json({message: "Computer not found!"});
