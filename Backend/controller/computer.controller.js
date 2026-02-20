@@ -55,3 +55,20 @@ export const updateComputer = async(req, res)=> {
     return res.status(400).json({error: "Unable to update computers", error});
   }
 };
+
+export const deleteComputer= async(req, res)=>{
+  try {
+    const {id}= req.params;
+
+    const pc= await Computer.findById(id);
+    if(pc.status==="In-use"){
+      return res.status(400).json({message: "Cannot remove a computer that is currently in use"});
+    }
+
+    await Computer.findByIdAndDelete(id);
+    return res.status(200).json({message: "Computer removed successfully"});
+
+  } catch (error) {
+    return res.status(500).json({error: "Unable to remove computer", error});
+  }
+}
