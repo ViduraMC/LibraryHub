@@ -11,7 +11,7 @@ const startOverdueChecker = () => {
 
             // find all active transactions where dueDate has passed
             const result = await BookTransaction.updateMany(
-                { status: "active", dueDate: { $lt: now } },
+                { status: "active", dueDate: { $lt: now }, isDeleted: false },
                 { $set: { status: "overdue" } }
             );
 

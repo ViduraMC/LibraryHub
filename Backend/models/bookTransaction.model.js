@@ -39,6 +39,15 @@ const bookTransactionSchema = new mongoose.Schema(
             type: Boolean,
             default: false,
         },
+        isDeleted: {
+            type: Boolean,
+            default: false,
+            index: true,
+        },
+        deletedAt: {
+            type: Date,
+            default: null,
+        },
     },
     {
         timestamps: true,
