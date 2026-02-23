@@ -1,26 +1,27 @@
-import express from 'express';
-import * as bookCtrl from '../controllers/book.controller.js';
-import { authenticate, requireLibrarian } from '../middleware/auth.js';
-import upload from '../middleware/upload.js';
+import express from "express";
+import * as bookCtrl from "../controller/book.controller.js";
+import auth from "../middleware/auth.js";
+import roleAuth from "../middleware/roleAuth.js";
+import upload from "../middleware/upload.js";
 
 const router = express.Router();
 
 // Public (authenticated) routes
-router.get('/', authenticate, bookCtrl.listBooks);
-router.get('/:id', authenticate, bookCtrl.getBookById);
+router.get("/", auth, bookCtrl.listBooks);
+router.get("/:id", auth, bookCtrl.getBookById);
 
 // Librarian-only routes
-router.post('/', authenticate, requireLibrarian, bookCtrl.createBook);
-router.put('/:id', authenticate, requireLibrarian, bookCtrl.updateBook);
-router.delete('/:id', authenticate, requireLibrarian, bookCtrl.deleteBook);
+router.post("/", auth, roleAuth("librarian", "admin"), bookCtrl.createBook);
+router.put("/:id", auth, roleAuth("librarian", "admin"), bookCtrl.updateBook);
+router.delete("/:id", auth, roleAuth("librarian", "admin"), bookCtrl.deleteBook);
 
-// Upload PDF for pastpapers / e-books (expects middleware to set req.file)
+// Upload PDF for pastpapers / e-books
 router.post(
-    '/:id/upload-pdf',
-    authenticate,
-    requireLibrarian,
-    upload.single('pdf'),
+    "/:id/upload-pdf",
+    auth,
+    roleAuth("librarian", "admin"),
+    upload.single("pdf"),
     bookCtrl.uploadPdf
 );
 
-export default router; 
+export default router;
