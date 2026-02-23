@@ -17,11 +17,11 @@ const computerReservationSchema= new mongoose.Schema({
   },
   slotStartTime:{
     type: Date,
-    required: true
+   
   },
   slotEndTime:{
     type:Date,
-    required:true
+   
   },
   status:{
     type:String,
