@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import User from "../models/user/user.model.js";
+import BlacklistedToken from "../models/blacklistedToken.model.js";
 
 const auth = async (req, res, next) => {
     try {
@@ -18,6 +19,15 @@ const auth = async (req, res, next) => {
 
         // verify token
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        // check if token has been blacklisted (logged out)
+        const isBlacklisted = await BlacklistedToken.findOne({ token });
+        if (isBlacklisted) {
+            return res.status(401).json({
+                success: false,
+                message: "Token has been invalidated. Please login again",
+            });
+        }
 
         // find user by id from token and attach to request
         const user = await User.findById(decoded.id).select("-password");
