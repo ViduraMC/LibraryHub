@@ -25,8 +25,10 @@ const computerReservationSchema= new mongoose.Schema({
   },
   status:{
     type:String,
-    enum: ["Reserved","In-use","expired","completed","cancelled"],
-    default: "Reserved"
+    enum: ["reserved","in-use","expired","completed","cancelled"],
+    default: "reserved",
+    lowercase: true,
+    trim: true
   }
   
 },{

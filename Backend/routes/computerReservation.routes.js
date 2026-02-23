@@ -7,6 +7,8 @@ const router = express.Router();
 
 //STUDENT/ TEACHER
 router.post("/", auth, roleAuth("student", "teacher"), computerReservationController.createReservation);
+router.patch("/cancel/:id", auth, roleAuth("student", "teacher"), computerReservationController.cancelReservation);
 
+//LIBRARIAN
 
 export default router;

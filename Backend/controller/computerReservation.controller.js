@@ -62,36 +62,42 @@ export const createReservation = async (req, res)=> {
   }
 };
 
-//LIBRARIAN
-export const updateReservationStatus = async (req, res)=> {
+export const cancelReservation = async (req, res)=> {
   try {
     const {id}= req.params;
-    const {status}= req.body;
-
-    const validStatuses=["Reserved", "In-use", "Completed", "Cancelled","Expired"];
-    if(!validStatuses.includes(status)){
-      return res.status(400).json({error: "Invalid status update"});
-    }
+    const userId = req.user.id;
 
     const reservation = await ComputerReservation.findById(id);
     if(!reservation) return res.status(404).json({error: "Reservation not found!"});
 
-    const today= new Date().setHours(0,0,0,0);
-    const reservationDay= new Date(reservation.reservationDate).setHours(0,0,0,0);
-
-    if(status==="In-use" && today!== reservationDay){
-      return res.status(400).json({error: "Cannot check-in for a reservation scheduled for another day!"});
+    if(reservation.userId.toString()!== userId){
+      return res.status(404).json({error: "Unauthorized: You can only cancel your own reservations!"});
     }
 
-    const finalStates = ["Completed", "Cancelled", "Expired"];
-    if(finalStates.includes(status)){
-      return res.status(400).json({error: `Cannot update. This reservation is already ${reservation.status}`});
+    if(reservation.status!== "Reserved"){
+      return res.status(404).json({error: `Cannot cancel reservation, status is : ${reservation.status}`});
     }
 
-    reservation.status = status;
+    reservation.status = "Cancelled";
     await reservation.save();
 
-    return res.status(200).json({message: `Status updated to ${status}`, data: reservation});
+    return res.status(200).json({message: "Reservation cancelled successfully!", data: reservation});
+
+  } catch (error) {
+    return res.status(500).json({error: "Cancellation failed!", error});
+  }
+};
+
+//LIBRARIAN
+export const manageReservationStatus = async (req, res)=> {
+  try {
+    const {id}= req.params;
+    const {status}= req.body;
+
+    const reservation = await ComputerReservation.findById(id);
+    if(!reservation) return res.status(404).json({error: "Reservation not found!"});
+
+    const terminalStates = ["cancelled", "completed", "expired"];
 
   } catch (error) {
     return res.status(500).json({error: "Update failed", error});
