@@ -3,6 +3,7 @@ import User from "../models/user/user.model.js";
 import Student from "../models/user/student.model.js";
 import Teacher from "../models/user/teacher.model.js";
 import MembershipRequest from "../models/membershipRequest.model.js";
+import BlacklistedToken from "../models/blacklistedToken.model.js";
 
 // generate jwt token
 const generateToken = (user) => {
@@ -191,6 +192,32 @@ export const setPassword = async (req, res) => {
         res.status(500).json({
             success: false,
             message: "Server error",
+        });
+    }
+};
+
+// logout — blacklist the current token
+export const logout = async (req, res) => {
+    try {
+        // extract token from header
+        const token = req.headers.authorization.split(" ")[1];
+
+        // decode to get expiry time (exp is in seconds, Date needs milliseconds)
+        const decoded = jwt.decode(token);
+        const expiresAt = new Date(decoded.exp * 1000);
+
+        // add to blacklist — TTL index will auto-remove it after it expires
+        await BlacklistedToken.create({ token, expiresAt });
+
+        res.status(200).json({
+            success: true,
+            message: "Logged out successfully",
+        });
+    } catch (error) {
+        console.error("Logout error:", error.message);
+        res.status(500).json({
+            success: false,
+            message: "Server error while logging out",
         });
     }
 };

@@ -8,7 +8,7 @@ export const borrowBook = async (req, res) => {
     try {
         const userId = req.user._id;
         const userRole = req.user.role;
-        const { bookId } = req.body;
+        const { bookId } = req.body; // same as const bookId = req.body.bookId
 
         if (!bookId) {
             return res.status(400).json({
