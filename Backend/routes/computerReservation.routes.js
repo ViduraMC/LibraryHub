@@ -8,9 +8,11 @@ const router = express.Router();
 //STUDENT/ TEACHER
 router.post("/", auth, roleAuth("student", "teacher"), computerReservationController.createReservation);
 router.patch("/cancel/:id", auth, roleAuth("student", "teacher"), computerReservationController.cancelReservation);
-router.get("/reservations", auth, roleAuth("student","teacher"), computerReservationController.getMyReservations);
+router.get("/my-reservations", auth, roleAuth("student","teacher"), computerReservationController.getMyReservations);
 
 //LIBRARIAN
 router.patch("/manage/:id", auth, roleAuth("librarian"), computerReservationController.manageReservationStatus);
+router.get("/all-reservations", auth, roleAuth("librarian"), computerReservationController.getAllReservations);
+
 
 export default router;
