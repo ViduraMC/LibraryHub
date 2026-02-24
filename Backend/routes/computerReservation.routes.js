@@ -13,6 +13,6 @@ router.get("/my-reservations", auth, roleAuth("student","teacher"), computerRese
 //LIBRARIAN
 router.patch("/manage/:id", auth, roleAuth("librarian"), computerReservationController.manageReservationStatus);
 router.get("/all-reservations", auth, roleAuth("librarian"), computerReservationController.getAllReservations);
-
+router.delete("/delete/:id", auth, roleAuth("librarian"), computerReservationController.deleteReservation);
 
 export default router;

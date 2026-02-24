@@ -168,12 +168,11 @@ export const manageReservationStatus = async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
+    const targetStatus = status.toLowerCase();
 
     const reservation = await ComputerReservation.findById(id);
     if (!reservation)
       return res.status(404).json({ error: "Reservation not found!" });
-
-    const targetStatus = status.toLowerCase();
 
     const terminalStates = ["cancelled", "completed", "expired"];
     if (terminalStates.includes(reservation.status.toLowerCase())) {
@@ -183,8 +182,6 @@ export const manageReservationStatus = async (req, res) => {
     }
 
     const now = new Date();
-    const isCurrentSlot =
-      now >= reservation.slotStartTime && now <= reservation.slotEndTime;
     const gracePeriod = 15 * 60 * 1000;
     const expiryThreshold = new Date(
       reservation.slotStartTime.getTime() + gracePeriod,
@@ -202,10 +199,18 @@ export const manageReservationStatus = async (req, res) => {
       });
     }
 
-    if (targetStatus === "completed" || targetStatus === "cancelled") {
+    if (targetStatus === "completed") {
       await Computer.findByIdAndUpdate(reservation.computerId, {
         status: "Available",
       });
+    }
+
+    if (targetStatus === "cancelled") {
+      return res
+        .status(400)
+        .json({
+          error: "Reservation cancellation can only be done by student!",
+        });
     }
 
     if (targetStatus === "in-use") {
@@ -262,5 +267,28 @@ export const getAllReservations = async (req, res) => {
     });
   } catch (error) {
     return res.status(500).json({ error: "Error fetching reservations!" });
+  }
+};
+
+export const deleteReservation = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const reservation = await ComputerReservation.findById(id);
+    if (!reservation)
+      return res.status(404).json({ error: "Reservation not found!" });
+
+    if (["reserved", "in-use"].includes(reservation.status)) {
+      await Computer.findByIdAndUpdate(reservation.computerId, {
+        status: "Available",
+      });
+    }
+
+    await ComputerReservation.findByIdAndDelete(id);
+    return res.status(200).json({
+      message: "Reservation permanently deleted and computer status resetted!",
+    });
+  } catch (error) {
+    return res.status(500).json({ error: "Error deleting reservation" });
   }
 };
