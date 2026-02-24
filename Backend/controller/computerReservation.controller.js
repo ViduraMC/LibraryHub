@@ -16,16 +16,25 @@ export const createReservation = async (req, res)=> {
       return res.status(404).json({error: "Computer or Time slot not found!"});
     }
 
-    if (computer.status !== "Available"){
-      return res.status(404).json({error: `Unable to make reservation, computer state is : ${computer.status}`});
+    if (computer.status === "Maintenance"){
+      return res.status(404).json({error: `Unable to make reservation, computer is under : ${computer.status}`});
     }
 
     const now = new Date();
     const start= new Date(reservationDate);
     start.setHours(slot.startHour, slot.startMinute, 0, 0); 
 
+    const maxDaysAhead = 7;
+    const maxDate= new Date();
+    maxDate.setDate(now.getDate()+ maxDaysAhead);
+    maxDate.setHours(23,59,59,999);
+
     const gracePeriod= 15*60000;
     const latestPossibleBookingTime = new Date(start.getTime()+ gracePeriod);
+
+    if(start>maxDate){
+      return res.status(400).json({error: `You can only book up to ${maxDaysAhead} days in advance!`});
+    }
 
     if(now > latestPossibleBookingTime){
       return res.status(400).json({error: "This slot started more than 15 mins ago, and therefore is no longer available!"});
@@ -78,17 +87,21 @@ export const createReservation = async (req, res)=> {
   }
 };
 
-export const getReservations = async (req, res)=>{
+export const getMyReservations = async (req, res)=>{
   try {
     const userId = req.user.id;
 
+    const reservations = await ComputerReservation.find({userId}).populate("computerId","createdAt").sort({slotStartTime: -1});
 
-
+    return res.status(200).json({
+      count: reservations.length,
+      data: reservations
+    });
 
   } catch (error) {
-    
+    return res.status(500).json({error: "Failed to fetch your reservations!"});    
   }
-}
+};
 
 export const cancelReservation = async (req, res)=> {
   try {
@@ -108,6 +121,8 @@ export const cancelReservation = async (req, res)=> {
 
     reservation.status = "cancelled";
     await reservation.save();
+
+    await Computer.findByIdAndUpdate(reservation.computerId, {status: "Available"});
 
     return res.status(200).json({message: "Reservation cancelled successfully!", data: reservation});
 
@@ -142,9 +157,8 @@ export const manageReservationStatus = async (req, res)=> {
         return res.status(400).json({error: "Can't expire yet. The student still has time to show up!"});
       }
 
-      if(isCurrentSlot){
-        await Computer.findByIdAndUpdate(reservation.computerId, {status: "Available"});
-      }     
+      await Computer.findByIdAndUpdate(reservation.computerId, {status: "Available"});
+           
     }
 
     if(targetStatus === "completed"){
@@ -159,6 +173,7 @@ export const manageReservationStatus = async (req, res)=> {
       }
 
       await Computer.findByIdAndUpdate(reservation.computerId, {status: "In-use"});
+
     }
 
     reservation.status= targetStatus;
@@ -170,3 +185,4 @@ export const manageReservationStatus = async (req, res)=> {
     return res.status(500).json({error: "Update failed", error});
   }
 };
+
