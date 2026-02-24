@@ -10,5 +10,6 @@ router.post("/", auth, roleAuth("student", "teacher"), computerReservationContro
 router.patch("/cancel/:id", auth, roleAuth("student", "teacher"), computerReservationController.cancelReservation);
 
 //LIBRARIAN
+router.patch("/manage/:id", auth, roleAuth("librarian"), computerReservationController.manageReservationStatus);
 
 export default router;

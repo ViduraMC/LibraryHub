@@ -13,7 +13,7 @@ const computerSchema= new mongoose.Schema({
   },
   status: {
     type: String,
-    enum:["Available","In-use","Maintenance"],
+    enum:["Available","In-use","Maintenance","Reserved"],
     default: "Available",
     required:true
   }

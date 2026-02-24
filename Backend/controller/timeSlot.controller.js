@@ -30,7 +30,7 @@ export const initializeSchoolSchedule = async (req, res)=> {
   }
 
   const activeBookings= await ComputerReservation.findOne({
-    status: {$in : ["Reserved", "In-use"]},
+    status: {$in : ["reserved", "in-use"]},
     slotStartTime: {$gte: new Date()}
    });
 
@@ -124,7 +124,7 @@ export const deleteTimeSlot = async (req, res)=> {
     //check for active or upcoming reservations which are reserved or in-use
     const activeReservations = await ComputerReservation.findOne({
       slotNumber: slot.slotNumber,
-      status: {$in: ["Reserved", "In-use"]},
+      status: {$in: ["reserved", "in-use"]},
       slotStartTime: {$gte: new Date()} //check future or current ones
     });
 

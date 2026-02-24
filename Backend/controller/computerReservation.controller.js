@@ -20,26 +20,36 @@ export const createReservation = async (req, res)=> {
       return res.status(404).json({error: `Unable to make reservation, computer state is : ${computer.status}`});
     }
 
+    const now = new Date();
     const start= new Date(reservationDate);
     start.setHours(slot.startHour, slot.startMinute, 0, 0); 
 
-    const end= new Date(start.getTime() + slot.durationMinutes*60000);  //cinvert to milliseconds
+    const gracePeriod= 15*60000;
+    const latestPossibleBookingTime = new Date(start.getTime()+ gracePeriod);
+
+    if(now > latestPossibleBookingTime){
+      return res.status(400).json({error: "This slot started more than 15 mins ago, and therefore is no longer available!"});
+    }
+
+    const end= new Date(start.getTime() + slot.durationMinutes*60000);  //convert to milliseconds
 
     const isOccupied = await ComputerReservation.findOne({
       computerId,
       slotStartTime: start,
-      status: {$in: ["Reserved", "In-use"]}
+      status: {$in: ["reserved", "in-use"]}
     });
 
     if(isOccupied) return res.status(400).json({error: "This computer is already booked for this time slot"}); 
 
-    const startOfDay = new Date(start).setHours(0,0,0,0);
-    const endOfDay = new Date(start).setHours(23,59,59,999);
+    const startOfDay = new Date(start);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(start);
+    endOfDay.setHours(23, 59, 59, 999);
 
     const studentBusy = await ComputerReservation.findOne({
       userId,
       slotStartTime: {$gte: startOfDay, $lte: endOfDay},
-      status: {$in: ["Reserved", "In-use"]}
+      status: {$in: ["reserved", "in-use"]}
     });
 
     if(studentBusy){
@@ -52,8 +62,14 @@ export const createReservation = async (req, res)=> {
       slotNumber: slot.slotNumber,
       slotStartTime: start,
       slotEndTime: end,
-      status: "Reserved"
+      status: "reserved"
     });
+
+    if(newBooking){
+      await Computer.findByIdAndUpdate(computerId,{
+      status: "Reserved",
+    });
+    }
 
     return res.status(201).json({message: "Reservation confirmed!", data: newBooking});
 
@@ -61,6 +77,18 @@ export const createReservation = async (req, res)=> {
     return res.status(500).json({error: "Error in making reservation", error});
   }
 };
+
+export const getReservations = async (req, res)=>{
+  try {
+    const userId = req.user.id;
+
+
+
+
+  } catch (error) {
+    
+  }
+}
 
 export const cancelReservation = async (req, res)=> {
   try {
@@ -74,11 +102,11 @@ export const cancelReservation = async (req, res)=> {
       return res.status(404).json({error: "Unauthorized: You can only cancel your own reservations!"});
     }
 
-    if(reservation.status!== "Reserved"){
+    if(reservation.status!== "reserved"){
       return res.status(404).json({error: `Cannot cancel reservation, status is : ${reservation.status}`});
     }
 
-    reservation.status = "Cancelled";
+    reservation.status = "cancelled";
     await reservation.save();
 
     return res.status(200).json({message: "Reservation cancelled successfully!", data: reservation});
@@ -97,7 +125,46 @@ export const manageReservationStatus = async (req, res)=> {
     const reservation = await ComputerReservation.findById(id);
     if(!reservation) return res.status(404).json({error: "Reservation not found!"});
 
+    const targetStatus = status.toLowerCase();
+
     const terminalStates = ["cancelled", "completed", "expired"];
+    if(terminalStates.includes(reservation.status.toLowerCase())){
+      return res.status(400).json({error: `This reservation is already ${reservation.status}`});
+    }
+
+    const now= new Date();
+    const isCurrentSlot = now>=reservation.slotStartTime && now<= reservation.slotEndTime;
+    const gracePeriod = 15*60*1000;
+    const expiryThreshold= new Date(reservation.slotStartTime.getTime() + gracePeriod);
+
+    if(targetStatus === "expired"){
+      if(now < expiryThreshold){
+        return res.status(400).json({error: "Can't expire yet. The student still has time to show up!"});
+      }
+
+      if(isCurrentSlot){
+        await Computer.findByIdAndUpdate(reservation.computerId, {status: "Available"});
+      }     
+    }
+
+    if(targetStatus === "completed"){
+      if(isCurrentSlot){
+        await Computer.findByIdAndUpdate(reservation.computerId, {status: "Available"});
+      }
+    }
+
+    if(targetStatus === "in-use"){
+      if(now > reservation.slotEndTime){
+        return res.status(400).json({error: "This slot time has already ended!"});
+      }
+
+      await Computer.findByIdAndUpdate(reservation.computerId, {status: "In-use"});
+    }
+
+    reservation.status= targetStatus;
+    await reservation.save();
+
+    return res.status(200).json({message: `Status updated to ${targetStatus}`, data: reservation});
 
   } catch (error) {
     return res.status(500).json({error: "Update failed", error});
