@@ -2,6 +2,7 @@ import express from "express";
 import connectDB from "./config/mongodb.js"
 import seedAdmin from "./config/adminSeed.js";
 import startOverdueChecker from "./config/overdueChecker.js";
+import { startComputerStatusSync } from "./config/computerSync.js";
 import "dotenv/config";
 import cors from "cors";
 
@@ -20,6 +21,7 @@ const app = express();
 connectDB().then(() => {
   seedAdmin();
   startOverdueChecker();
+  startComputerStatusSync();
 });
 app.use(express.json());
 app.use(cors());

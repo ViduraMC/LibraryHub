@@ -112,7 +112,7 @@ export const getMyReservations = async (req, res) => {
     const userId = req.user.id;
 
     const reservations = await ComputerReservation.find({ userId })
-      .populate("computerId", "createdAt")
+      .populate("computerId", "computerNumber createdAt")
       .sort({ slotStartTime: -1 });
 
     return res.status(200).json({
@@ -279,9 +279,7 @@ export const deleteReservation = async (req, res) => {
       return res.status(404).json({ error: "Reservation not found!" });
 
     if (["reserved", "in-use"].includes(reservation.status)) {
-      await Computer.findByIdAndUpdate(reservation.computerId, {
-        status: "Available",
-      });
+      return res.status(400).json({error: "Cannot delete an active or pending reservation!"});
     }
 
     await ComputerReservation.findByIdAndDelete(id);
