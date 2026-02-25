@@ -30,7 +30,7 @@ export const startComputerStatusSync = () => {
       await Computer.updateMany(
         {
           _id: { $nin: busyComputerIds },
-          status: { $in: ["Reserved", "In-use"] } 
+          status: { $in: ["Reserved"] } 
         },
         { $set: { status: "Available" } }
       );
