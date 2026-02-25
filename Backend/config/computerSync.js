@@ -10,7 +10,7 @@ export const startComputerStatusSync = ()=> {
       const activeReservations = await ComputerReservation.find({
         slotStartTime: {$lte: now},
         slotEndTime: {$gt: now},
-        status: {$in: ["reserved", "in-use"]}
+        status: {$in: ["reserved"]}
       });
 
       const busyComputerIds= activeReservations.map(res=> res.computerId);
@@ -26,7 +26,7 @@ export const startComputerStatusSync = ()=> {
       await Computer.updateMany(
         {
           _id: {$nin: busyComputerIds},
-          status: {$in: ["Reserved", "In-use"]}
+          status: {$in: ["Reserved","In-use"]}
         },
         {$set: {status: "Available"}}
       );
