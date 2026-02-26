@@ -17,16 +17,18 @@ const computerReservationSchema= new mongoose.Schema({
   },
   slotStartTime:{
     type: Date,
-    required: true
+   
   },
   slotEndTime:{
     type:Date,
-    required:true
+   
   },
   status:{
     type:String,
-    enum: ["Reserved","In-use","expired","completed","cancelled"],
-    default: "Reserved"
+    enum: ["reserved","in-use","expired","completed","cancelled"],
+    default: "reserved",
+    lowercase: true,
+    trim: true
   }
   
 },{
