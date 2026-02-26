@@ -5,8 +5,12 @@ import auth from "../middleware/auth.js";
 
 const router = express.Router();
 
+//STUDENT AND TEACHER
 router.post("/", auth, roleAuth("student", "teacher"), bookReservation.createBookReservation);
+router.patch("/cancel/:reservationId", auth, roleAuth("student","teacher"), bookReservation.cancelReservation);
 
+//LIBRRIAN
+router.post("/issue-book", auth, roleAuth("librarian"), bookReservation.processBorrowing);
 
 
 export default router;

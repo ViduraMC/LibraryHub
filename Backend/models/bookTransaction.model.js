@@ -12,6 +12,12 @@ const bookTransactionSchema = new mongoose.Schema(
             ref: "Book",
             required: [true, "Book ID is required"],
         },
+        reservationId:{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "BookReservation",
+            required: false,
+            default: null
+        },
         borrowDate: {
             type: Date,
             default: Date.now,
