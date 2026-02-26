@@ -15,6 +15,9 @@ import bookTransactionRoutes from "./routes/bookTransaction.routes.js";
 import computerRoutes from "./routes/computer.routes.js";
 import timeSlotRoutes from "./routes/timeSlot.routes.js";
 import computerReservationRoutes from "./routes/computerReservation.routes.js";
+import bookRoutes from "./routes/book.routes.js";
+import fineRoutes from "./routes/fine.routes.js";
+
 
 const app = express();
 
@@ -35,6 +38,8 @@ app.use("/api/transactions", bookTransactionRoutes);
 app.use("/api/computer", computerRoutes);
 app.use("/api/time-slot", timeSlotRoutes);
 app.use("/api/computer-reservation", computerReservationRoutes);
+app.use("/api/books", bookRoutes);
+app.use("/api/fines", fineRoutes);
 
 app.get("/", (req, res) => {
   res.send("API working");
