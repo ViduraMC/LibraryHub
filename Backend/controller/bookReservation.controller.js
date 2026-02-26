@@ -202,3 +202,69 @@ export const processBorrowing= async (req, res)=> {
   }
 
 };
+
+export const processReturn = async (req, res)=> {
+  const session= await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const {transactionId} = req.body;
+
+    const transaction = await BookTransaction.findById(transactionId).session(session);
+    if(!transaction || transaction.status=== "returned"){
+      return res.status(400).json({error: "Active transaction not found or already returned"});
+    } 
+
+    transaction.status= "returned";
+    transaction.returnDate= new Date();
+    transaction.isLate = new Date() > transaction.dueDate;
+    await transaction.save({session});
+
+    await BookReservation.findByIdAndUpdate(
+      transaction.reservationId,
+      {status: "completed"},
+      {session}
+    );
+
+    await User.findByIdAndUpdate(
+      transaction.userId,
+      {$inc: {noOfBorrowedBooks: -1}},
+      {session}
+    );
+
+    const nextInLine= await BookReservation.findOne({
+      bookId: transaction.bookId,
+      status: "waiting"
+    }).sort({queuePosition: 1}).session(session);
+
+    if(nextInLine){
+      nextInLine.status= "reserved";
+      nextInLine.queuePosition=0;
+      nextInLine.reservedAt= new Date();
+      nextInLine.expiredDate= new Date(Date.now()+ 24*60*60*1000);
+      await nextInLine.save({session});
+
+      await BookReservation.updateMany(
+        {bookId: transaction.bookId, status: "waiting"},
+        {$inc: {queuePosition: -1}},
+        {session}
+      );
+    }else{
+      await Book.findByIdAndUpdate(
+        transaction.bookId,
+        {$inc: {availableCopies: 1}},
+        {session}
+      );
+    }
+
+    await session.commitTransaction();
+    session.endSession();
+
+    res.status(200).json({message: nextInLine? "Book returned and assigned to next in queue!" : "Book returned to shelf"});
+
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    res.status(500).json({error: "Error during return"});
+  }
+};
