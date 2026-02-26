@@ -12,6 +12,9 @@ import schoolListRoutes from "./routes/schoolList.routes.js";
 import membershipRequestRoutes from "./routes/membershipRequest.routes.js";
 import bookTransactionRoutes from "./routes/bookTransaction.routes.js";
 import reportRoutes from "./routes/report.routes.js";
+import bookRoutes from "./routes/book.routes.js";
+import fineRoutes from "./routes/fine.routes.js";
+
 
 const app = express();
 
@@ -29,6 +32,8 @@ app.use("/api/school-list", schoolListRoutes);
 app.use("/api/membership-request", membershipRequestRoutes);
 app.use("/api/transactions", bookTransactionRoutes);
 app.use("/api/reports", reportRoutes);
+app.use("/api/books", bookRoutes);
+app.use("/api/fines", fineRoutes);
 
 app.get("/", (req, res) => {
   res.send("API working");

@@ -8,7 +8,7 @@ export const borrowBook = async (req, res) => {
     try {
         const userId = req.user._id;
         const userRole = req.user.role;
-        const { bookId } = req.body;
+        const { bookId } = req.body; // same as const bookId = req.body.bookId
 
         if (!bookId) {
             return res.status(400).json({
@@ -38,6 +38,7 @@ export const borrowBook = async (req, res) => {
         const currentBorrows = await BookTransaction.countDocuments({
             userId,
             status: "active",
+            isDeleted: false,
         });
 
         if (currentBorrows >= maxBooks) {
@@ -52,6 +53,7 @@ export const borrowBook = async (req, res) => {
             userId,
             bookId,
             status: "active",
+            isDeleted: false,
         });
 
         if (alreadyBorrowed) {
@@ -108,8 +110,8 @@ export const returnBook = async (req, res) => {
     try {
         const { id } = req.params;
 
-        // find the active transaction
-        const transaction = await BookTransaction.findById(id);
+        // find the active transaction (exclude deleted)
+        const transaction = await BookTransaction.findOne({ _id: id, isDeleted: false });
         if (!transaction) {
             return res.status(404).json({
                 success: false,
@@ -171,7 +173,7 @@ export const renewBook = async (req, res) => {
         const { id } = req.params;
         const userId = req.user._id;
 
-        const transaction = await BookTransaction.findById(id);
+        const transaction = await BookTransaction.findOne({ _id: id, isDeleted: false });
         if (!transaction) {
             return res.status(404).json({
                 success: false,
@@ -231,7 +233,7 @@ export const getMyTransactions = async (req, res) => {
         const userId = req.user._id;
         const { status } = req.query;
 
-        const filter = { userId };
+        const filter = { userId, isDeleted: false };
         if (status) filter.status = status;
 
         const transactions = await BookTransaction.find(filter)
@@ -257,7 +259,7 @@ export const getAllTransactions = async (req, res) => {
     try {
         const { status, userId } = req.query;
 
-        const filter = {};
+        const filter = { isDeleted: false };
         if (status) filter.status = status;
         if (userId) filter.userId = userId;
 
@@ -285,7 +287,7 @@ export const getSingleTransaction = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const transaction = await BookTransaction.findById(id)
+        const transaction = await BookTransaction.findOne({ _id: id, isDeleted: false })
             .populate("bookId", "bookId name author grade type value")
             .populate("userId", "fullName email role");
 
@@ -305,6 +307,165 @@ export const getSingleTransaction = async (req, res) => {
         res.status(500).json({
             success: false,
             message: "Server error while fetching transaction",
+        });
+    }
+};
+
+// soft delete a transaction (move to recycle bin)
+export const softDeleteTransaction = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const transaction = await BookTransaction.findOne({ _id: id, isDeleted: false });
+        if (!transaction) {
+            return res.status(404).json({
+                success: false,
+                message: "Transaction not found or already deleted",
+            });
+        }
+
+        // if active or overdue → reverse the side effects
+        if (transaction.status === "active" || transaction.status === "overdue") {
+            // give the copy back to the book
+            const booksCollection = mongoose.connection.db.collection("books");
+            await booksCollection.updateOne(
+                { _id: new mongoose.Types.ObjectId(transaction.bookId) },
+                {
+                    $inc: { availableCopies: 1 },
+                    $set: { available: true },
+                }
+            );
+
+            // decrease user's borrow count
+            await User.updateOne(
+                { _id: transaction.userId },
+                { $inc: { noOfBorrowedBooks: -1 } }
+            );
+        }
+
+        transaction.isDeleted = true;
+        transaction.deletedAt = new Date();
+        await transaction.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Transaction moved to recycle bin",
+            transaction,
+        });
+    } catch (error) {
+        console.error("Soft delete error:", error.message);
+        res.status(500).json({
+            success: false,
+            message: "Server error while deleting transaction",
+        });
+    }
+};
+
+// restore a soft-deleted transaction
+export const restoreTransaction = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const transaction = await BookTransaction.findOne({ _id: id, isDeleted: true });
+        if (!transaction) {
+            return res.status(404).json({
+                success: false,
+                message: "Deleted transaction not found",
+            });
+        }
+
+        // if was active or overdue → re-apply the side effects
+        if (transaction.status === "active" || transaction.status === "overdue") {
+            // check book still has copies to take
+            const book = await Book.findById(transaction.bookId);
+            if (!book || book.availableCopies <= 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Cannot restore — book has no available copies",
+                });
+            }
+
+            // take back the copy from the book
+            const booksCollection = mongoose.connection.db.collection("books");
+            await booksCollection.updateOne(
+                { _id: new mongoose.Types.ObjectId(transaction.bookId) },
+                {
+                    $inc: { availableCopies: -1 },
+                    $set: { available: book.availableCopies - 1 > 0 },
+                }
+            );
+
+            // increase user's borrow count
+            await User.updateOne(
+                { _id: transaction.userId },
+                { $inc: { noOfBorrowedBooks: 1 } }
+            );
+        }
+
+        transaction.isDeleted = false;
+        transaction.deletedAt = null;
+        await transaction.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Transaction restored successfully",
+            transaction,
+        });
+    } catch (error) {
+        console.error("Restore transaction error:", error.message);
+        res.status(500).json({
+            success: false,
+            message: "Server error while restoring transaction",
+        });
+    }
+};
+
+// view recycle bin (soft-deleted transactions)
+export const getDeletedTransactions = async (req, res) => {
+    try {
+        const transactions = await BookTransaction.find({ isDeleted: true })
+            .populate("bookId", "bookId name author grade")
+            .populate("userId", "fullName email role")
+            .sort({ deletedAt: -1 });
+
+        res.status(200).json({
+            success: true,
+            count: transactions.length,
+            transactions,
+        });
+    } catch (error) {
+        console.error("Get deleted transactions error:", error.message);
+        res.status(500).json({
+            success: false,
+            message: "Server error while fetching deleted transactions",
+        });
+    }
+};
+
+// permanently delete a transaction (admin only — must be in recycle bin first)
+export const permanentDeleteTransaction = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const transaction = await BookTransaction.findOne({ _id: id, isDeleted: true });
+        if (!transaction) {
+            return res.status(404).json({
+                success: false,
+                message: "Transaction not found in recycle bin. Soft-delete it first",
+            });
+        }
+
+        await BookTransaction.findByIdAndDelete(id);
+
+        res.status(200).json({
+            success: true,
+            message: "Transaction permanently deleted",
+        });
+    } catch (error) {
+        console.error("Permanent delete error:", error.message);
+        res.status(500).json({
+            success: false,
+            message: "Server error while permanently deleting transaction",
         });
     }
 };
