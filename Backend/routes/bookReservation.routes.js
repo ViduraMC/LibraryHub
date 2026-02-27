@@ -12,5 +12,6 @@ router.patch("/cancel/:reservationId", auth, roleAuth("student","teacher"), book
 //LIBRRIAN
 router.post("/issue-book", auth, roleAuth("librarian"), bookReservation.processBorrowing);
 router.post("/return-book", auth, roleAuth("librarian"), bookReservation.processReturn);
+router.get("/reservations", auth, roleAuth("librarian"), bookReservation.getReservations);
 
 export default router;

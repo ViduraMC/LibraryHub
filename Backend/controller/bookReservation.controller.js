@@ -268,3 +268,36 @@ export const processReturn = async (req, res)=> {
     res.status(500).json({error: "Error during return"});
   }
 };
+
+export const getReservations = async (req, res)=> {
+  try {
+    const reservations= await BookReservation.find({status: {$in: ["reserved", "waiting"]}})
+                              .populate("bookId", "bookId name author grade")
+                              .populate("userId", "fullName membershipId email studentId")
+                              .sort({status:-1, queuePosition:1, expiredDate: 1});
+
+    const formattedData = reservations.map(resv=> {
+      let timeStatus= "In Queue";
+
+      if(resv.status=== "reserved"){
+        const now= new Date();
+        const timeLeft= Math.max(0, resv.expiredDate - now);
+        const hoursLeft = Math.floor(timeLeft / (1000*60*60));
+        const minutesLeft= Math.floor((timeLeft % (1000*60*60))/ (1000*60));
+        timeStatus= `${hoursLeft}h ${minutesLeft}m left to collect`
+      }else{
+        timeStatus= `Position: #${resv.queuePosition}`;
+      }
+
+      return{
+        ...resv._doc,
+        displayStatus: timeStatus
+      };
+    });
+
+    res.status(200).json({success: true, count: formattedData.length, data: formattedData});
+
+  } catch (error) {
+    res.status(500).json({error: "Failed to fetch reservations!"});
+  }
+};
