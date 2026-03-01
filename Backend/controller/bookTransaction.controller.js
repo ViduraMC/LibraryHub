@@ -34,7 +34,7 @@ export const borrowBook = async (req, res) => {
         }
 
         // check borrowing limit (students: 3, teachers: 5)
-        const maxBooks = userRole === "student" ? 3 : 5;
+        const maxBooks = userRole === "student" ? 3 : 5; //ternary operator
         const currentBorrows = await BookTransaction.countDocuments({
             userId,
             status: "active",
@@ -75,15 +75,9 @@ export const borrowBook = async (req, res) => {
             dueDate,
         });
 
-        // update book availability (native driver — skips Book model hooks)
-        const booksCollection = mongoose.connection.db.collection("books");
-        await booksCollection.updateOne(
-            { _id: new mongoose.Types.ObjectId(bookId) },
-            {
-                $inc: { availableCopies: -1 },
-                $set: { available: book.availableCopies - 1 > 0 },
-            }
-        );
+        // update book availability using Mongoose
+        book.availableCopies -= 1;
+        await book.save();
 
         // update user's borrowed count
         await User.updateOne(
@@ -135,15 +129,12 @@ export const returnBook = async (req, res) => {
         transaction.isLate = isLate;
         await transaction.save();
 
-        // increment book availability (native driver)
-        const booksCollection = mongoose.connection.db.collection("books");
-        await booksCollection.updateOne(
-            { _id: new mongoose.Types.ObjectId(transaction.bookId) },
-            {
-                $inc: { availableCopies: 1 },
-                $set: { available: true },
-            }
-        );
+        // increment book availability using Mongoose
+        const book = await Book.findById(transaction.bookId);
+        if (book) {
+            book.availableCopies += 1;
+            await book.save();
+        }
 
         // decrement user's borrowed count
         await User.updateOne(
@@ -327,14 +318,11 @@ export const softDeleteTransaction = async (req, res) => {
         // if active or overdue → reverse the side effects
         if (transaction.status === "active" || transaction.status === "overdue") {
             // give the copy back to the book
-            const booksCollection = mongoose.connection.db.collection("books");
-            await booksCollection.updateOne(
-                { _id: new mongoose.Types.ObjectId(transaction.bookId) },
-                {
-                    $inc: { availableCopies: 1 },
-                    $set: { available: true },
-                }
-            );
+            const book = await Book.findById(transaction.bookId);
+            if (book) {
+                book.availableCopies += 1;
+                await book.save();
+            }
 
             // decrease user's borrow count
             await User.updateOne(
@@ -386,14 +374,8 @@ export const restoreTransaction = async (req, res) => {
             }
 
             // take back the copy from the book
-            const booksCollection = mongoose.connection.db.collection("books");
-            await booksCollection.updateOne(
-                { _id: new mongoose.Types.ObjectId(transaction.bookId) },
-                {
-                    $inc: { availableCopies: -1 },
-                    $set: { available: book.availableCopies - 1 > 0 },
-                }
-            );
+            book.availableCopies -= 1;
+            await book.save();
 
             // increase user's borrow count
             await User.updateOne(
