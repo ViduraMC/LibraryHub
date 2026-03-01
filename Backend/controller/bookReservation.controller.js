@@ -5,6 +5,60 @@ import User from "../models/user/user.model.js";
 import Fine from "../models/fine.model.js";
 import mongoose from "mongoose";
 
+//FUNCTION
+export const cleanUpExpiredReservations= async()=>{
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const now = new Date();
+    const expired= await BookReservation.find({
+      status: "reserved",
+      expiredDate: {$lt: now}
+    }).session(session);
+
+    if(expired.length === 0){
+      await session.commitTransaction();
+      return 0;
+    }
+
+    for(const resv of expired){
+      resv.status= "expired";
+      await resv.save({session});
+
+      const nextInLine = await BookReservation.findOne({
+        bookId: resv.bookId,
+        status: "waiting",
+        queuePosition: 1
+      }).session(session);
+
+      if(nextInLine){
+        nextInLine.status= "reserved";
+        nextInLine.queuePosition= 0;
+        nextInLine.reservedAt=  now;
+        nextInLine.expiredDate= new Date(now.getTime()+ 24*60*60*1000);
+        await nextInLine.save({session});
+
+        await BookReservation.updateMany(
+          {bookId: resv.bookId, status: "waiting"},
+          {$inc: {queuePosition: -1}},
+          {session}
+        );
+      }else{
+        await Book.findByIdAndUpdate(resv.bookId, {$inc: {availableCopies: 1}}, {session});
+      }
+
+    }
+
+    await session.commitTransaction();
+
+  } catch (error) {
+      await session.abortTransaction();
+  }finally{
+    session.endSession();
+  }
+};
+
 //STUDENT/ TEACHER
 export const createBookReservation= async(req, res)=>{
   const session = await mongoose.startSession();
@@ -299,5 +353,24 @@ export const getReservations = async (req, res)=> {
 
   } catch (error) {
     res.status(500).json({error: "Failed to fetch reservations!"});
+  }
+};
+
+export const triggerManualCleanup= async (req, res)=> {
+  try {
+    const count = await cleanUpExpiredReservations();
+
+    if(count===0){
+      return res.status(200).json({
+        success: true, message: "Everything is up to date! No expired reservations found."
+      });      
+    }
+
+    res.status(200).json({
+        success: true,
+        message: `Cleanup complete. ${count} expired reservations were released`
+    });
+  } catch (error) {
+    res.status(500).json({error: "Failed to perform manual cleanup"});
   }
 };
