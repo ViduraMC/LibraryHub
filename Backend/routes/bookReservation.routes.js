@@ -13,7 +13,9 @@ router.get("/my-reservations", auth, roleAuth("student", "teacher"), bookReserva
 //LIBRRIAN
 router.post("/issue-book", auth, roleAuth("librarian"), bookReservation.processBorrowing);
 router.post("/return-book", auth, roleAuth("librarian"), bookReservation.processReturn);
-router.get("/reservations", auth, roleAuth("librarian"), bookReservation.getReservations);
+router.get("/pending-reservations", auth, roleAuth("librarian"), bookReservation.getPendingReservations);
 router.post("/manual-cleanup", auth, roleAuth("librarian"), bookReservation.triggerManualCleanup);
 router.delete("/delete/:id", auth, roleAuth("librarian"), bookReservation.deleteReservations);
+router.get("/reservations/:id", auth, roleAuth("librarian"), bookReservation.getReservationsById);
+
 export default router;

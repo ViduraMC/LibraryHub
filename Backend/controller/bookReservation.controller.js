@@ -372,7 +372,7 @@ export const processReturn = async (req, res)=> {
   }
 };
 
-export const getReservations = async (req, res)=> {
+export const getPendingReservations = async (req, res)=> {
   try {
     const reservations= await BookReservation.find({status: {$in: ["reserved", "waiting"]}})
                               .populate("bookId", "bookId name author grade")
@@ -444,3 +444,22 @@ export const deleteReservations= async (req, res)=> {
     res.status(500).json({error: "Delete failed!"});
   }
 };
+
+export const getReservationsById= async (req, res)=> {
+  try {
+    const {id}= req.params;
+    const reservation= await BookReservation.findById(id)
+                            .populate("bookId", "name author img availableCopies")
+                            .populate("userId", "fullName email studentId membershipId");
+
+    if(!reservation) return res.status(404).json({error: "Reservation not found!"});
+
+    res.status(200).json({success: true, data: reservation});
+
+  } catch (error) {
+    res.status(500).json({error: "Error fetching reservation details!"});
+  }
+};
+
+
+
