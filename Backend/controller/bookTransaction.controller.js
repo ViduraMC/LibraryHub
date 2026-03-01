@@ -68,6 +68,8 @@ export const borrowBook = async (req, res) => {
         const dueDate = new Date(borrowDate);
         dueDate.setDate(dueDate.getDate() + 14);
 
+
+        // CREATE transaction
         const transaction = await BookTransaction.create({
             userId,
             bookId,
@@ -90,6 +92,7 @@ export const borrowBook = async (req, res) => {
             message: "Book borrowed successfully",
             transaction,
         });
+
     } catch (error) {
         console.error("Borrow book error:", error.message);
         res.status(500).json({
@@ -158,7 +161,7 @@ export const returnBook = async (req, res) => {
     }
 };
 
-// renew a borrow (student/teacher — 1 time only, +2 days)
+// UPDATE--> renew a borrow (student/teacher — 1 time only, +2 days)
 export const renewBook = async (req, res) => {
     try {
         const { id } = req.params;
@@ -224,8 +227,8 @@ export const getMyTransactions = async (req, res) => {
         const userId = req.user._id;
         const { status } = req.query;
 
-        const filter = { userId, isDeleted: false };
-        if (status) filter.status = status;
+        const filter = { userId, isDeleted: false }; // Baseline rules; must always be true
+        if (status) filter.status = status; // Add optional rules if needed
 
         const transactions = await BookTransaction.find(filter)
             .populate("bookId", "bookId name author grade type")
