@@ -372,34 +372,28 @@ export const processReturn = async (req, res)=> {
   }
 };
 
-export const getPendingReservations = async (req, res)=> {
+export const getReservations = async (req, res)=> {
   try {
-    const reservations= await BookReservation.find({status: {$in: ["reserved", "waiting"]}})
-                              .populate("bookId", "bookId name author grade")
-                              .populate("userId", "fullName membershipId email studentId")
-                              .sort({status:-1, queuePosition:1, expiredDate: 1});
+    const {search, status}= req.query;
+    let query={};
 
-    const formattedData = reservations.map(resv=> {
-      let timeStatus= "In Queue";
+    if(status) query.status= status;
 
-      if(resv.status=== "reserved"){
-        const now= new Date();
-        const timeLeft= Math.max(0, resv.expiredDate - now);
-        const hoursLeft = Math.floor(timeLeft / (1000*60*60));
-        const minutesLeft= Math.floor((timeLeft % (1000*60*60))/ (1000*60));
-        timeStatus= `${hoursLeft}h ${minutesLeft}m left to collect`
-      }else{
-        timeStatus= `Position: #${resv.queuePosition}`;
-      }
+    const reservations = await BookReservation.find(query)
+                          .populate("bookId", "name author")
+                          .populate("userId", "fullName studentId membershipId email")
+                          .sort({createdAt: -1});
 
-      return{
-        ...resv._doc,
-        displayStatus: timeStatus
-      };
-    });
+    let filteredData= reservations;
+    if(search){
+      filteredData= reservations.filter(r=>
+        r.userId?.fullName.toLowerCase().includes(search.toLowerCase())||
+        r.bookId?.name.toLowerCase().includes(search.toLowerCase())
+      );
+    }
 
-    res.status(200).json({success: true, count: formattedData.length, data: formattedData});
-
+    res.status(200).json({success:true, count:filteredData.length, data: filteredData});
+    
   } catch (error) {
     res.status(500).json({error: "Failed to fetch reservations!"});
   }
@@ -460,6 +454,5 @@ export const getReservationsById= async (req, res)=> {
     res.status(500).json({error: "Error fetching reservation details!"});
   }
 };
-
 
 
