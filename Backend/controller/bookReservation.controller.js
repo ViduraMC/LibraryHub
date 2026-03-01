@@ -202,6 +202,55 @@ export const cancelReservation = async (req, res)=> {
   }
 };
 
+export const getMyReservations = async (req, res) => {
+  try {
+    const userId= req.user.id;
+    const {tab} = req.query;
+
+    const activeStatuses= ["waiting", "reserved"];
+    const historyStatuses= ["collected", "expired", "cancelled", "completed"];
+
+    const targetStatuses= tab === "history"? historyStatuses: activeStatuses;
+
+    const reservation= await BookReservation.find({
+      userId,
+      status: {$in: targetStatuses}
+    })
+      .populate("bookId", "name author img")
+      .sort({updatedAt: -1});
+
+      const formattedData = reservation.map(resv => {
+        const now= new Date();
+        let displayStatus= resv.status;
+        let timeRemaning= null;
+
+        if(resv.status === "reserved"){
+          const timeLeft= Math.max(0, resv.expiredDate- now);
+          const hours= Math.floor(timeLeft / (1000*60*60));
+          const minutes= Math.floor((timeLeft % (1000*60*60))/ (1000/60));
+          timeRemaning= `${hours}h ${minutes}m left`;
+        }
+
+        return {
+          ...resv._doc,
+          displayStatus,
+          timeRemaning,
+          isActionRequired: resv.status === "reserved"
+        };
+      });
+
+      res.status(200).json({
+        success: true,
+        tab: tab || "active",
+        count: formattedData.length,
+        data: formattedData
+      });
+
+  } catch (error) {
+    res.status(500).json({error: "Failed to fetch your reservations!"});
+  }
+};
+
 
 //LIBRARIAN
 export const processBorrowing= async (req, res)=> {
@@ -372,5 +421,26 @@ export const triggerManualCleanup= async (req, res)=> {
     });
   } catch (error) {
     res.status(500).json({error: "Failed to perform manual cleanup"});
+  }
+};
+
+export const deleteReservations= async (req, res)=> {
+  try {
+    const {id}= req.params;
+    const reservation= await BookReservation.findById(id);
+
+    if(!reservation) return res.status(404).json({error: "Reservation not found!"});
+
+    if(["waiting", "reserved"].includes(reservation.status)){
+      return res.status(400).json({
+        error: "Cannot delete active reservations!"
+      });
+    }
+
+    await BookReservation.findByIdAndDelete(id);
+    res.status(200).json({success: true, message: "Record permamnently erased!"});
+
+  } catch (error) {
+    res.status(500).json({error: "Delete failed!"});
   }
 };
