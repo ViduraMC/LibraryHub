@@ -51,6 +51,7 @@ export const cleanUpExpiredReservations= async()=>{
     }
 
     await session.commitTransaction();
+    return expired.length;
 
   } catch (error) {
       await session.abortTransaction();
