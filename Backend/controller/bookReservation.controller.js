@@ -55,6 +55,8 @@ export const cleanUpExpiredReservations= async()=>{
 
   } catch (error) {
       await session.abortTransaction();
+      console.log("Clean up transaction error: ", error);
+      return 0;
   }finally{
     session.endSession();
   }
