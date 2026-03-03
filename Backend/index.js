@@ -20,6 +20,7 @@ import bookRoutes from "./routes/book.routes.js";
 import fineRoutes from "./routes/fine.routes.js";
 
 
+//This is the moment the server is born. app is the main object that represents your entire backend application.
 const app = express();
 
 connectDB().then(() => {
@@ -27,6 +28,8 @@ connectDB().then(() => {
   startOverdueChecker();
   startComputerStatusSync();
 });
+
+//setting up Global Middlewares/ground rules
 app.use(express.json());
 app.use(cors());
 
@@ -43,6 +46,7 @@ app.use("/api/reports", reportRoutes);
 app.use("/api/books", bookRoutes);
 app.use("/api/fines", fineRoutes);
 
+//sanity check
 app.get("/", (req, res) => {
   res.send("API working");
 });
