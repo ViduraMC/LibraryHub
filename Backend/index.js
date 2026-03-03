@@ -3,6 +3,7 @@ import connectDB from "./config/mongodb.js"
 import seedAdmin from "./config/adminSeed.js";
 import startOverdueChecker from "./config/overdueChecker.js";
 import { startComputerStatusSync } from "./config/computerSync.js";
+import initReservation from "./config/initReservationCron.js";
 import "dotenv/config";
 import cors from "cors";
 
@@ -18,7 +19,7 @@ import computerReservationRoutes from "./routes/computerReservation.routes.js";
 import reportRoutes from "./routes/report.routes.js";
 import bookRoutes from "./routes/book.routes.js";
 import fineRoutes from "./routes/fine.routes.js";
-
+import bookReservationRoutes from "./routes/bookReservation.routes.js";
 
 //This is the moment the server is born. app is the main object that represents your entire backend application.
 const app = express();
@@ -27,6 +28,7 @@ connectDB().then(() => {
   seedAdmin();
   startOverdueChecker();
   startComputerStatusSync();
+  initReservation();
 });
 
 //setting up Global Middlewares/ground rules
@@ -45,6 +47,7 @@ app.use("/api/computer-reservation", computerReservationRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/books", bookRoutes);
 app.use("/api/fines", fineRoutes);
+app.use("/api/book-reservation", bookReservationRoutes);
 
 //sanity check
 app.get("/", (req, res) => {
