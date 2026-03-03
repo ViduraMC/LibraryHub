@@ -15,7 +15,7 @@ export const cleanUpExpiredReservations= async()=>{
     const expired= await BookReservation.find({
       status: "reserved",
       expiredDate: {$lt: now}
-    }).session(session);
+    }).session(session);  //check reservations that are expired
 
     if(expired.length === 0){
       await session.commitTransaction();
@@ -24,15 +24,15 @@ export const cleanUpExpiredReservations= async()=>{
 
     for(const resv of expired){
       resv.status= "expired";
-      await resv.save({session});
+      await resv.save({session}); //mark current reservation as expired
 
-      const nextInLine = await BookReservation.findOne({
+      const nextInLine = await BookReservation.findOne({  //find user next in line
         bookId: resv.bookId,
         status: "waiting",
         queuePosition: 1
       }).session(session);
 
-      if(nextInLine){
+      if(nextInLine){   //give book to user next in line
         nextInLine.status= "reserved";
         nextInLine.queuePosition= 0;
         nextInLine.reservedAt=  now;
@@ -42,10 +42,10 @@ export const cleanUpExpiredReservations= async()=>{
         await BookReservation.updateMany(
           {bookId: resv.bookId, status: "waiting"},
           {$inc: {queuePosition: -1}},
-          {session}
+          {session} //update queue position by moving 1 spot up in the queue
         );
       }else{
-        await Book.findByIdAndUpdate(resv.bookId, {$inc: {availableCopies: 1}}, {session});
+        await Book.findByIdAndUpdate(resv.bookId, {$inc: {availableCopies: 1}}, {session}); //if noone is waiting, put book to shelf
       }
 
     }
@@ -68,7 +68,20 @@ export const createBookReservation= async(req, res)=>{
   try {
     const {bookId}= req.body;
     const userId= req.user.id;
+    const MAX_RESERVATIONS=5;
 
+    //check active reservations and ensure its less than max limit
+    const activeReservationCount= await BookReservation.countDocuments({
+      userId,
+      status: {$in: ["waiting", "reserved"]}
+
+    }).session(session);
+
+    if(activeReservationCount >= MAX_RESERVATIONS){
+      return res.status(400).json({error: `Reservation limit reached! You can only have ${MAX_RESERVATIONS} active requests at a time.`});
+    }
+
+    //check for unpaid fines and block reservation if any
     const unpaidFine = await Fine.findOne({
       userId,
       fineStatus: "unpaid"
@@ -76,9 +89,11 @@ export const createBookReservation= async(req, res)=>{
 
     if(unpaidFine) return res.status(404).json({error: "Reservation blocked! You have oustanding unpaid fines", fineAmount: unpaidFine.fineAmount});
 
+    //check if book exists
     const book= await Book.findById(bookId).session(session);
     if(!book) return res.status(404).json({error: "Book not found!"});
 
+    //check for pending/active requests for the same book
     const existing= await BookReservation.findOne({
       userId,
       bookId,
@@ -95,15 +110,15 @@ export const createBookReservation= async(req, res)=>{
     if(book.availableCopies>0){
       status= "reserved";
       reservedAt= new Date();
-      expiredDate= new Date(reservedAt.getTime()+ 24*60*60*1000);
+      expiredDate= new Date(reservedAt.getTime()+ 24*60*60*1000); 
 
-      book.availableCopies-=1;
-      await book.save({session});
+      book.availableCopies-=1;  
+      await book.save({session}); //if available, reserve the book and set expiry for 24 hrs and decrement available copies
     }else{
       const lastInQueue = await BookReservation.findOne({bookId, status: "waiting"})
                                 .sort({queuePosition: -1})
                                 .session(session);
-      queuePosition = lastInQueue? lastInQueue.queuePosition+1 : 1;
+      queuePosition = lastInQueue? lastInQueue.queuePosition+1 : 1; //updating queue postition for waiting list
     } 
     
     const reservation= await BookReservation.create([{
@@ -113,7 +128,7 @@ export const createBookReservation= async(req, res)=>{
       queuePosition,
       reservedAt,
       expiredDate
-    }], {session});
+    }], {session}); //create reservation
 
     await session.commitTransaction();
     session.endSession();
@@ -153,11 +168,12 @@ export const cancelReservation = async (req, res)=> {
     const oldStatus= reservation.status;
     const oldQueuePos= reservation.queuePosition;
 
+    //update queue logic
     if(oldStatus === "waiting"){
       await BookReservation.updateMany(
         {bookId, status:"waiting", queuePosition: {$gt: oldQueuePos}},
         {$inc: {queuePosition: -1}},
-        {session}
+        {session} //move everyone behind this person
       );
 
     }else if(oldStatus === "reserved"){
@@ -165,7 +181,7 @@ export const cancelReservation = async (req, res)=> {
         bookId,
         status: "waiting",
         queuePosition: 1
-      }).session(session);
+      }).session(session); 
 
       if(nextInLine){
         nextInLine.status = "reserved";
@@ -178,7 +194,7 @@ export const cancelReservation = async (req, res)=> {
           {bookId, status: "waiting"},
           {$inc: {queuePosition: -1}},
           {session}
-        );
+        );             //if reserved spot opened, assign it to person next in line
 
       }else{
         await Book.findByIdAndUpdate(bookId, {$inc: {availableCopies: 1}},
@@ -206,12 +222,12 @@ export const cancelReservation = async (req, res)=> {
 export const getMyReservations = async (req, res) => {
   try {
     const userId= req.user.id;
-    const {tab} = req.query;
+    const {tab} = req.query;  //'active' or 'history' tab
 
     const activeStatuses= ["waiting", "reserved"];
     const historyStatuses= ["collected", "expired", "cancelled", "completed"];
 
-    const targetStatuses= tab === "history"? historyStatuses: activeStatuses;
+    const targetStatuses= tab === "history"? historyStatuses: activeStatuses; //if history tab, show all past reservations, else show active ones
 
     const reservation= await BookReservation.find({
       userId,
@@ -271,6 +287,7 @@ export const processBorrowing= async (req, res)=> {
       return res.status(400).json({error: `Cannot collect. Current status is ${reservation.status}. Only 'reserved' books can be issued!`});
     }
 
+    //update reservation status to collected
     reservation.status="collected";
     await reservation.save({session});
 
@@ -285,7 +302,7 @@ export const processBorrowing= async (req, res)=> {
       borrowDate,
       dueDate,
       status: "active"
-    }], {session});
+    }], {session}); //create transaction record for this borrowing
 
     await User.findByIdAndUpdate(
       reservation.userId,
@@ -319,6 +336,7 @@ export const processReturn = async (req, res)=> {
       return res.status(400).json({error: "Active transaction not found or already returned"});
     } 
 
+    //update transaction status to returned
     transaction.status= "returned";
     transaction.returnDate= new Date();
     transaction.isLate = new Date() > transaction.dueDate;
@@ -327,7 +345,7 @@ export const processReturn = async (req, res)=> {
     await BookReservation.findByIdAndUpdate(
       transaction.reservationId,
       {status: "completed"},
-      {session}
+      {session}       //mark book reservation as completed
     );
 
     await User.findByIdAndUpdate(
@@ -341,6 +359,7 @@ export const processReturn = async (req, res)=> {
       status: "waiting"
     }).sort({queuePosition: 1}).session(session);
 
+    //assign book to next in line if exists, else update available copies
     if(nextInLine){
       nextInLine.status= "reserved";
       nextInLine.queuePosition=0;
