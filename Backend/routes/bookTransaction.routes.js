@@ -1,6 +1,6 @@
 import express from "express";
 import {
-    borrowBook,
+    unifiedCheckout,
     returnBook,
     renewBook,
     getMyTransactions,
@@ -16,8 +16,8 @@ import roleAuth from "../middleware/roleAuth.js";
 
 const router = express.Router();
 
-// POST /api/transactions/borrow
-router.post("/borrow", auth, roleAuth("student", "teacher"), borrowBook);
+// POST /api/transactions/borrow — Unified Checkout (Walk-ins & Reservations)
+router.post("/borrow", auth, roleAuth("librarian", "admin"), unifiedCheckout);
 
 // PUT /api/transactions/:id/return
 router.put("/:id/return", auth, roleAuth("librarian", "admin"), returnBook);
