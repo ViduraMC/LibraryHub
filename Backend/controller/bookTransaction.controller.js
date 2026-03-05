@@ -1,66 +1,77 @@
 import BookTransaction from "../models/bookTransaction.model.js";
 import Book from "../models/book.model.js";
 import User from "../models/user/user.model.js";
+import BookReservation from "../models/bookReservation.model.js";
+import Fine from "../models/fine.model.js";
 import mongoose from "mongoose";
 
-// borrow a book
-export const borrowBook = async (req, res) => {
+// borrow a book (unified flow for walk-ins and reservation pickups)
+export const unifiedCheckout = async (req, res) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
     try {
-        const userId = req.user._id;
-        const userRole = req.user.role;
-        const { bookId } = req.body; // same as const bookId = req.body.bookId
+        const { bookId, userId } = req.body;
 
-        if (!bookId) {
-            return res.status(400).json({
-                success: false,
-                message: "Book ID is required",
-            });
-        }
-
-        // check book exists and has available copies
-        const book = await Book.findById(bookId);
-        if (!book) {
+        // check user and book exists
+        const user = await User.findById(userId).session(session);
+        const book = await Book.findById(bookId).session(session);
+        if (!user || !book) {
             return res.status(404).json({
                 success: false,
-                message: "Book not found",
-            });
-        }
-
-        if (book.availableCopies <= 0) {
-            return res.status(400).json({
-                success: false,
-                message: "No copies available for borrowing",
+                message: "User or Book not found",
             });
         }
 
         // check borrowing limit (students: 3, teachers: 5)
-        const maxBooks = userRole === "student" ? 3 : 5; //ternary operator
-        const currentBorrows = await BookTransaction.countDocuments({
-            userId,
-            status: "active",
-            isDeleted: false,
-        });
-
-        if (currentBorrows >= maxBooks) {
+        const maxBooks = user.role === "student" ? 3 : 5;
+        if (user.noOfBorrowedBooks >= maxBooks) {
             return res.status(400).json({
                 success: false,
-                message: `Borrowing limit reached. ${userRole === "student" ? "Students" : "Teachers"} can borrow up to ${maxBooks} books at a time`,
+                message: `Borrowing limit reached. ${user.role === "student" ? "Students" : "Teachers"} can borrow up to ${maxBooks} books at a time`,
             });
         }
 
-        // check if user already has this book borrowed
-        const alreadyBorrowed = await BookTransaction.findOne({
-            userId,
-            bookId,
-            status: "active",
-            isDeleted: false,
-        });
-
-        if (alreadyBorrowed) {
+        // check for unpaid fines
+        const hasFines = await Fine.findOne({ userId, fineStatus: "unpaid" }).session(session);
+        if (hasFines) {
             return res.status(400).json({
                 success: false,
-                message: "You have already borrowed this book",
+                message: "User has unpaid fines",
             });
+        }
+
+        // check if this is a reservation pickup
+        const reservation = await BookReservation.findOne({
+            userId, bookId, status: "reserved"
+        }).session(session);
+
+        if (reservation) {
+            // mark reservation as collected
+            reservation.status = "collected";
+            await reservation.save({ session });
+        } else {
+            // walk-in borrow flow
+            // check if someone else is waiting in the queue
+            const isQueued = await BookReservation.findOne({ bookId, status: "waiting" }).session(session);
+            if (isQueued) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Walk-in denied: This book is reserved for the waiting list",
+                });
+            }
+
+            // check available copies
+            if (book.availableCopies <= 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: "No copies available",
+                });
+            }
+
+            // update book availability
+            book.availableCopies -= 1;
+            await book.save({ session });
         }
 
         // create the transaction (dueDate = 14 days from now)
@@ -68,47 +79,45 @@ export const borrowBook = async (req, res) => {
         const dueDate = new Date(borrowDate);
         dueDate.setDate(dueDate.getDate() + 14);
 
-
         // CREATE transaction
-        const transaction = await BookTransaction.create({
+        const transaction = await BookTransaction.create([{
             userId,
             bookId,
+            reservationId: reservation ? reservation._id : null,
             borrowDate,
             dueDate,
-        });
-
-        // update book availability using Mongoose
-        book.availableCopies -= 1;
-        await book.save();
+            status: "active"
+        }], { session });
 
         // update user's borrowed count
-        await User.updateOne(
-            { _id: userId },
-            { $inc: { noOfBorrowedBooks: 1 } }
+        await User.findByIdAndUpdate(
+            userId,
+            { $inc: { noOfBorrowedBooks: 1 } },
+            { session }
         );
 
-        res.status(201).json({
-            success: true,
-            message: "Book borrowed successfully",
-            transaction,
-        });
+        await session.commitTransaction();
+        res.status(200).json({ success: true, message: "Book issued!", data: transaction[0] });
 
     } catch (error) {
-        console.error("Borrow book error:", error.message);
-        res.status(500).json({
-            success: false,
-            message: "Server error while borrowing book",
-        });
+        console.error("unifiedCheckout Error:", error.message);
+        await session.abortTransaction();
+        res.status(500).json({ error: "Checkout failed" });
+    } finally {
+        session.endSession();
     }
 };
 
-// return a book (librarian processes the return)
+// return a book (librarian processes the return, fulfills waiting list)
 export const returnBook = async (req, res) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
     try {
         const { id } = req.params;
 
         // find the active transaction (exclude deleted)
-        const transaction = await BookTransaction.findOne({ _id: id, isDeleted: false });
+        const transaction = await BookTransaction.findOne({ _id: id, isDeleted: false }).session(session);
         if (!transaction) {
             return res.status(404).json({
                 success: false,
@@ -130,34 +139,73 @@ export const returnBook = async (req, res) => {
         transaction.returnDate = returnDate;
         transaction.status = "returned";
         transaction.isLate = isLate;
-        await transaction.save();
+        await transaction.save({ session });
 
-        // increment book availability using Mongoose
-        const book = await Book.findById(transaction.bookId);
-        if (book) {
-            book.availableCopies += 1;
-            await book.save();
+        // update reservation if this was a reserved borrow
+        if (transaction.reservationId) {
+            await BookReservation.findByIdAndUpdate(
+                transaction.reservationId,
+                { status: "completed" },
+                { session }
+            );
         }
 
         // decrement user's borrowed count
-        await User.updateOne(
-            { _id: transaction.userId },
-            { $inc: { noOfBorrowedBooks: -1 } }
+        await User.findByIdAndUpdate(
+            transaction.userId,
+            { $inc: { noOfBorrowedBooks: -1 } },
+            { session }
         );
 
+        // check waiting list and update book availability
+        const nextInLine = await BookReservation.findOne({
+            bookId: transaction.bookId,
+            status: "waiting"
+        }).sort({ queuePosition: 1 }).session(session);
+
+        let returnMessage = isLate ? "Book returned (overdue — returned after due date)." : "Book returned successfully.";
+
+        if (nextInLine) {
+            // give book to next person in waiting list (keep library availableCopies the same)
+            nextInLine.status = "reserved";
+            nextInLine.queuePosition = 0;
+            nextInLine.reservedAt = new Date();
+            nextInLine.expiredDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
+            await nextInLine.save({ session });
+
+            // shift everyone else up in the queue
+            await BookReservation.updateMany(
+                { bookId: transaction.bookId, status: "waiting" },
+                { $inc: { queuePosition: -1 } },
+                { session }
+            );
+            returnMessage += " Book assigned to next user in waiting queue!";
+        } else {
+            // nobody waiting, put book back on shelf
+            const book = await Book.findById(transaction.bookId).session(session);
+            if (book) {
+                book.availableCopies += 1;
+                await book.save({ session });
+            }
+            returnMessage += " Book returned to shelf.";
+        }
+
+        await session.commitTransaction();
         res.status(200).json({
             success: true,
-            message: isLate
-                ? "Book returned (overdue — returned after due date)"
-                : "Book returned successfully",
+            message: returnMessage,
             transaction,
         });
+
     } catch (error) {
         console.error("Return book error:", error.message);
+        await session.abortTransaction();
         res.status(500).json({
             success: false,
             message: "Server error while returning book",
         });
+    } finally {
+        session.endSession();
     }
 };
 

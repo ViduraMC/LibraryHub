@@ -35,8 +35,56 @@ const fineSchema = new mongoose.Schema(
 
         fineStatus: {
             type: String,
-            enum: ["unpaid", "paid"],
+            enum: ["unpaid", "paid", "cancelled", "refunded"],
             default: "unpaid",
+        },
+
+        paymentDate: {
+            type: Date,
+            default: null,
+        },
+
+        paidBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            default: null,
+        },
+
+        cancellationReason: {
+            type: String,
+            default: null,
+        },
+
+        cancelledBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            default: null,
+        },
+
+        cancellationDate: {
+            type: Date,
+            default: null,
+        },
+
+        refundAmount: {
+            type: Number,
+            default: null,
+        },
+
+        refundReason: {
+            type: String,
+            default: null,
+        },
+
+        refundedBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            default: null,
+        },
+
+        refundDate: {
+            type: Date,
+            default: null,
         },
 
         paymentDate: {
