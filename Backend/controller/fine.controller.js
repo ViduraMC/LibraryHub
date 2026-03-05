@@ -173,8 +173,7 @@ export const getFineById = async (req, res) => {
             .populate("userId")
             .populate("bookTransactionId")
             .populate("bookId")
-            .populate("paidBy")
-            .populate("cancelledBy");
+            .populate("paidBy");
 
         if (!fine) {
             return res.status(404).json({
@@ -469,6 +468,8 @@ export const refundFine = async (req, res) => {
 
         fine.fineStatus = "refunded";
         fine.refundAmount = refundAmount;
+        fine.refundReason = refundReason;
+        fine.refundedBy = req.user._id;
         fine.refundDate = new Date();
 
         await fine.save();
