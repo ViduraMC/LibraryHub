@@ -5,7 +5,7 @@ import BookReservation from "../models/bookReservation.model.js";
 import Fine from "../models/fine.model.js";
 import mongoose from "mongoose";
 
-// Unified Checkout: Handles both Walk-ins and Reservation Pickups (Librarian action)
+// borrow a book (unified flow for walk-ins and reservation pickups)
 export const unifiedCheckout = async (req, res) => {
     const session = await mongoose.startSession();
     session.startTransaction();
@@ -13,51 +13,88 @@ export const unifiedCheckout = async (req, res) => {
     try {
         const { bookId, userId } = req.body;
 
-        // 1. VALIDATION: User & Book existence
+        // check user and book exists
         const user = await User.findById(userId).session(session);
         const book = await Book.findById(bookId).session(session);
-        if (!user || !book) return res.status(404).json({ error: "Data not found" });
+        if (!user || !book) {
+            return res.status(404).json({
+                success: false,
+                message: "User or Book not found",
+            });
+        }
 
-        // 2. VALIDATION: Global Library Rules (Limits & Fines)
+        // check borrowing limit (students: 3, teachers: 5)
         const maxBooks = user.role === "student" ? 3 : 5;
         if (user.noOfBorrowedBooks >= maxBooks) {
-            return res.status(400).json({ error: "Borrowing limit reached!" });
+            return res.status(400).json({
+                success: false,
+                message: `Borrowing limit reached. ${user.role === "student" ? "Students" : "Teachers"} can borrow up to ${maxBooks} books at a time`,
+            });
         }
-        const hasFines = await Fine.findOne({ userId, fineStatus: "unpaid" }).session(session);
-        if (hasFines) return res.status(400).json({ error: "User has unpaid fines!" });
 
-        // 3. LOGIC: Determine if this is a Reservation pickup or a Walk-in
+        // check for unpaid fines
+        const hasFines = await Fine.findOne({ userId, fineStatus: "unpaid" }).session(session);
+        if (hasFines) {
+            return res.status(400).json({
+                success: false,
+                message: "User has unpaid fines",
+            });
+        }
+
+        // check if this is a reservation pickup
         const reservation = await BookReservation.findOne({
             userId, bookId, status: "reserved"
         }).session(session);
 
         if (reservation) {
-            // CASE A: Fulfilling a reservation (Copies already decremented previously)
+            // mark reservation as collected
             reservation.status = "collected";
             await reservation.save({ session });
         } else {
-            // CASE B: Walk-in Borrow
-            // GUARD: Check if someone else is waiting in the queue
+            // walk-in borrow flow
+            // check if someone else is waiting in the queue
             const isQueued = await BookReservation.findOne({ bookId, status: "waiting" }).session(session);
             if (isQueued) {
-                return res.status(400).json({ error: "Walk-in denied: This book is reserved for the waiting list." });
+                return res.status(400).json({
+                    success: false,
+                    message: "Walk-in denied: This book is reserved for the waiting list",
+                });
             }
 
-            if (book.availableCopies <= 0) return res.status(400).json({ error: "No copies available" });
+            // check available copies
+            if (book.availableCopies <= 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: "No copies available",
+                });
+            }
 
+            // update book availability
             book.availableCopies -= 1;
             await book.save({ session });
         }
 
-        // 4. EXECUTION: Create the transaction and update user count
+        // create the transaction (dueDate = 14 days from now)
+        const borrowDate = new Date();
+        const dueDate = new Date(borrowDate);
+        dueDate.setDate(dueDate.getDate() + 14);
+
+        // CREATE transaction
         const transaction = await BookTransaction.create([{
-            userId, bookId,
+            userId,
+            bookId,
             reservationId: reservation ? reservation._id : null,
-            dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+            borrowDate,
+            dueDate,
             status: "active"
         }], { session });
 
-        await User.findByIdAndUpdate(userId, { $inc: { noOfBorrowedBooks: 1 } }, { session });
+        // update user's borrowed count
+        await User.findByIdAndUpdate(
+            userId,
+            { $inc: { noOfBorrowedBooks: 1 } },
+            { session }
+        );
 
         await session.commitTransaction();
         res.status(200).json({ success: true, message: "Book issued!", data: transaction[0] });
@@ -79,24 +116,32 @@ export const returnBook = async (req, res) => {
     try {
         const { id } = req.params;
 
+        // find the active transaction (exclude deleted)
         const transaction = await BookTransaction.findOne({ _id: id, isDeleted: false }).session(session);
         if (!transaction) {
-            return res.status(404).json({ success: false, message: "Transaction not found" });
+            return res.status(404).json({
+                success: false,
+                message: "Transaction not found",
+            });
         }
 
         if (transaction.status !== "active" && transaction.status !== "overdue") {
-            return res.status(400).json({ success: false, message: `Cannot return — transaction status is "${transaction.status}"` });
+            return res.status(400).json({
+                success: false,
+                message: `Cannot return — transaction status is "${transaction.status}"`,
+            });
         }
 
-        // 1. UPDATE TRANSACTION
+        // set return date and check if late
         const returnDate = new Date();
         const isLate = returnDate > transaction.dueDate;
+
         transaction.returnDate = returnDate;
         transaction.status = "returned";
         transaction.isLate = isLate;
         await transaction.save({ session });
 
-        // 2. UPDATE RESERVATION IF THIS WAS A RESERVED BORROW
+        // update reservation if this was a reserved borrow
         if (transaction.reservationId) {
             await BookReservation.findByIdAndUpdate(
                 transaction.reservationId,
@@ -105,30 +150,30 @@ export const returnBook = async (req, res) => {
             );
         }
 
-        // 3. DECREMENT USER BORROW COUNT
+        // decrement user's borrowed count
         await User.findByIdAndUpdate(
             transaction.userId,
             { $inc: { noOfBorrowedBooks: -1 } },
             { session }
         );
 
-        // 4. CHECK WAITING LIST / UPDATE BOOK COPIES
+        // check waiting list and update book availability
         const nextInLine = await BookReservation.findOne({
             bookId: transaction.bookId,
             status: "waiting"
         }).sort({ queuePosition: 1 }).session(session);
 
-        let returnMessage = isLate ? "Book returned (overdue)." : "Book returned successfully.";
+        let returnMessage = isLate ? "Book returned (overdue — returned after due date)." : "Book returned successfully.";
 
         if (nextInLine) {
-            // Give book to next person in waiting list (Don't alter library availableCopies)
+            // give book to next person in waiting list (keep library availableCopies the same)
             nextInLine.status = "reserved";
             nextInLine.queuePosition = 0;
             nextInLine.reservedAt = new Date();
             nextInLine.expiredDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
             await nextInLine.save({ session });
 
-            // Shift everyone else up in the queue
+            // shift everyone else up in the queue
             await BookReservation.updateMany(
                 { bookId: transaction.bookId, status: "waiting" },
                 { $inc: { queuePosition: -1 } },
@@ -136,7 +181,7 @@ export const returnBook = async (req, res) => {
             );
             returnMessage += " Book assigned to next user in waiting queue!";
         } else {
-            // Nobody waiting, put book back on shelf
+            // nobody waiting, put book back on shelf
             const book = await Book.findById(transaction.bookId).session(session);
             if (book) {
                 book.availableCopies += 1;
@@ -146,12 +191,19 @@ export const returnBook = async (req, res) => {
         }
 
         await session.commitTransaction();
-        res.status(200).json({ success: true, message: returnMessage, transaction });
+        res.status(200).json({
+            success: true,
+            message: returnMessage,
+            transaction,
+        });
 
     } catch (error) {
         console.error("Return book error:", error.message);
         await session.abortTransaction();
-        res.status(500).json({ success: false, message: "Server error while returning book" });
+        res.status(500).json({
+            success: false,
+            message: "Server error while returning book",
+        });
     } finally {
         session.endSession();
     }
