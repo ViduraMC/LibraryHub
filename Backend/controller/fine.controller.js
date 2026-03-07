@@ -167,7 +167,10 @@ export const getAllUnpaidFines = async (req, res) => {
 
 export const getFineById = async (req, res) => {
     try {
-        const { fineId } = req.params;
+
+        //Take the fineId value from the URL and store it in a variable called fineId ==>> http://localhost:5000/fine/12345
+        //const fineId = req.params.fineId;
+        const { fineId } = req.params;  
 
         const fine = await Fine.findById(fineId)
             .populate("userId")
