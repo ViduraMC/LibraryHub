@@ -307,7 +307,7 @@ export const getAllTransactions = async (req, res) => {
 
         const transactions = await BookTransaction.find(filter)
             .populate("bookId", "bookId name author grade")
-            .populate("userId", "fullName email role")
+            .populate("userId", "fullName email role membershipId")
             .sort({ createdAt: -1 });
 
         res.status(200).json({
@@ -331,7 +331,7 @@ export const getSingleTransaction = async (req, res) => {
 
         const transaction = await BookTransaction.findOne({ _id: id, isDeleted: false })
             .populate("bookId", "bookId name author grade type value")
-            .populate("userId", "fullName email role");
+            .populate("userId", "fullName email role membershipId");
 
         if (!transaction) {
             return res.status(404).json({
@@ -458,7 +458,7 @@ export const getDeletedTransactions = async (req, res) => {
     try {
         const transactions = await BookTransaction.find({ isDeleted: true })
             .populate("bookId", "bookId name author grade")
-            .populate("userId", "fullName email role")
+            .populate("userId", "fullName email role membershipId")
             .sort({ deletedAt: -1 });
 
         res.status(200).json({
