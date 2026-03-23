@@ -4,27 +4,25 @@ import { toast } from 'react-toastify';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { loginUser } from '../../api/auth.api.js';
 
+/**
+ * Unified login interface for LibraryHub.
+ * Identifies role based on credentials and directs traffic accordingly.
+ */
 const LoginPage = () => {
     const navigate = useNavigate();
     const { login } = useAuth();
 
-    // toggle between email (admin/librarian) and membershipId (student/teacher) login
-    const [loginType, setLoginType] = useState('email'); // 'email' or 'membership'
-    const [formData, setFormData] = useState({ email: '', membershipId: '', password: '' });
+    const [identifier, setIdentifier] = useState('');
+    const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
-
-    const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
 
-        const credentials =
-            loginType === 'email'
-                ? { email: formData.email, password: formData.password }
-                : { membershipId: formData.membershipId, password: formData.password };
+        const credentials = identifier.includes('@') 
+            ? { email: identifier.trim().toLowerCase(), password }
+            : { membershipId: identifier.trim().toUpperCase(), password };
 
         try {
             const res = await loginUser(credentials);
@@ -33,14 +31,13 @@ const LoginPage = () => {
             login(user, token);
             toast.success(`Welcome back, ${user.fullName}!`);
 
-            // redirect user based on their role after successful login
             if (user.role === 'student' || user.role === 'teacher') {
                 navigate('/my-transactions');
             } else {
                 navigate('/transactions');
             }
         } catch (err) {
-            const msg = err.response?.data?.message || 'Login failed. Check credentials.';
+            const msg = err.response?.data?.message || 'Login failed. Please check your credentials.';
             toast.error(msg);
         } finally {
             setLoading(false);
@@ -48,97 +45,111 @@ const LoginPage = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-100">
-            <div className="bg-white rounded-2xl shadow-lg w-full max-w-md p-8">
-                {/* main login header */}
-                <div className="text-center mb-8">
-                    <h1 className="text-3xl font-bold text-gray-800">LibraryHub</h1>
-                    <p className="text-gray-500 mt-1">School Library Management System</p>
-                </div>
-
-                {/* switch between login methods */}
-                <div className="flex rounded-lg overflow-hidden border border-gray-200 mb-6">
-                    <button
-                        type="button"
-                        onClick={() => setLoginType('email')}
-                        className={`flex-1 py-2 text-sm font-medium transition ${
-                            loginType === 'email'
-                                ? 'bg-blue-600 text-white'
-                                : 'bg-white text-gray-500 hover:bg-gray-50'
-                        }`}
-                    >
-                        Admin / Librarian
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => setLoginType('membership')}
-                        className={`flex-1 py-2 text-sm font-medium transition ${
-                            loginType === 'membership'
-                                ? 'bg-blue-600 text-white'
-                                : 'bg-white text-gray-500 hover:bg-gray-50'
-                        }`}
-                    >
-                        Student / Teacher
-                    </button>
-                </div>
-
-                {/* login credentials form */}
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    {loginType === 'email' ? (
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Email Address
-                            </label>
-                            <input
-                                type="email"
-                                name="email"
-                                value={formData.email}
-                                onChange={handleChange}
-                                required
-                                placeholder="admin@libraryhub.com"
-                                className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            />
+        <div className="min-h-screen flex flex-col lg:flex-row bg-theme-white">
+            {/* Left side: branding section */}
+            <div className="hidden lg:flex lg:w-1/2 bg-theme-pale items-center justify-center p-12">
+                <div className="max-w-lg text-center lg:text-left">
+                    <span className="inline-block px-4 py-1.5 mb-6 text-xs font-semibold tracking-wider text-theme-blue uppercase bg-white rounded-full shadow-sm">
+                        Digital Knowledge Hub
+                    </span>
+                    <h1 className="text-5xl font-bold leading-tight text-theme-navy mb-6">
+                        Where Every Page Opens a <span className="text-theme-blue text-6xl block mt-2">New World</span>
+                    </h1>
+                    <p className="text-lg text-slate-600 leading-relaxed mb-8">
+                        Access thousands of academic resources, digital catalogs, and transaction history 
+                        all in one place.
+                    </p>
+                    <div className="flex gap-4">
+                        <div className="p-4 bg-white rounded-2xl shadow-sm flex-1">
+                            <div className="h-2 w-12 bg-theme-navy rounded-full mb-3"></div>
+                            <p className="text-sm font-medium text-slate-500">Resource Access</p>
                         </div>
-                    ) : (
+                        <div className="p-4 bg-white rounded-2xl shadow-sm flex-1">
+                            <div className="h-2 w-12 bg-theme-blue rounded-full mb-3"></div>
+                            <p className="text-sm font-medium text-slate-500">Digital Catalog</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Right side: Login form */}
+            <div className="flex-1 flex items-center justify-center p-8 lg:p-16">
+                <div className="w-full max-w-md">
+                    <div className="mb-10">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="w-10 h-10 bg-theme-navy rounded-xl flex items-center justify-center overflow-hidden">
+                                <div className="w-5 h-5 bg-theme-pale rotate-45 transform translate-x-3 translate-y-3"></div>
+                                <div className="w-5 h-5 bg-white rotate-45 transform -translate-x-3 -translate-y-3"></div>
+                            </div>
+                            <h2 className="text-2xl font-bold text-theme-navy tracking-tight uppercase">LibraryHub</h2>
+                        </div>
+                        <h3 className="text-3xl font-bold text-slate-800">Welcome Back</h3>
+                        <p className="text-slate-500 mt-2 text-sm leading-relaxed">
+                            Sign in to manage your library profile and track transactions.
+                        </p>
+                    </div>
+
+                    <form onSubmit={handleSubmit} className="space-y-6">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Membership ID
+                            <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                Email or Membership ID
                             </label>
                             <input
                                 type="text"
-                                name="membershipId"
-                                value={formData.membershipId}
-                                onChange={handleChange}
+                                value={identifier}
+                                onChange={(e) => setIdentifier(e.target.value)}
                                 required
-                                placeholder="ST-26-0001 or TH-26-0001"
-                                className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="Enter your credentials"
+                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-slate-700 focus:outline-none focus:ring-2 focus:ring-theme-blue/20 focus:border-theme-blue transition-all"
+                            />
+                            <p className="text-[10px] text-slate-400 mt-1.5 ml-1 italic">
+                                Use email for admin login, or membership ID for member access.
+                            </p>
+                        </div>
+
+                        <div>
+                            <div className="flex justify-between mb-2">
+                                <label className="text-sm font-semibold text-slate-700">
+                                    Password
+                                </label>
+                                <a href="#" className="text-xs font-semibold text-theme-blue hover:underline">
+                                    Forgot password?
+                                </a>
+                            </div>
+                            <input
+                                type="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                                placeholder="••••••••"
+                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-slate-700 focus:outline-none focus:ring-2 focus:ring-theme-blue/20 focus:border-theme-blue transition-all"
                             />
                         </div>
-                    )}
 
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Password
-                        </label>
-                        <input
-                            type="password"
-                            name="password"
-                            value={formData.password}
-                            onChange={handleChange}
-                            required
-                            placeholder="Enter your password"
-                            className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                    </div>
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="w-full bg-theme-navy text-white py-4 rounded-xl font-bold hover:bg-slate-800 transition-all shadow-lg shadow-theme-navy/10 flex items-center justify-center gap-2 group disabled:opacity-70"
+                        >
+                            {loading ? (
+                                <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                            ) : (
+                                <>
+                                    <span>Sign In</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                    </svg>
+                                </>
+                            )}
+                        </button>
+                    </form>
 
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="w-full bg-blue-600 text-white py-2.5 rounded-lg font-medium hover:bg-blue-700 transition disabled:opacity-60"
-                    >
-                        {loading ? 'Logging in...' : 'Login'}
-                    </button>
-                </form>
+                    <footer className="mt-12 text-center border-t border-slate-100 pt-8">
+                        <p className="text-sm text-slate-500 font-medium">
+                            Need help? <span className="text-theme-blue font-bold cursor-pointer hover:underline">Contact System Admin</span>
+                        </p>
+                    </footer>
+                </div>
             </div>
         </div>
     );
