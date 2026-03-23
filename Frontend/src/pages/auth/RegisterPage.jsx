@@ -20,16 +20,16 @@ const RegisterPage = () => {
     const [submitted, setSubmitted] = useState(false);
 
     const [form, setForm] = useState({
-        schoolId: '',
+        schoolId: '',   // used as studentId or teacherId depending on applicantType
         fullName: '',
         email: '',
         phone: '',
-        // student-only
+        // student-only fields
         grade: '',
         classRoom: '',
         guardianName: '',
         guardianPhone: '',
-        // teacher-only
+        // teacher-only fields
         subject: '',
     });
 
@@ -53,20 +53,23 @@ const RegisterPage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        // Backend expects `studentId` for students and `teacherId` for teachers —
+        // not a generic `schoolId`. The fields are used for school list verification.
         const payload = {
             applicantType,
-            schoolId: form.schoolId.trim(),
             fullName: form.fullName.trim(),
             email: form.email.trim().toLowerCase(),
             phone: form.phone.trim(),
         };
 
         if (applicantType === 'student') {
+            payload.studentId = form.schoolId.trim();
             payload.grade = form.grade.trim();
             payload.classRoom = form.classRoom.trim();
             payload.guardianName = form.guardianName.trim();
             payload.guardianPhone = form.guardianPhone.trim();
         } else {
+            payload.teacherId = form.schoolId.trim();
             payload.subject = form.subject.trim();
         }
 
