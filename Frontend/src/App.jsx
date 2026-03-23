@@ -3,17 +3,18 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { AuthProvider } from './context/AuthContext.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
+import MainLayout from './components/MainLayout.jsx';
 
 // auth pages
 import LoginPage from './pages/auth/LoginPage.jsx';
 import SetPasswordPage from './pages/auth/SetPasswordPage.jsx';
 import UnauthorizedPage from './pages/auth/UnauthorizedPage.jsx';
 
-// transaction pages (will be added in next stage)
-// import MyTransactionsPage from './pages/transactions/MyTransactionsPage.jsx';
-// import AllTransactionsPage from './pages/transactions/AllTransactionsPage.jsx';
-// import BorrowBookPage from './pages/transactions/BorrowBookPage.jsx';
-// import RecycleBinPage from './pages/transactions/RecycleBinPage.jsx';
+// transaction pages (stubs for phase 9)
+const MyTransactionsPage = () => <div className="p-8 bg-meridian-pale rounded-3xl min-h-[400px] flex items-center justify-center text-meridian-navy font-bold italic">User Dashboard Coming Soon</div>;
+const AllTransactionsPage = () => <div className="p-8 bg-meridian-pale rounded-3xl min-h-[400px] flex items-center justify-center text-meridian-navy font-bold italic">Librarian Dashboard Coming Soon</div>;
+const BorrowBookPage = () => <div className="p-8 bg-meridian-pale rounded-3xl min-h-[400px] flex items-center justify-center text-meridian-navy font-bold italic">Borrow Interface Coming Soon</div>;
+const RecycleBinPage = () => <div className="p-8 bg-meridian-pale rounded-3xl min-h-[400px] flex items-center justify-center text-meridian-navy font-bold italic">Recycle Bin Coming Soon</div>;
 
 // other core modules
 // import BookListPage from './pages/books/BookListPage.jsx';
@@ -31,11 +32,13 @@ function App() {
                     {/* default redirect to login */}
                     <Route path="/" element={<Navigate to="/login" replace />} />
 
-                    {/* borrowing and transaction routes */}
-                    {/* <Route path="/my-transactions" element={<ProtectedRoute allowedRoles={['student', 'teacher']}><MyTransactionsPage /></ProtectedRoute>} /> */}
-                    {/* <Route path="/transactions" element={<ProtectedRoute allowedRoles={['librarian', 'admin']}><AllTransactionsPage /></ProtectedRoute>} /> */}
-                    {/* <Route path="/borrow" element={<ProtectedRoute allowedRoles={['librarian', 'admin']}><BorrowBookPage /></ProtectedRoute>} /> */}
-                    {/* <Route path="/recycle-bin" element={<ProtectedRoute allowedRoles={['librarian', 'admin']}><RecycleBinPage /></ProtectedRoute>} /> */}
+                    {/* protected application routes */}
+                    <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
+                        <Route path="/my-transactions" element={<ProtectedRoute allowedRoles={['student', 'teacher']}><MyTransactionsPage /></ProtectedRoute>} />
+                        <Route path="/transactions" element={<ProtectedRoute allowedRoles={['librarian', 'admin']}><AllTransactionsPage /></ProtectedRoute>} />
+                        <Route path="/borrow" element={<ProtectedRoute allowedRoles={['librarian', 'admin']}><BorrowBookPage /></ProtectedRoute>} />
+                        <Route path="/recycle-bin" element={<ProtectedRoute allowedRoles={['librarian', 'admin']}><RecycleBinPage /></ProtectedRoute>} />
+                    </Route>
                 </Routes>
             </Router>
 
