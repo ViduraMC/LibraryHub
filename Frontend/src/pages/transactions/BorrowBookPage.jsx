@@ -1,107 +1,267 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import axiosInstance from '../../api/axiosInstance.js';
 import { borrowBook } from '../../api/transactions.api.js';
 
-// Librarians use this page to manually issue a book to a member.
-// The librarian enters the member's Membership ID (e.g. ST-26-0001)
-// and the Book ID (e.g. BK001) — not the raw Mongo _id.
-// The backend resolves these to their actual database records.
+// Librarians use this page to issue a book to a member.
+//
+// How it works:
+//  1. Librarian types the member's Membership ID (e.g. ST-26-0001)
+//     → We look up the user via GET /api/transactions?userId=... won't work.
+//     We use GET /api/membership-request?status=approved and filter client-side
+//     OR use a direct user search. Since no /users endpoint exists, we look
+//     up by scanning GET /api/membership-request with membershipId.
+//
+//  2. Librarian types the Book ID (e.g. BK001) → resolved via GET /api/books/:id
+//     The listBooks endpoint doesn't filter by bookId, so we call GET /api/books
+//     and resolve by the human bookId string stored on the Book document.
+//
+//  3. Once both are resolved to Mongo _ids, we POST /api/transactions/borrow
+//     with { userId: <mongo_id>, bookId: <mongo_id> }.
 const BorrowBookPage = () => {
     const navigate = useNavigate();
 
-    const [formData, setFormData] = useState({
-        membershipId: '',
-        bookId: '',
-    });
-    const [loading, setLoading] = useState(false);
+    // What the librarian types
+    const [membershipIdInput, setMembershipIdInput] = useState('');
+    const [bookIdInput, setBookIdInput] = useState('');
 
-    const handleChange = (e) =>
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+    // Resolved records after lookup
+    const [resolvedUser, setResolvedUser] = useState(null);
+    const [resolvedBook, setResolvedBook] = useState(null);
+
+    // Loading states per field
+    const [lookingUpUser, setLookingUpUser] = useState(false);
+    const [lookingUpBook, setLookingUpBook] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
+
+    // Look up a member by their membershipId using the school list endpoint.
+    // We search through approved membership requests which have the membershipId.
+    const lookupUser = useCallback(async () => {
+        if (!membershipIdInput.trim()) return;
+        setLookingUpUser(true);
+        setResolvedUser(null);
+        try {
+            // Approved requests have a membershipId and the corresponding user _id
+            // We look at all active transactions to find the userId by membershipId.
+            // The getAllTransactions response populates userId with fullName + role. 
+            // We match by membershipId on the populated user object.
+            const res = await axiosInstance.get('/transactions', {
+                params: { limit: 1000 }
+            });
+            const txns = res.data.transactions || [];
+            const match = txns.find(
+                (t) => t.userId?.membershipId === membershipIdInput.trim().toUpperCase()
+            );
+
+            if (match?.userId) {
+                setResolvedUser({
+                    _id: match.userId._id,
+                    fullName: match.userId.fullName,
+                    role: match.userId.role,
+                    membershipId: match.userId.membershipId,
+                });
+            } else {
+                // Fallback: search membership requests for approved members
+                const mRes = await axiosInstance.get('/membership-request', {
+                    params: { status: 'active' }
+                });
+                const requests = mRes.data.requests || [];
+                const mMatch = requests.find(
+                    (r) => r.membershipId === membershipIdInput.trim().toUpperCase()
+                );
+                if (mMatch) {
+                    setResolvedUser({
+                        _id: mMatch.userId || null,
+                        fullName: mMatch.fullName,
+                        role: mMatch.applicantType,
+                        membershipId: mMatch.membershipId,
+                        needsMongoId: true,
+                    });
+                } else {
+                    toast.error(`No member found with Membership ID: ${membershipIdInput}`);
+                }
+            }
+        } catch {
+            toast.error('Could not look up the member. Please check the ID and try again.');
+        } finally {
+            setLookingUpUser(false);
+        }
+    }, [membershipIdInput]);
+
+    // Look up a book by its human-readable bookId (e.g. BK001).
+    // The backend stores bookId as a String field on the Book model.
+    // We use GET /api/books with free-text search and match manually.
+    const lookupBook = useCallback(async () => {
+        if (!bookIdInput.trim()) return;
+        setLookingUpBook(true);
+        setResolvedBook(null);
+        try {
+            const res = await axiosInstance.get('/books', {
+                params: { q: bookIdInput.trim(), limit: 50 }
+            });
+            const books = res.data.data || [];
+            // Exact match on the bookId string field
+            const match = books.find(
+                (b) => b.bookId?.toLowerCase() === bookIdInput.trim().toLowerCase()
+            );
+            if (match) {
+                setResolvedBook(match);
+            } else {
+                toast.error(`No book found with ID: ${bookIdInput}`);
+            }
+        } catch {
+            toast.error('Could not look up the book. Please check the ID and try again.');
+        } finally {
+            setLookingUpBook(false);
+        }
+    }, [bookIdInput]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setLoading(true);
+
+        if (!resolvedUser || !resolvedBook) {
+            toast.error('Please look up and confirm both the member and the book first.');
+            return;
+        }
+
+        if (!resolvedUser._id) {
+            toast.error('Member resolved but no system ID found. Please contact the admin.');
+            return;
+        }
+
+        setSubmitting(true);
         try {
+            // Backend expects MongoDB _id for both userId and bookId
             await borrowBook({
-                membershipId: formData.membershipId.trim().toUpperCase(),
-                bookId: formData.bookId.trim(),
+                userId: resolvedUser._id,
+                bookId: resolvedBook._id,
             });
-            toast.success('Book successfully issued!');
+            toast.success('Book issued successfully!');
             navigate('/transactions');
         } catch (err) {
-            toast.error(err.response?.data?.message || 'Could not issue the book. Please check the IDs and try again.');
+            toast.error(err.response?.data?.message || 'Checkout failed. Please try again.');
         } finally {
-            setLoading(false);
+            setSubmitting(false);
         }
     };
 
     return (
         <div className="max-w-2xl mx-auto space-y-8">
+            {/* Header */}
             <div className="text-center">
                 <h1 className="text-4xl font-black text-theme-navy tracking-tight uppercase">
                     Issue Book
                 </h1>
                 <p className="text-slate-500 mt-2 text-sm">
-                    Enter the member's Membership ID and the Book ID to issue a book.
+                    Enter the Membership ID and Book ID to look them up, then confirm the issue.
                 </p>
             </div>
 
             <div className="bg-white border border-slate-100 rounded-3xl shadow-xl shadow-slate-200/40 overflow-hidden">
-                {/* Top colour bar */}
                 <div className="h-1 w-full bg-gradient-to-r from-theme-blue to-theme-navy" />
 
                 <form onSubmit={handleSubmit} className="p-10 space-y-8">
-                    <div className="space-y-6">
-                        {/* Membership ID */}
-                        <div>
-                            <label className="block text-sm font-bold text-slate-700 mb-2">
-                                Member's Membership ID
-                            </label>
-                            <input
-                                name="membershipId"
-                                type="text"
-                                value={formData.membershipId}
-                                onChange={handleChange}
-                                required
-                                placeholder="e.g. ST-26-0001"
-                                className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-slate-700 focus:outline-none focus:ring-4 focus:ring-theme-blue/10 focus:border-theme-blue transition-all font-mono"
-                            />
-                            <p className="text-[11px] text-slate-400 mt-1.5 ml-1">
-                                Students: ST-YY-XXXX  •  Teachers: TH-YY-XXXX
-                            </p>
-                        </div>
 
-                        {/* Book ID */}
-                        <div>
-                            <label className="block text-sm font-bold text-slate-700 mb-2">
-                                Book ID
-                            </label>
+                    {/* Step 1: Member lookup */}
+                    <div>
+                        <label className="block text-sm font-bold text-slate-700 mb-2">
+                            Step 1 — Member's Membership ID
+                        </label>
+                        <div className="flex gap-3">
                             <input
-                                name="bookId"
                                 type="text"
-                                value={formData.bookId}
-                                onChange={handleChange}
-                                required
-                                placeholder="e.g. BK001"
-                                className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-slate-700 focus:outline-none focus:ring-4 focus:ring-theme-blue/10 focus:border-theme-blue transition-all font-mono"
+                                value={membershipIdInput}
+                                onChange={(e) => {
+                                    setMembershipIdInput(e.target.value);
+                                    setResolvedUser(null); // reset if typing changes
+                                }}
+                                placeholder="e.g. ST-26-0001"
+                                className="flex-1 bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-slate-700 font-mono focus:outline-none focus:ring-4 focus:ring-theme-blue/10 focus:border-theme-blue transition-all"
                             />
-                            <p className="text-[11px] text-slate-400 mt-1.5 ml-1">
-                                Found on the book's spine label or in the book catalogue.
-                            </p>
+                            <button
+                                type="button"
+                                onClick={lookupUser}
+                                disabled={lookingUpUser || !membershipIdInput.trim()}
+                                className="px-5 py-4 bg-theme-pale text-theme-blue rounded-2xl font-bold text-sm hover:bg-theme-blue hover:text-white transition-all disabled:opacity-50"
+                            >
+                                {lookingUpUser ? (
+                                    <span className="w-4 h-4 border-2 border-theme-blue border-t-white rounded-full animate-spin inline-block" />
+                                ) : 'Look Up'}
+                            </button>
                         </div>
+                        {/* Member preview card */}
+                        {resolvedUser && (
+                            <div className="mt-3 bg-emerald-50 border border-emerald-100 rounded-2xl px-5 py-3 flex items-center gap-3">
+                                <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600">
+                                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p className="text-sm font-bold text-slate-800">{resolvedUser.fullName}</p>
+                                    <p className="text-xs text-emerald-600 uppercase font-bold">{resolvedUser.role} · {resolvedUser.membershipId}</p>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
-                    {/* Reminder notice */}
+                    {/* Step 2: Book lookup */}
+                    <div>
+                        <label className="block text-sm font-bold text-slate-700 mb-2">
+                            Step 2 — Book ID
+                        </label>
+                        <div className="flex gap-3">
+                            <input
+                                type="text"
+                                value={bookIdInput}
+                                onChange={(e) => {
+                                    setBookIdInput(e.target.value);
+                                    setResolvedBook(null);
+                                }}
+                                placeholder="e.g. BK001"
+                                className="flex-1 bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-slate-700 font-mono focus:outline-none focus:ring-4 focus:ring-theme-blue/10 focus:border-theme-blue transition-all"
+                            />
+                            <button
+                                type="button"
+                                onClick={lookupBook}
+                                disabled={lookingUpBook || !bookIdInput.trim()}
+                                className="px-5 py-4 bg-theme-pale text-theme-blue rounded-2xl font-bold text-sm hover:bg-theme-blue hover:text-white transition-all disabled:opacity-50"
+                            >
+                                {lookingUpBook ? (
+                                    <span className="w-4 h-4 border-2 border-theme-blue border-t-white rounded-full animate-spin inline-block" />
+                                ) : 'Look Up'}
+                            </button>
+                        </div>
+                        {/* Book preview card */}
+                        {resolvedBook && (
+                            <div className="mt-3 bg-emerald-50 border border-emerald-100 rounded-2xl px-5 py-3 flex items-center gap-3">
+                                <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600">
+                                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p className="text-sm font-bold text-slate-800">{resolvedBook.name}</p>
+                                    <p className="text-xs text-emerald-600 font-bold">
+                                        By {resolvedBook.author} · {resolvedBook.availableCopies} {resolvedBook.availableCopies === 1 ? 'copy' : 'copies'} available
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Pre-issue checklist */}
                     <div className="bg-theme-pale/50 border border-theme-pale rounded-2xl px-5 py-4 text-sm text-theme-navy">
-                        <p className="font-bold mb-1">Before issuing:</p>
+                        <p className="font-bold mb-1">Before confirming:</p>
                         <ul className="text-slate-600 text-xs space-y-1 list-disc list-inside">
-                            <li>Confirm the member's ID card matches the Membership ID</li>
-                            <li>Check the physical book copy is available on the shelf</li>
-                            <li>Record is automatically dated — due in 14 days</li>
+                            <li>Verify the member's physical ID card matches the name shown above</li>
+                            <li>Confirm the book copy is in hand and ready to issue</li>
+                            <li>Due date will be set to 14 days from today</li>
                         </ul>
                     </div>
 
+                    {/* Action buttons */}
                     <div className="flex gap-4">
                         <button
                             type="button"
@@ -112,14 +272,12 @@ const BorrowBookPage = () => {
                         </button>
                         <button
                             type="submit"
-                            disabled={loading}
-                            className="flex-[2] py-4 bg-theme-navy text-white rounded-2xl font-bold hover:bg-slate-800 transition-all shadow-lg shadow-theme-navy/20 disabled:opacity-70 flex items-center justify-center gap-2"
+                            disabled={submitting || !resolvedUser || !resolvedBook}
+                            className="flex-[2] py-4 bg-theme-navy text-white rounded-2xl font-bold hover:bg-slate-800 transition-all shadow-lg shadow-theme-navy/20 disabled:opacity-50 flex items-center justify-center gap-2"
                         >
-                            {loading ? (
+                            {submitting ? (
                                 <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                            ) : (
-                                'Confirm Issue'
-                            )}
+                            ) : 'Confirm Issue'}
                         </button>
                     </div>
                 </form>
