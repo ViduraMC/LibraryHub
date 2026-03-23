@@ -18,7 +18,8 @@ const AdminLibrariansPage = () => {
     const [form, setForm] = useState({
         fullName: '',
         email: '',
-        password: '',
+        // Note: no password field — the backend auto-generates a secure
+        // temp password and emails it to the librarian directly.
     });
 
     const fetchLibrarians = async () => {
@@ -44,8 +45,8 @@ const AdminLibrariansPage = () => {
         setSubmitting(true);
         try {
             await createLibrarian(form);
-            toast.success(`Librarian account created. A setup email has been sent to ${form.email}.`);
-            setForm({ fullName: '', email: '', password: '' });
+            toast.success(`Account created. Login credentials have been emailed to ${form.email}.`);
+            setForm({ fullName: '', email: '' });
             setShowForm(false);
             fetchLibrarians();
         } catch (err) {
@@ -84,10 +85,11 @@ const AdminLibrariansPage = () => {
                 >
                     <h2 className="text-lg font-bold text-slate-800">New Librarian Account</h2>
                     <p className="text-sm text-slate-400 -mt-2">
-                        The librarian will receive an email with a link to set their own password.
+                        The system will auto-generate a secure temporary password and email it directly to the librarian.
                     </p>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    {/* Only fullName and email are needed — backend generates the temp password */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">
                                 Full Name *
@@ -112,21 +114,6 @@ const AdminLibrariansPage = () => {
                                 onChange={handleChange}
                                 required
                                 placeholder="librarian@email.com"
-                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-theme-blue/20 focus:border-theme-blue transition-all"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">
-                                Temporary Password *
-                            </label>
-                            <input
-                                name="password"
-                                type="password"
-                                value={form.password}
-                                onChange={handleChange}
-                                required
-                                minLength={6}
-                                placeholder="Min. 6 characters"
                                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-theme-blue/20 focus:border-theme-blue transition-all"
                             />
                         </div>
@@ -194,14 +181,15 @@ const AdminLibrariansPage = () => {
                                             {lib.email}
                                         </td>
                                         <td className="px-6 py-5">
+                                            {/* User model uses isActive (boolean), not status (string) */}
                                             <span
                                                 className={`px-2.5 py-1 text-[9px] font-black uppercase tracking-widest rounded-md border ${
-                                                    lib.status === 'active'
+                                                    lib.isActive !== false
                                                         ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
                                                         : 'bg-slate-50 text-slate-400 border-slate-100'
                                                 }`}
                                             >
-                                                {lib.status || 'active'}
+                                                {lib.isActive !== false ? 'Active' : 'Inactive'}
                                             </span>
                                         </td>
                                     </tr>
