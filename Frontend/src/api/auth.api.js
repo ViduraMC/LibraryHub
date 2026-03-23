@@ -1,15 +1,16 @@
 import axiosInstance from './axiosInstance.js';
 
-// login for all roles
-// admin/librarian: email + password
-// student/teacher: membershipId + password
+// Login for all roles:
+//   admin / librarian  → { email, password }
+//   student / teacher  → { membershipId, password }
 export const loginUser = (credentials) =>
     axiosInstance.post('/auth/login', credentials);
 
-// set password for newly approved members via link token
-export const setPassword = (token, newPassword) =>
-    axiosInstance.post('/auth/set-password', { token, newPassword });
+// Set password for newly approved members via the 48-hour email link.
+// Backend expects: { token, password }  (NOT newPassword)
+export const setPassword = (token, password) =>
+    axiosInstance.post('/auth/set-password', { token, password });
 
-// invalidate token on server side logout
-export const logoutUser = () =>
-    axiosInstance.post('/auth/logout');
+// Submit a membership application (public — student or teacher registration)
+export const submitMembershipRequest = (data) =>
+    axiosInstance.post('/membership-request/submit', data);
