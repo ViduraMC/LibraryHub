@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import { logoutUser } from '../api/auth.api.js';
 
 const AuthContext = createContext(null);
 
@@ -20,7 +21,7 @@ export const AuthProvider = ({ children }) => {
         setLoading(false);
     }, []);
 
-    // Call after a successful login API response
+    // Called after a successful login API response
     const login = (userData, jwtToken) => {
         setUser(userData);
         setToken(jwtToken);
@@ -28,13 +29,20 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('user', JSON.stringify(userData));
     };
 
-    // Logout is purely client-side — no /auth/logout backend endpoint exists.
-    // Just clear local state and localStorage.
-    const logout = () => {
-        setUser(null);
-        setToken(null);
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+    // Calls the backend to blacklist the token, then clears local state.
+    // Even if the API call fails, we still clear the local session so
+    // the user is logged out from the frontend regardless.
+    const logout = async () => {
+        try {
+            await logoutUser();
+        } catch {
+            // silently ignore — token may already be expired or invalid
+        } finally {
+            setUser(null);
+            setToken(null);
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+        }
     };
 
     return (
