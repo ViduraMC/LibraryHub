@@ -1,13 +1,13 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 
-// wraps any page that requires login
-// if not logged in — redirects to /login
-// if role restriction given — checks the role too
+// route guard to protect pages that require login
+// redirects to login if not authenticated
+// checks for allowed roles if specified
 const ProtectedRoute = ({ children, allowedRoles = [] }) => {
     const { user, loading } = useAuth();
 
-    // wait for localStorage to be read before deciding
+    // wait for auth state to load
     if (loading) {
         return <div className="flex justify-center items-center h-screen">Loading...</div>;
     }

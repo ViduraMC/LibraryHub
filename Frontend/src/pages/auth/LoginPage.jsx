@@ -8,7 +8,7 @@ const LoginPage = () => {
     const navigate = useNavigate();
     const { login } = useAuth();
 
-    // toggle between email login (admin/librarian) and membershipId login (student/teacher)
+    // toggle between email (admin/librarian) and membershipId (student/teacher) login
     const [loginType, setLoginType] = useState('email'); // 'email' or 'membership'
     const [formData, setFormData] = useState({ email: '', membershipId: '', password: '' });
     const [loading, setLoading] = useState(false);
@@ -33,7 +33,7 @@ const LoginPage = () => {
             login(user, token);
             toast.success(`Welcome back, ${user.fullName}!`);
 
-            // redirect based on role
+            // redirect user based on their role after successful login
             if (user.role === 'student' || user.role === 'teacher') {
                 navigate('/my-transactions');
             } else {
@@ -50,13 +50,13 @@ const LoginPage = () => {
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100">
             <div className="bg-white rounded-2xl shadow-lg w-full max-w-md p-8">
-                {/* header */}
+                {/* main login header */}
                 <div className="text-center mb-8">
                     <h1 className="text-3xl font-bold text-gray-800">LibraryHub</h1>
                     <p className="text-gray-500 mt-1">School Library Management System</p>
                 </div>
 
-                {/* login type toggle */}
+                {/* switch between login methods */}
                 <div className="flex rounded-lg overflow-hidden border border-gray-200 mb-6">
                     <button
                         type="button"
@@ -82,7 +82,7 @@ const LoginPage = () => {
                     </button>
                 </div>
 
-                {/* form */}
+                {/* login credentials form */}
                 <form onSubmit={handleSubmit} className="space-y-4">
                     {loginType === 'email' ? (
                         <div>

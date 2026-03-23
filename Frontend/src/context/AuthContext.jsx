@@ -2,13 +2,13 @@ import { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext(null);
 
-// auth provider wraps the whole app to share login state
+// auth provider to manage login state across the app
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [token, setToken] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    // on app load — restore session from localStorage if exists
+    // check for existing session in localStorage on load
     useEffect(() => {
         const storedToken = localStorage.getItem('token');
         const storedUser = localStorage.getItem('user');
@@ -19,7 +19,7 @@ export const AuthProvider = ({ children }) => {
         setLoading(false);
     }, []);
 
-    // called after successful login
+    // save user and token after successful login
     const login = (userData, jwtToken) => {
         setUser(userData);
         setToken(jwtToken);
@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('user', JSON.stringify(userData));
     };
 
-    // called on logout button click
+    // clear session on logout
     const logout = () => {
         setUser(null);
         setToken(null);
@@ -42,7 +42,7 @@ export const AuthProvider = ({ children }) => {
     );
 };
 
-// custom hook — use this in any component to get auth state
+// hook to use auth state in components
 export const useAuth = () => {
     const context = useContext(AuthContext);
     if (!context) throw new Error('useAuth must be used inside AuthProvider');

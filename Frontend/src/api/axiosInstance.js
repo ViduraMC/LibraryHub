@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-// centralized axios instance — attach this to all api calls
+// global axios instance for all api calls
 const axiosInstance = axios.create({
     baseURL: 'http://localhost:5000/api',
     headers: {
@@ -8,7 +8,7 @@ const axiosInstance = axios.create({
     },
 });
 
-// request interceptor — auto-attach jwt token from localStorage to every request
+// attach jwt token to every request if it exists in localStorage
 axiosInstance.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('token');
@@ -20,7 +20,7 @@ axiosInstance.interceptors.request.use(
     (error) => Promise.reject(error)
 );
 
-// response interceptor — handle 401 globally (token expired / invalid)
+// redirect to login if server returns 401 unauthorized
 axiosInstance.interceptors.response.use(
     (response) => response,
     (error) => {

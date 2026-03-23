@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 
+// page shown when a user tries to access a restricted route without permission
 const UnauthorizedPage = () => {
     const navigate = useNavigate();
 

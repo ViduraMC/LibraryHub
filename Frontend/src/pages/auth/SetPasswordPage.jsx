@@ -3,7 +3,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { setPassword } from '../../api/auth.api.js';
 
-// this page is reached via the email link: /set-password?token=<token>
+// page to set password via link sent to email
+// URL format: /set-password?token=<token_here>
 const SetPasswordPage = () => {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
@@ -50,7 +51,7 @@ const SetPasswordPage = () => {
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100">
             <div className="bg-white rounded-2xl shadow-lg w-full max-w-md p-8">
-                {/* header */}
+                {/* page header */}
                 <div className="text-center mb-8">
                     <h1 className="text-3xl font-bold text-gray-800">LibraryHub</h1>
                     <p className="text-gray-500 mt-1">Set your account password</p>
