@@ -55,8 +55,9 @@ const AdminSchoolListsPage = () => {
         try {
             const uploadFn = tab === 'students' ? uploadStudentList : uploadTeacherList;
             const res = await uploadFn(formData);
-            const count = res.data.count ?? res.data.inserted ?? '?';
-            toast.success(`Successfully imported ${count} ${tab} records.`);
+            // Backend response shape: { added, skipped, totalRows }
+            const { added = 0, skipped = 0 } = res.data;
+            toast.success(`Imported ${added} ${tab} record${added !== 1 ? 's' : ''}${skipped > 0 ? ` (${skipped} duplicates skipped)` : ''}.`);
             fetchLists();
         } catch (err) {
             const msg = err.response?.data?.message || 'CSV upload failed. Make sure the file format is correct.';
@@ -110,14 +111,17 @@ const AdminSchoolListsPage = () => {
                 </label>
             </div>
 
-            {/* CSV format hint */}
+            {/* CSV format hint — columns must match what schoolList controller reads from the CSV */}
             <div className="bg-theme-pale border border-theme-blue/10 rounded-2xl px-6 py-4 text-sm text-theme-navy">
                 <p className="font-bold mb-1">Expected CSV columns for {tab}:</p>
                 {tab === 'students' ? (
-                    <code className="text-xs text-slate-600">schoolId, name, grade, classRoom, guardianName, guardianPhone</code>
+                    <code className="text-xs text-slate-600">schoolId, fullName, grade, classRoom</code>
                 ) : (
-                    <code className="text-xs text-slate-600">schoolId, name, subject</code>
+                    <code className="text-xs text-slate-600">schoolId, fullName, subject</code>
                 )}
+                <p className="text-[11px] text-slate-400 mt-1.5">
+                    The <strong>schoolId</strong> column is used to verify membership applications automatically.
+                </p>
             </div>
 
             {/* Tabs */}
@@ -144,7 +148,7 @@ const AdminSchoolListsPage = () => {
                         <thead>
                             <tr className="bg-slate-50/50">
                                 {tab === 'students'
-                                    ? ['School ID', 'Name', 'Grade', 'Class', 'Guardian', 'Guardian Phone'].map((h) => (
+                                    ? ['School ID', 'Name', 'Grade', 'Class'].map((h) => (
                                           <th key={h} className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 border-b border-slate-100">
                                               {h}
                                           </th>
@@ -178,18 +182,16 @@ const AdminSchoolListsPage = () => {
                                 rows.map((s) => (
                                     <tr key={s._id} className="hover:bg-slate-50/30 transition-colors">
                                         <td className="px-6 py-4 text-xs font-mono font-bold text-theme-blue">{s.schoolId}</td>
-                                        <td className="px-6 py-4 font-semibold text-slate-800 text-sm">{s.name}</td>
+                                        <td className="px-6 py-4 font-semibold text-slate-800 text-sm">{s.fullName}</td>
                                         <td className="px-6 py-4 text-sm text-slate-500">{s.grade}</td>
                                         <td className="px-6 py-4 text-sm text-slate-500">{s.classRoom}</td>
-                                        <td className="px-6 py-4 text-sm text-slate-500">{s.guardianName}</td>
-                                        <td className="px-6 py-4 text-sm text-slate-500">{s.guardianPhone}</td>
                                     </tr>
                                 ))
                             ) : (
                                 rows.map((t) => (
                                     <tr key={t._id} className="hover:bg-slate-50/30 transition-colors">
                                         <td className="px-6 py-4 text-xs font-mono font-bold text-theme-blue">{t.schoolId}</td>
-                                        <td className="px-6 py-4 font-semibold text-slate-800 text-sm">{t.name}</td>
+                                        <td className="px-6 py-4 font-semibold text-slate-800 text-sm">{t.fullName}</td>
                                         <td className="px-6 py-4 text-sm text-slate-500">{t.subject}</td>
                                     </tr>
                                 ))
