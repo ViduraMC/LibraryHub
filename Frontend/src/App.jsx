@@ -10,11 +10,11 @@ import LoginPage from './pages/auth/LoginPage.jsx';
 import SetPasswordPage from './pages/auth/SetPasswordPage.jsx';
 import UnauthorizedPage from './pages/auth/UnauthorizedPage.jsx';
 
-// transaction pages (stubs for phase 9)
-const MyTransactionsPage = () => <div className="p-8 bg-meridian-pale rounded-3xl min-h-[400px] flex items-center justify-center text-meridian-navy font-bold italic">User Dashboard Coming Soon</div>;
-const AllTransactionsPage = () => <div className="p-8 bg-meridian-pale rounded-3xl min-h-[400px] flex items-center justify-center text-meridian-navy font-bold italic">Librarian Dashboard Coming Soon</div>;
-const BorrowBookPage = () => <div className="p-8 bg-meridian-pale rounded-3xl min-h-[400px] flex items-center justify-center text-meridian-navy font-bold italic">Borrow Interface Coming Soon</div>;
-const RecycleBinPage = () => <div className="p-8 bg-meridian-pale rounded-3xl min-h-[400px] flex items-center justify-center text-meridian-navy font-bold italic">Recycle Bin Coming Soon</div>;
+// transaction pages
+import MyTransactionsPage from './pages/transactions/MyTransactionsPage.jsx';
+import AllTransactionsPage from './pages/transactions/AllTransactionsPage.jsx';
+import BorrowBookPage from './pages/transactions/BorrowBookPage.jsx';
+import RecycleBinPage from './pages/transactions/RecycleBinPage.jsx';
 
 // other core modules
 // import BookListPage from './pages/books/BookListPage.jsx';
