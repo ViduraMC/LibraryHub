@@ -171,7 +171,8 @@ const LibrarianMembershipPage = () => {
                                                 </span>
                                             </td>
                                             <td className="px-6 py-5 font-mono text-xs text-slate-600">
-                                                {req.schoolId}
+                                                {/* MembershipRequest has studentId for students, teacherId for teachers */}
+                                                {req.applicantType === 'student' ? req.studentId : req.teacherId}
                                             </td>
                                             <td className="px-6 py-5 text-sm text-slate-500">{req.email}</td>
                                             <td className="px-6 py-5 text-xs text-slate-400">
@@ -185,6 +186,10 @@ const LibrarianMembershipPage = () => {
                                                 >
                                                     {req.status}
                                                 </span>
+                                                {/* Show the generated membership ID on approved records */}
+                                                {req.status === 'approved' && req.membershipId && (
+                                                    <p className="text-[10px] text-emerald-600 font-bold mt-1">{req.membershipId}</p>
+                                                )}
                                                 {req.status === 'rejected' && req.rejectionReason && (
                                                     <p className="text-[10px] text-red-400 mt-1">{req.rejectionReason}</p>
                                                 )}
