@@ -1,18 +1,20 @@
 import axiosInstance from './axiosInstance.js';
 
-// Get all membership requests — supports query params like { status: 'verified' }
+// GET /api/membership-request?status=verified  (librarian/admin)
+// Returns all membership requests, optionally filtered by status.
 export const getMembershipRequests = (params) =>
     axiosInstance.get('/membership-request', { params });
 
-// Get a single membership request by ID
+// GET /api/membership-request/:id  (librarian/admin)
 export const getMembershipRequest = (id) =>
     axiosInstance.get(`/membership-request/${id}`);
 
-// Approve a verified membership request (librarian only)
+// PUT /api/membership-request/:id/approve  (librarian only)
+// Generates a membershipId and sends a set-password email.
 export const approveRequest = (id) =>
     axiosInstance.put(`/membership-request/${id}/approve`);
 
-// Reject a verified membership request (librarian only)
-// reason is an optional string explaining the rejection
+// PUT /api/membership-request/:id/reject  (librarian only)
+// Body: { reason }
 export const rejectRequest = (id, reason) =>
     axiosInstance.put(`/membership-request/${id}/reject`, { reason });
