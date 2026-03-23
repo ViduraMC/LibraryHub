@@ -12,5 +12,5 @@
 
 body {
     font-family: 'Inter', sans-serif;
-    @apply bg-meridian-white text-gray-800;
+    @apply bg-theme-white text-gray-800;
 }

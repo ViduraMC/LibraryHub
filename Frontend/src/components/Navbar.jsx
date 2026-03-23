@@ -4,8 +4,8 @@ import { toast } from 'react-toastify';
 import { logoutUser } from '../api/auth.api.js';
 
 /**
- * Shared navigation bar for authenticated users.
- * Displays user identity and provides role-based navigation and logout.
+ * Shared navigation bar for LibraryHub.
+ * Provides role-based links and session management.
  */
 const Navbar = () => {
     const { user, logout } = useAuth();
@@ -15,11 +15,10 @@ const Navbar = () => {
         try {
             await logoutUser();
             logout();
-            toast.info('Session terminated. See you soon!');
+            toast.info('Session terminated.');
             navigate('/login');
         } catch (err) {
             console.error('Logout error:', err);
-            // even if server fails, we clear local session
             logout();
             navigate('/login');
         }
@@ -28,31 +27,31 @@ const Navbar = () => {
     if (!user) return null;
 
     return (
-        <nav className="bg-meridian-white border-b border-slate-100 px-6 py-4 flex items-center justify-between sticky top-0 z-50">
+        <nav className="bg-theme-white border-b border-slate-100 px-6 py-4 flex items-center justify-between sticky top-0 z-50">
             <div className="flex items-center gap-8">
                 {/* Brand */}
                 <Link to="/" className="flex items-center gap-2 group">
-                    <div className="w-8 h-8 bg-meridian-navy rounded-lg flex items-center justify-center overflow-hidden transition-transform group-hover:rotate-6">
-                        <div className="w-4 h-4 bg-meridian-pale rotate-45 transform translate-x-2 translate-y-2"></div>
+                    <div className="w-8 h-8 bg-theme-navy rounded-lg flex items-center justify-center overflow-hidden transition-transform group-hover:rotate-6">
+                        <div className="w-4 h-4 bg-theme-pale rotate-45 transform translate-x-2 translate-y-2"></div>
                     </div>
-                    <span className="text-xl font-bold font-sans text-meridian-navy tracking-tight">Meridian</span>
+                    <span className="text-xl font-bold font-sans text-theme-navy tracking-tight uppercase">LibraryHub</span>
                 </Link>
 
                 {/* Navigation Links (Role-based) */}
                 <div className="hidden md:flex items-center gap-6">
                     {user.role === 'student' || user.role === 'teacher' ? (
-                        <Link to="/my-transactions" className="text-sm font-semibold text-slate-600 hover:text-meridian-blue transition-colors">
+                        <Link to="/my-transactions" className="text-sm font-semibold text-slate-600 hover:text-theme-blue transition-colors">
                             My Borrows
                         </Link>
                     ) : (
                         <>
-                            <Link to="/transactions" className="text-sm font-semibold text-slate-600 hover:text-meridian-blue transition-colors">
+                            <Link to="/transactions" className="text-sm font-semibold text-slate-600 hover:text-theme-blue transition-colors">
                                 Dashboard
                             </Link>
-                            <Link to="/borrow" className="text-sm font-semibold text-slate-600 hover:text-meridian-blue transition-colors">
+                            <Link to="/borrow" className="text-sm font-semibold text-slate-600 hover:text-theme-blue transition-colors">
                                 New Borrow
                             </Link>
-                            <Link to="/recycle-bin" className="text-sm font-semibold text-slate-600 hover:text-meridian-blue transition-colors">
+                            <Link to="/recycle-bin" className="text-sm font-semibold text-slate-600 hover:text-theme-blue transition-colors">
                                 Recycle Bin
                             </Link>
                         </>
@@ -64,7 +63,7 @@ const Navbar = () => {
             <div className="flex items-center gap-4">
                 <div className="text-right hidden sm:block">
                     <p className="text-sm font-bold text-slate-800 leading-none mb-1">{user.fullName}</p>
-                    <p className="text-[10px] font-bold text-meridian-blue uppercase tracking-widest">{user.role}</p>
+                    <p className="text-[10px] font-bold text-theme-blue uppercase tracking-widest">{user.role}</p>
                 </div>
                 
                 <div className="h-8 w-[1px] bg-slate-100 mx-2"></div>

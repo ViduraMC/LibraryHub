@@ -7,10 +7,10 @@ export default {
   theme: {
     extend: {
       colors: {
-        'meridian-white': '#FFFFFF',
-        'meridian-pale': '#DBEAFE',
-        'meridian-navy': '#0A2463',
-        'meridian-blue': '#1E3FA0',
+        'theme-white': '#FFFFFF',
+        'theme-pale': '#DBEAFE',
+        'theme-navy': '#0A2463',
+        'theme-blue': '#1E3FA0',
       },
       fontFamily: {
         'sans': ['Inter', 'sans-serif'],
