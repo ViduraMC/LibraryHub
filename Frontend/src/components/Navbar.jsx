@@ -2,15 +2,9 @@ import { useNavigate, Link, NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { toast } from 'react-toastify';
 
-/**
- * Role-based navigation bar.
- *
- * Each role sees a completely different set of links:
- *   admin     → Dashboard, Librarians, School Lists
- *   librarian → Transactions, New Borrow, Membership Requests, Recycle Bin
- *   student   → My Borrows
- *   teacher   → My Borrows
- */
+// Role-based navigation bar.
+// Each role sees its own set of nav links, and clicking the logo
+// brings them back to their own dashboard (not the login page).
 const Navbar = () => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
@@ -22,6 +16,15 @@ const Navbar = () => {
     };
 
     if (!user) return null;
+
+    // Where the logo click should go, based on role
+    const homeRoutes = {
+        admin:     '/admin/dashboard',
+        librarian: '/transactions',
+        student:   '/my-transactions',
+        teacher:   '/my-transactions',
+    };
+    const homePath = homeRoutes[user.role] || '/login';
 
     // Active link style — shared across all roles
     const linkClass = ({ isActive }) =>
@@ -52,7 +55,8 @@ const Navbar = () => {
         <nav className="bg-theme-white border-b border-slate-100 px-6 py-4 flex items-center justify-between sticky top-0 z-50">
             {/* Brand + Nav links */}
             <div className="flex items-center gap-8">
-                <Link to="/" className="flex items-center gap-2 group">
+                {/* Logo — goes to the role's own home dashboard, not / */}
+                <Link to={homePath} className="flex items-center gap-2 group">
                     <div className="w-8 h-8 bg-theme-navy rounded-lg flex items-center justify-center overflow-hidden transition-transform group-hover:rotate-6">
                         <div className="w-4 h-4 bg-theme-pale rotate-45 transform translate-x-2 translate-y-2"></div>
                     </div>
