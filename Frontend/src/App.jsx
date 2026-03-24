@@ -32,7 +32,7 @@ function App() {
             <Router>
                 <Routes>
                     {/* ── Public routes (no login required) ─────────────────── */}
-                    <Route path="/" element={<HomePage />} />
+
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/register" element={<RegisterPage />} />
                     <Route path="/set-password" element={<SetPasswordPage />} />
@@ -40,6 +40,10 @@ function App() {
 
                     {/* Default: redirect / to /login
                     <Route path="/" element={<Navigate to="/login" replace />} /> */}
+
+                    <Route element={<MainLayout />}>
+                        <Route path="/" element={<HomePage />} />
+                    </Route>
 
                     {/* ── Protected routes (must be logged in) ──────────────── */}
                     <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
@@ -58,37 +62,19 @@ function App() {
                                 </ProtectedRoute>
                             }
                         />
-                   
+
                         {/* Librarian-only routes */}
                         <Route
-                            path="/membership-requests"
+                            path="/librarian/*"
                             element={
                                 <ProtectedRoute allowedRoles={['librarian']}>
-                                    <LibrarianMembershipPage />
-                                </ProtectedRoute>
-                            }
-                        />
-                        <Route
-                            path="/transactions"
-                            element={
-                                <ProtectedRoute allowedRoles={['librarian', 'admin']}>
-                                    <AllTransactionsPage />
-                                </ProtectedRoute>
-                            }
-                        />
-                        <Route
-                            path="/borrow"
-                            element={
-                                <ProtectedRoute allowedRoles={['librarian', 'admin']}>
-                                    <BorrowBookPage />
-                                </ProtectedRoute>
-                            }
-                        />
-                        <Route
-                            path="/recycle-bin"
-                            element={
-                                <ProtectedRoute allowedRoles={['librarian', 'admin']}>
-                                    <RecycleBinPage />
+                                    <Routes>
+                                        <Route path="membership-requests" element={<LibrarianMembershipPage />} />
+                                        <Route path="transactions" element={<AllTransactionsPage />} />
+                                        <Route path="borrow" element={<BorrowBookPage />} />
+                                        <Route path="recycle-bin" element={<RecycleBinPage />} />
+                                    </Routes>
+
                                 </ProtectedRoute>
                             }
                         />
