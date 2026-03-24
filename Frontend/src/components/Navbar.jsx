@@ -12,7 +12,7 @@ const Navbar = () => {
     const handleLogout = () => {
         logout(); // client-side only — clears localStorage and state
         toast.info('You have been signed out.');
-        navigate('/login');
+        navigate('/');
     };
 
     if (!user) return null;
@@ -45,8 +45,14 @@ const Navbar = () => {
             { to: '/membership-requests', label: 'Membership Requests' },
             { to: '/recycle-bin', label: 'Recycle Bin' },
         ],
-        student: [{ to: '/my-transactions', label: 'My Borrows' }],
-        teacher: [{ to: '/my-transactions', label: 'My Borrows' }],
+        student: [
+            { to: '/home', label: 'Home' },
+            { to: '/my-transactions', label: 'My Borrows' },
+        ],
+         teacher: [
+            { to: '/home', label: 'Home' },
+            { to: '/my-transactions', label: 'My Borrows' },
+        ],
     };
 
     const links = navLinks[user.role] || [];
