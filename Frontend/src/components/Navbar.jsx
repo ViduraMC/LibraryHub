@@ -12,7 +12,7 @@ const Navbar = () => {
     const handleLogout = () => {
         logout(); // client-side only — clears localStorage and state
         toast.info('You have been signed out.');
-        navigate('/');
+        navigate('/login');
     };
 
     // if (!user) return null;
@@ -59,7 +59,6 @@ const Navbar = () => {
             { to: '/', label: 'Home' },
             { to: '/about', label: 'About' },
             { to: '/e-resources', label: 'eResources' },
-            { to: '/our-services', label: 'Our Services' },
             { to: '/my-transactions', label: 'My Transactions' },
             { to: '/my-reservations', label: 'My Reservations' },
         ],

@@ -8,6 +8,7 @@ import MainLayout from './components/MainLayout.jsx';
 // --- Public auth pages ---
 import HomePage from './pages/main site/Home.jsx';
 import LoginPage from './pages/auth/LoginPage.jsx';
+import AboutPage from './pages/main site/About.jsx';
 import RegisterPage from './pages/auth/RegisterPage.jsx';
 import SetPasswordPage from './pages/auth/SetPasswordPage.jsx';
 import UnauthorizedPage from './pages/auth/UnauthorizedPage.jsx';
@@ -26,6 +27,10 @@ import AllTransactionsPage from './pages/transactions/AllTransactionsPage.jsx';
 import BorrowBookPage from './pages/transactions/BorrowBookPage.jsx';
 import RecycleBinPage from './pages/transactions/RecycleBinPage.jsx';
 
+//-- Student/Teacher pages (student and teacher) ---
+import ResourcesPage from './pages/main site/Resources.jsx';
+import MyReservationsPage from './pages/reservations/MyReservations.jsx';
+
 function App() {
     return (
         <AuthProvider>
@@ -43,6 +48,7 @@ function App() {
 
                     <Route element={<MainLayout />}>
                         <Route path="/" element={<HomePage />} />
+                        <Route path="/about" element={<AboutPage />} />
                     </Route>
 
                     {/* ── Protected routes (must be logged in) ──────────────── */}
@@ -81,13 +87,19 @@ function App() {
 
                         {/* Student / Teacher routes */}
                         <Route
-                            path="/my-transactions"
+                            path="/*"
                             element={
                                 <ProtectedRoute allowedRoles={['student', 'teacher']}>
-                                    <MyTransactionsPage />
+                                    <Routes>
+                                        <Route path="my-transactions" element={<MyTransactionsPage />} />
+                                        <Route path="my-reservations" element={<MyReservationsPage />} />
+                                        <Route path="e-resources" element={<ResourcesPage />} />
+                                    </Routes>
+
                                 </ProtectedRoute>
                             }
                         />
+
                     </Route>
                 </Routes>
             </Router>
