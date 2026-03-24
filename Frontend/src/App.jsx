@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { AuthProvider } from './context/AuthContext.jsx';
-import ProtectedRoute from './components/ProtectedRoute.jsx';
+import ProtectedRoute, { StaffBlockedRoute } from './components/ProtectedRoute.jsx';
 import MainLayout from './components/MainLayout.jsx';
 
 // --- Public auth pages ---
@@ -29,6 +29,7 @@ import RecycleBinPage from './pages/transactions/RecycleBinPage.jsx';
 
 //-- Student/Teacher pages (student and teacher) ---
 import ResourcesPage from './pages/main site/Resources.jsx';
+import BooksPage from './pages/main site/Books.jsx';
 import MyReservationsPage from './pages/reservations/MyReservations.jsx';
 
 function App() {
@@ -47,8 +48,9 @@ function App() {
                     <Route path="/" element={<Navigate to="/login" replace />} /> */}
 
                     <Route element={<MainLayout />}>
-                        <Route path="/" element={<HomePage />} />
-                        <Route path="/about" element={<AboutPage />} />
+                        <Route path="/" element={<StaffBlockedRoute><HomePage /></StaffBlockedRoute>} />
+                        <Route path="/about" element={<StaffBlockedRoute><AboutPage /></StaffBlockedRoute>} />
+
                     </Route>
 
                     {/* ── Protected routes (must be logged in) ──────────────── */}
@@ -89,14 +91,18 @@ function App() {
                         <Route
                             path="/*"
                             element={
-                                <ProtectedRoute allowedRoles={['student', 'teacher']}>
-                                    <Routes>
-                                        <Route path="my-transactions" element={<MyTransactionsPage />} />
-                                        <Route path="my-reservations" element={<MyReservationsPage />} />
-                                        <Route path="e-resources" element={<ResourcesPage />} />
-                                    </Routes>
+                                <StaffBlockedRoute>
+                                    <ProtectedRoute allowedRoles={['student', 'teacher']}>
+                                        <Routes>
 
-                                </ProtectedRoute>
+                                            <Route path="my-transactions" element={<MyTransactionsPage />} />
+                                            <Route path="my-reservations" element={<MyReservationsPage />} />
+                                            <Route path="e-resources" element={<ResourcesPage />} />
+                                            <Route path="books" element={<BooksPage />} />
+                                        </Routes>
+
+                                    </ProtectedRoute>
+                                </StaffBlockedRoute>
                             }
                         />
 

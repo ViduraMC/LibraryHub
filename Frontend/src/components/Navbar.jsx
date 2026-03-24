@@ -37,10 +37,10 @@ const Navbar = () => {
         { to: '/', label: 'Home' },
         { to: '/about', label: 'About' },
         { to: '/login', label: 'eResources' },
+        { to: '/login', label: 'Books' },
         { to: '/login', label: 'My Transactions' },
         { to: '/login', label: 'My Reservations' },
     ];
-
 
     // Nav link sets per role
     const navLinks = {
@@ -59,6 +59,7 @@ const Navbar = () => {
             { to: '/', label: 'Home' },
             { to: '/about', label: 'About' },
             { to: '/e-resources', label: 'eResources' },
+            { to: '/books', label: 'Books' },
             { to: '/my-transactions', label: 'My Transactions' },
             { to: '/my-reservations', label: 'My Reservations' },
         ],
@@ -66,6 +67,7 @@ const Navbar = () => {
             { to: '/', label: 'Home' },
             { to: '/about', label: 'About' },
             { to: '/e-resources', label: 'eResources' },
+            { to: '/books', label: 'Books' },
             { to: '/my-transactions', label: 'My Transactions' },
             { to: '/my-reservations', label: 'My Reservations' },
         ],
@@ -89,7 +91,7 @@ const Navbar = () => {
 
                 <div className="hidden md:flex items-center gap-6">
                     {links.map(({ to, label }) => (
-                        <NavLink key={to} to={to} className={linkClass}>
+                        <NavLink key={label} to={to} className={linkClass}>
                             {label}
                         </NavLink>
                     ))}

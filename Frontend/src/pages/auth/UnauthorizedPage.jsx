@@ -9,9 +9,9 @@ const UnauthorizedPage = () => {
     // Where to send each role when they click "Back to Dashboard"
     const homeRoutes = {
         admin:     '/admin/dashboard',
-        librarian: '/transactions',
-        student:   '/my-transactions',
-        teacher:   '/my-transactions',
+        librarian: '/librarian/transactions',
+        student:   '/',
+        teacher:   '/',
     };
     const homePath = user ? (homeRoutes[user.role] || '/login') : '/login';
 
