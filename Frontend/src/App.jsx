@@ -2,11 +2,13 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { AuthProvider } from './context/AuthContext.jsx';
-import ProtectedRoute from './components/ProtectedRoute.jsx';
+import ProtectedRoute, { StaffBlockedRoute } from './components/ProtectedRoute.jsx';
 import MainLayout from './components/MainLayout.jsx';
 
 // --- Public auth pages ---
+import HomePage from './pages/main site/Home.jsx';
 import LoginPage from './pages/auth/LoginPage.jsx';
+import AboutPage from './pages/main site/About.jsx';
 import RegisterPage from './pages/auth/RegisterPage.jsx';
 import SetPasswordPage from './pages/auth/SetPasswordPage.jsx';
 import UnauthorizedPage from './pages/auth/UnauthorizedPage.jsx';
@@ -25,92 +27,85 @@ import AllTransactionsPage from './pages/transactions/AllTransactionsPage.jsx';
 import BorrowBookPage from './pages/transactions/BorrowBookPage.jsx';
 import RecycleBinPage from './pages/transactions/RecycleBinPage.jsx';
 
+//-- Student/Teacher pages (student and teacher) ---
+import ResourcesPage from './pages/main site/Resources.jsx';
+import BooksPage from './pages/main site/Books.jsx';
+import MyReservationsPage from './pages/reservations/MyReservations.jsx';
+
 function App() {
     return (
         <AuthProvider>
             <Router>
                 <Routes>
                     {/* ── Public routes (no login required) ─────────────────── */}
+
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/register" element={<RegisterPage />} />
                     <Route path="/set-password" element={<SetPasswordPage />} />
                     <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
-                    {/* Default: redirect / to /login */}
-                    <Route path="/" element={<Navigate to="/login" replace />} />
+                    {/* Default: redirect / to /login
+                    <Route path="/" element={<Navigate to="/login" replace />} /> */}
+
+                    <Route element={<MainLayout />}>
+                        <Route path="/" element={<StaffBlockedRoute><HomePage /></StaffBlockedRoute>} />
+                        <Route path="/about" element={<StaffBlockedRoute><AboutPage /></StaffBlockedRoute>} />
+
+                    </Route>
 
                     {/* ── Protected routes (must be logged in) ──────────────── */}
                     <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
 
                         {/* Admin-only routes */}
                         <Route
-                            path="/admin/dashboard"
+                            path="/admin/*"
                             element={
                                 <ProtectedRoute allowedRoles={['admin']}>
-                                    <AdminDashboardPage />
-                                </ProtectedRoute>
-                            }
-                        />
-                        <Route
-                            path="/admin/librarians"
-                            element={
-                                <ProtectedRoute allowedRoles={['admin']}>
-                                    <AdminLibrariansPage />
-                                </ProtectedRoute>
-                            }
-                        />
-                        <Route
-                            path="/admin/school-lists"
-                            element={
-                                <ProtectedRoute allowedRoles={['admin']}>
-                                    <AdminSchoolListsPage />
+                                    <Routes>
+                                        <Route path="dashboard" element={<AdminDashboardPage />} />
+                                        <Route path="librarians" element={<AdminLibrariansPage />} />
+                                        <Route path="school-lists" element={<AdminSchoolListsPage />} />
+                                    </Routes>
+
                                 </ProtectedRoute>
                             }
                         />
 
                         {/* Librarian-only routes */}
                         <Route
-                            path="/membership-requests"
+                            path="/librarian/*"
                             element={
                                 <ProtectedRoute allowedRoles={['librarian']}>
-                                    <LibrarianMembershipPage />
-                                </ProtectedRoute>
-                            }
-                        />
-                        <Route
-                            path="/transactions"
-                            element={
-                                <ProtectedRoute allowedRoles={['librarian', 'admin']}>
-                                    <AllTransactionsPage />
-                                </ProtectedRoute>
-                            }
-                        />
-                        <Route
-                            path="/borrow"
-                            element={
-                                <ProtectedRoute allowedRoles={['librarian', 'admin']}>
-                                    <BorrowBookPage />
-                                </ProtectedRoute>
-                            }
-                        />
-                        <Route
-                            path="/recycle-bin"
-                            element={
-                                <ProtectedRoute allowedRoles={['librarian', 'admin']}>
-                                    <RecycleBinPage />
+                                    <Routes>
+                                        <Route path="membership-requests" element={<LibrarianMembershipPage />} />
+                                        <Route path="transactions" element={<AllTransactionsPage />} />
+                                        <Route path="borrow" element={<BorrowBookPage />} />
+                                        <Route path="recycle-bin" element={<RecycleBinPage />} />
+                                    </Routes>
+
                                 </ProtectedRoute>
                             }
                         />
 
                         {/* Student / Teacher routes */}
                         <Route
-                            path="/my-transactions"
+                            path="/*"
                             element={
-                                <ProtectedRoute allowedRoles={['student', 'teacher']}>
-                                    <MyTransactionsPage />
-                                </ProtectedRoute>
+                                <StaffBlockedRoute>
+                                    <ProtectedRoute allowedRoles={['student', 'teacher']}>
+                                        <Routes>
+
+                                            <Route path="my-transactions" element={<MyTransactionsPage />} />
+                                            <Route path="my-reservations" element={<MyReservationsPage />} />
+                                            <Route path="e-resources" element={<ResourcesPage />} />
+                                            <Route path="books" element={<BooksPage />} />
+                                        </Routes>
+
+                                    </ProtectedRoute>
+                                </StaffBlockedRoute>
                             }
                         />
+
                     </Route>
                 </Routes>
             </Router>

@@ -11,7 +11,7 @@ import { loginUser } from '../../api/auth.api.js';
  *
  * After successful login, each role is redirected to its dedicated dashboard:
  *   admin     → /admin/dashboard
- *   librarian → /transactions
+ *   librarian → /librarian/transactions
  *   student   → /my-transactions
  *   teacher   → /my-transactions
  */
@@ -43,10 +43,10 @@ const LoginPage = () => {
             if (user.role === 'admin') {
                 navigate('/admin/dashboard');
             } else if (user.role === 'librarian') {
-                navigate('/transactions');
+                navigate('/librarian/transactions');
             } else {
                 // student or teacher
-                navigate('/my-transactions');
+                navigate('/');
             }
         } catch (err) {
             const msg = err.response?.data?.message || 'Login failed. Please check your credentials.';
@@ -87,6 +87,18 @@ const LoginPage = () => {
 
             {/* Right side: login form */}
             <div className="flex-1 flex items-center justify-center p-8 lg:p-16">
+
+                {/* Back to home — pinned to top-left of the right panel */}
+                <Link
+                    to="/"
+                    className="absolute top-6 left-6 flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-theme-navy transition-colors group"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    Back to Home
+                </Link>
+
                 <div className="w-full max-w-md">
                     {/* Brand mark */}
                     <div className="mb-10">

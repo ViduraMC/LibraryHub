@@ -15,22 +15,32 @@ const Navbar = () => {
         navigate('/login');
     };
 
-    if (!user) return null;
+    // if (!user) return null;
 
     // Where the logo click should go, based on role
     const homeRoutes = {
-        admin:     '/admin/dashboard',
-        librarian: '/transactions',
-        student:   '/my-transactions',
-        teacher:   '/my-transactions',
+        admin: '/admin/dashboard',
+        librarian: '/librarian/transactions',
+        student: '/',
+        teacher: '/',
     };
-    const homePath = homeRoutes[user.role] || '/login';
+    const homePath = user ? (homeRoutes[user.role] || '/') : '/';
 
     // Active link style — shared across all roles
     const linkClass = ({ isActive }) =>
         isActive
             ? 'text-sm font-bold text-theme-blue'
             : 'text-sm font-semibold text-slate-600 hover:text-theme-blue transition-colors';
+
+    //Guest links
+    const guestLinks = [
+        { to: '/', label: 'Home' },
+        { to: '/about', label: 'About' },
+        { to: '/login', label: 'eResources' },
+        { to: '/login', label: 'Books' },
+        { to: '/login', label: 'My Transactions' },
+        { to: '/login', label: 'My Reservations' },
+    ];
 
     // Nav link sets per role
     const navLinks = {
@@ -40,16 +50,30 @@ const Navbar = () => {
             { to: '/admin/school-lists', label: 'School Lists' },
         ],
         librarian: [
-            { to: '/transactions', label: 'Transactions' },
-            { to: '/borrow', label: 'New Borrow' },
-            { to: '/membership-requests', label: 'Membership Requests' },
-            { to: '/recycle-bin', label: 'Recycle Bin' },
+            { to: '/librarian/transactions', label: 'Transactions' },
+            { to: '/librarian/borrow', label: 'New Borrow' },
+            { to: '/librarian/membership-requests', label: 'Membership Requests' },
+            { to: '/librarian/recycle-bin', label: 'Recycle Bin' },
         ],
-        student: [{ to: '/my-transactions', label: 'My Borrows' }],
-        teacher: [{ to: '/my-transactions', label: 'My Borrows' }],
+        student: [
+            { to: '/', label: 'Home' },
+            { to: '/about', label: 'About' },
+            { to: '/e-resources', label: 'eResources' },
+            { to: '/books', label: 'Books' },
+            { to: '/my-transactions', label: 'My Transactions' },
+            { to: '/my-reservations', label: 'My Reservations' },
+        ],
+        teacher: [
+            { to: '/', label: 'Home' },
+            { to: '/about', label: 'About' },
+            { to: '/e-resources', label: 'eResources' },
+            { to: '/books', label: 'Books' },
+            { to: '/my-transactions', label: 'My Transactions' },
+            { to: '/my-reservations', label: 'My Reservations' },
+        ],
     };
 
-    const links = navLinks[user.role] || [];
+    const links = user ? (navLinks[user.role] || []) : guestLinks;
 
     return (
         <nav className="bg-theme-white border-b border-slate-100 px-6 py-4 flex items-center justify-between sticky top-0 z-50">
@@ -67,7 +91,7 @@ const Navbar = () => {
 
                 <div className="hidden md:flex items-center gap-6">
                     {links.map(({ to, label }) => (
-                        <NavLink key={to} to={to} className={linkClass}>
+                        <NavLink key={label} to={to} className={linkClass}>
                             {label}
                         </NavLink>
                     ))}
@@ -75,41 +99,47 @@ const Navbar = () => {
             </div>
 
             {/* User info + Logout */}
-            <div className="flex items-center gap-4">
-                <div className="text-right hidden sm:block">
-                    <p className="text-sm font-bold text-slate-800 leading-none mb-1">
-                        {user.fullName}
-                    </p>
-                    <p className="text-[10px] font-bold text-theme-blue uppercase tracking-widest">
-                        {user.role}
-                    </p>
-                </div>
+            {user ? (
+                <div className="flex items-center gap-4">
+                    <div className="text-right hidden sm:block">
+                        <p className="text-sm font-bold text-slate-800 leading-none mb-1">
+                            {user.fullName}
+                        </p>
+                        <p className="text-[10px] font-bold text-theme-blue uppercase tracking-widest">
+                            {user.role}
+                        </p>
+                    </div>
 
-                <div className="h-8 w-px bg-slate-100 mx-2"></div>
+                    <div className="h-8 w-px bg-slate-100 mx-2"></div>
 
-                <button
-                    onClick={handleLogout}
-                    className="p-2.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
-                    title="Sign Out"
-                >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-6 w-6"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
+                    <button
+                        onClick={handleLogout}
+                        className="p-2.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                        title="Sign Out"
                     >
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                        />
-                    </svg>
-                </button>
-            </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                    </button>
+                </div>
+            ) : (
+                <div className="flex items-center gap-3">
+                    <Link
+                        to="/register"
+                        className="px-5 py-2 text-theme-navy text-sm font-bold rounded-xl hover:text-theme-blue transition-colors"
+                    >
+                        Membership
+                    </Link>
+                    <Link
+                        to="/login"
+                        className="px-5 py-2 bg-theme-navy text-white text-sm font-bold rounded-xl hover:bg-theme-blue transition-colors"
+                    >
+                        Login
+                    </Link>
+                </div>
+            )}
         </nav>
     );
 };
-
 export default Navbar;
