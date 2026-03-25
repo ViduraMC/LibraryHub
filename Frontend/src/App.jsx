@@ -5,10 +5,10 @@ import { AuthProvider } from './context/AuthContext.jsx';
 import ProtectedRoute, { StaffBlockedRoute } from './components/ProtectedRoute.jsx';
 import MainLayout from './components/MainLayout.jsx';
 
-// --- Public auth pages ---
-import HomePage from './pages/main site/Home.jsx';
+// --- Public pages ---
+import HomePage from './pages/main-site/Home.jsx';
 import LoginPage from './pages/auth/LoginPage.jsx';
-import AboutPage from './pages/main site/About.jsx';
+import AboutPage from './pages/main-site/About.jsx';
 import RegisterPage from './pages/auth/RegisterPage.jsx';
 import SetPasswordPage from './pages/auth/SetPasswordPage.jsx';
 import UnauthorizedPage from './pages/auth/UnauthorizedPage.jsx';
@@ -27,9 +27,9 @@ import AllTransactionsPage from './pages/transactions/AllTransactionsPage.jsx';
 import BorrowBookPage from './pages/transactions/BorrowBookPage.jsx';
 import RecycleBinPage from './pages/transactions/RecycleBinPage.jsx';
 
-//-- Student/Teacher pages (student and teacher) ---
-import ResourcesPage from './pages/main site/Resources.jsx';
-import BooksPage from './pages/main site/Books.jsx';
+// --- Student/Teacher pages ---
+import ResourcesPage from './pages/main-site/Resources.jsx';
+import BooksPage from './pages/main-site/Books.jsx';
 import MyReservationsPage from './pages/reservations/MyReservations.jsx';
 
 function App() {
@@ -87,24 +87,19 @@ function App() {
                             }
                         />
 
-                        {/* Student / Teacher routes */}
-                        <Route
-                            path="/*"
-                            element={
-                                <StaffBlockedRoute>
-                                    <ProtectedRoute allowedRoles={['student', 'teacher']}>
-                                        <Routes>
-
-                                            <Route path="my-transactions" element={<MyTransactionsPage />} />
-                                            <Route path="my-reservations" element={<MyReservationsPage />} />
-                                            <Route path="e-resources" element={<ResourcesPage />} />
-                                            <Route path="books" element={<BooksPage />} />
-                                        </Routes>
-
-                                    </ProtectedRoute>
-                                </StaffBlockedRoute>
-                            }
-                        />
+                        {/* Student / Teacher routes — explicit paths instead of catch-all /* */}
+                        <Route path="/my-transactions" element={
+                            <ProtectedRoute allowedRoles={['student', 'teacher']}><MyTransactionsPage /></ProtectedRoute>
+                        } />
+                        <Route path="/my-reservations" element={
+                            <ProtectedRoute allowedRoles={['student', 'teacher']}><MyReservationsPage /></ProtectedRoute>
+                        } />
+                        <Route path="/e-resources" element={
+                            <ProtectedRoute allowedRoles={['student', 'teacher']}><ResourcesPage /></ProtectedRoute>
+                        } />
+                        <Route path="/books" element={
+                            <ProtectedRoute allowedRoles={['student', 'teacher']}><BooksPage /></ProtectedRoute>
+                        } />
 
                     </Route>
                 </Routes>
