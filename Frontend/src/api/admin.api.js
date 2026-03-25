@@ -48,3 +48,15 @@ export const getStudentList = () =>
 export const getTeacherList = () =>
     axiosInstance.get('/school-list/teachers');
 
+// PUT /api/school-list/:id  (admin only)
+export const updateSchoolListEntry = (id, data) =>
+    axiosInstance.put(`/school-list/${id}`, data);
+
+// DELETE /api/school-list/:id  (admin only)
+export const deleteSchoolListEntry = (id) =>
+    axiosInstance.delete(`/school-list/${id}`);
+
+// DELETE /api/school-list/clear/:type  (admin only)
+// Wipes all entries of the given type (student or teacher)
+export const clearSchoolList = (type) =>
+    axiosInstance.delete(`/school-list/clear/${type}`);
