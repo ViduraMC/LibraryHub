@@ -32,14 +32,13 @@ const Navbar = () => {
             ? 'text-sm font-bold text-theme-blue'
             : 'text-sm font-semibold text-slate-600 hover:text-theme-blue transition-colors';
 
-    //Guest links
+    // Guest links — only public pages; My Transactions / My Reservations
+    // are private and only shown to logged-in students/teachers
     const guestLinks = [
         { to: '/', label: 'Home' },
         { to: '/about', label: 'About' },
         { to: '/login', label: 'eResources' },
         { to: '/login', label: 'Books' },
-        { to: '/login', label: 'My Transactions' },
-        { to: '/login', label: 'My Reservations' },
     ];
 
     // Nav link sets per role
