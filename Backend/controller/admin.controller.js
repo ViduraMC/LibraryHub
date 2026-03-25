@@ -63,7 +63,7 @@ export const createLibrarian = async (req, res) => {
             librarian: librarianResponse,
         });
     } catch (error) {
-        console.error("Create librarian error:", error.message);
+        console.error("Create librarian error:", error);
         res.status(500).json({
             success: false,
             message: "Server error",

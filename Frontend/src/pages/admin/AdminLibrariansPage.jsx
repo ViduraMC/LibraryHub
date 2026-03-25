@@ -9,14 +9,8 @@ import {
 } from '../../api/admin.api.js';
 
 /**
- * Admin: Librarian Management
- *
- * Full CRUD:
- *  - View all librarians in a table
- *  - Create a new librarian (backend emails temp password)
- *  - Edit librarian details (inline edit row)
- *  - Toggle active/inactive status
- *  - Delete with confirmation dialog
+ * Admin: Librarian Management — Full CRUD with toggle switch for status.
+ * 60-30-10 theme: White backgrounds, Pale Blue accents, Navy/Blue highlights.
  */
 const AdminLibrariansPage = () => {
     const [librarians, setLibrarians] = useState([]);
@@ -25,10 +19,7 @@ const AdminLibrariansPage = () => {
     const [showForm, setShowForm] = useState(false);
     const [processingId, setProcessingId] = useState(null);
 
-    // create form state
     const [form, setForm] = useState({ fullName: '', email: '' });
-
-    // edit state — which librarian is being edited and the draft values
     const [editingId, setEditingId] = useState(null);
     const [editForm, setEditForm] = useState({ fullName: '', email: '', phone: '' });
 
@@ -44,9 +35,7 @@ const AdminLibrariansPage = () => {
         }
     };
 
-    useEffect(() => {
-        fetchLibrarians();
-    }, []);
+    useEffect(() => { fetchLibrarians(); }, []);
 
     const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -70,18 +59,12 @@ const AdminLibrariansPage = () => {
     // --- Edit ---
     const startEditing = (lib) => {
         setEditingId(lib._id);
-        setEditForm({
-            fullName: lib.fullName,
-            email: lib.email,
-            phone: lib.phone || '',
-        });
+        setEditForm({ fullName: lib.fullName, email: lib.email, phone: lib.phone || '' });
     };
-
     const cancelEditing = () => {
         setEditingId(null);
         setEditForm({ fullName: '', email: '', phone: '' });
     };
-
     const handleUpdate = async (id) => {
         setProcessingId(id);
         try {
@@ -96,11 +79,17 @@ const AdminLibrariansPage = () => {
         }
     };
 
-    // --- Toggle active/inactive ---
-    const handleToggleStatus = async (id) => {
-        setProcessingId(id);
+    // --- Toggle active/inactive with confirmation ---
+    const handleToggleStatus = async (lib) => {
+        const action = lib.isActive !== false ? 'deactivate' : 'activate';
+        const confirmed = window.confirm(
+            `Are you sure you want to ${action} ${lib.fullName}?`
+        );
+        if (!confirmed) return;
+
+        setProcessingId(lib._id);
         try {
-            const res = await toggleLibrarianStatus(id);
+            const res = await toggleLibrarianStatus(lib._id);
             toast.success(res.data.message);
             fetchLibrarians();
         } catch (err) {
@@ -130,7 +119,7 @@ const AdminLibrariansPage = () => {
     };
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-6">
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
@@ -143,7 +132,7 @@ const AdminLibrariansPage = () => {
                 </div>
                 <button
                     onClick={() => setShowForm((v) => !v)}
-                    className="shrink-0 bg-theme-navy text-white px-6 py-3 rounded-xl font-bold hover:bg-slate-800 transition-all shadow-lg shadow-theme-navy/10 text-sm"
+                    className="shrink-0 bg-theme-navy text-white px-6 py-3 rounded-xl font-bold hover:bg-theme-blue transition-all text-sm"
                 >
                     {showForm ? 'Cancel' : '+ Add Librarian'}
                 </button>
@@ -153,16 +142,18 @@ const AdminLibrariansPage = () => {
             {showForm && (
                 <form
                     onSubmit={handleCreate}
-                    className="bg-white border border-slate-100 rounded-3xl p-8 shadow-sm space-y-5"
+                    className="bg-theme-pale/30 border border-theme-pale rounded-2xl p-6 space-y-4"
                 >
-                    <h2 className="text-lg font-bold text-slate-800">New Librarian Account</h2>
-                    <p className="text-sm text-slate-400 -mt-2">
-                        The system will auto-generate a secure temporary password and email it directly to the librarian.
+                    <h2 className="text-sm font-black text-theme-navy uppercase tracking-widest">
+                        New Librarian Account
+                    </h2>
+                    <p className="text-xs text-slate-400">
+                        A secure temporary password will be generated and emailed to the librarian automatically.
                     </p>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">
+                            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5">
                                 Full Name *
                             </label>
                             <input
@@ -171,11 +162,11 @@ const AdminLibrariansPage = () => {
                                 onChange={handleChange}
                                 required
                                 placeholder="Full Name"
-                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-theme-blue/20 focus:border-theme-blue transition-all"
+                                className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-theme-blue/20 focus:border-theme-blue transition-all"
                             />
                         </div>
                         <div>
-                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">
+                            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5">
                                 Email *
                             </label>
                             <input
@@ -185,7 +176,7 @@ const AdminLibrariansPage = () => {
                                 onChange={handleChange}
                                 required
                                 placeholder="librarian@email.com"
-                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-theme-blue/20 focus:border-theme-blue transition-all"
+                                className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-theme-blue/20 focus:border-theme-blue transition-all"
                             />
                         </div>
                     </div>
@@ -193,7 +184,7 @@ const AdminLibrariansPage = () => {
                     <button
                         type="submit"
                         disabled={submitting}
-                        className="bg-theme-blue text-white px-8 py-3 rounded-xl font-bold hover:bg-theme-navy transition-all text-sm flex items-center gap-2 disabled:opacity-60"
+                        className="bg-theme-navy text-white px-6 py-2.5 rounded-xl font-bold hover:bg-theme-blue transition-all text-sm flex items-center gap-2 disabled:opacity-60"
                     >
                         {submitting && (
                             <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -204,15 +195,15 @@ const AdminLibrariansPage = () => {
             )}
 
             {/* Librarians table */}
-            <div className="bg-white border border-slate-100 rounded-3xl shadow-sm overflow-hidden">
+            <div className="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr className="bg-slate-50/50">
-                                {['Name', 'Librarian ID', 'Email', 'Status', 'Actions'].map((h) => (
+                            <tr className="bg-theme-pale/30">
+                                {['Name', 'ID', 'Email', 'Status', 'Actions'].map((h) => (
                                     <th
                                         key={h}
-                                        className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 border-b border-slate-100"
+                                        className="px-5 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 border-b border-slate-100"
                                     >
                                         {h}
                                     </th>
@@ -223,54 +214,47 @@ const AdminLibrariansPage = () => {
                             {loading ? (
                                 [1, 2, 3].map((i) => (
                                     <tr key={i} className="animate-pulse">
-                                        <td colSpan={5} className="px-6 py-6">
+                                        <td colSpan={5} className="px-5 py-5">
                                             <div className="h-4 bg-slate-50 rounded w-full"></div>
                                         </td>
                                     </tr>
                                 ))
                             ) : librarians.length === 0 ? (
                                 <tr>
-                                    <td
-                                        colSpan={5}
-                                        className="px-6 py-20 text-center text-slate-400 italic text-sm"
-                                    >
+                                    <td colSpan={5} className="px-5 py-16 text-center text-slate-400 italic text-sm">
                                         No librarians found. Create one above.
                                     </td>
                                 </tr>
                             ) : (
                                 librarians.map((lib) => (
-                                    <tr key={lib._id} className="hover:bg-slate-50/30 transition-colors">
-                                        {/* Name — editable when editing */}
-                                        <td className="px-6 py-5">
+                                    <tr key={lib._id} className="hover:bg-theme-pale/10 transition-colors">
+                                        {/* Name */}
+                                        <td className="px-5 py-4">
                                             {editingId === lib._id ? (
                                                 <input
                                                     value={editForm.fullName}
-                                                    onChange={(e) =>
-                                                        setEditForm({ ...editForm, fullName: e.target.value })
-                                                    }
+                                                    onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })}
                                                     className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-sm w-full focus:outline-none focus:ring-2 focus:ring-theme-blue/20"
                                                 />
                                             ) : (
-                                                <p className="font-bold text-slate-800">{lib.fullName}</p>
+                                                <p className="font-bold text-slate-800 text-sm">{lib.fullName}</p>
                                             )}
                                         </td>
 
-                                        {/* Librarian ID — always read-only */}
-                                        <td className="px-6 py-5">
+                                        {/* Librarian ID */}
+                                        <td className="px-5 py-4">
                                             <span className="text-xs font-mono font-bold text-theme-blue">
                                                 {lib.librarianId || '—'}
                                             </span>
                                         </td>
 
-                                        {/* Email — editable when editing */}
-                                        <td className="px-6 py-5">
+                                        {/* Email */}
+                                        <td className="px-5 py-4">
                                             {editingId === lib._id ? (
                                                 <input
                                                     type="email"
                                                     value={editForm.email}
-                                                    onChange={(e) =>
-                                                        setEditForm({ ...editForm, email: e.target.value })
-                                                    }
+                                                    onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
                                                     className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-sm w-full focus:outline-none focus:ring-2 focus:ring-theme-blue/20"
                                                 />
                                             ) : (
@@ -278,25 +262,38 @@ const AdminLibrariansPage = () => {
                                             )}
                                         </td>
 
-                                        {/* Status badge */}
-                                        <td className="px-6 py-5">
-                                            <span
-                                                className={`px-2.5 py-1 text-[9px] font-black uppercase tracking-widest rounded-md border ${
-                                                    lib.isActive !== false
-                                                        ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
-                                                        : 'bg-slate-50 text-slate-400 border-slate-100'
-                                                }`}
-                                            >
-                                                {lib.isActive !== false ? 'Active' : 'Inactive'}
-                                            </span>
+                                        {/* Status — Toggle Switch */}
+                                        <td className="px-5 py-4">
+                                            <div className="flex items-center gap-2">
+                                                <button
+                                                    onClick={() => handleToggleStatus(lib)}
+                                                    disabled={processingId === lib._id}
+                                                    className={`relative w-11 h-6 rounded-full transition-colors duration-200 focus:outline-none disabled:opacity-50 ${
+                                                        lib.isActive !== false
+                                                            ? 'bg-emerald-500'
+                                                            : 'bg-slate-300'
+                                                    }`}
+                                                    title={lib.isActive !== false ? 'Click to deactivate' : 'Click to activate'}
+                                                >
+                                                    <span
+                                                        className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200 ${
+                                                            lib.isActive !== false ? 'translate-x-5' : 'translate-x-0'
+                                                        }`}
+                                                    />
+                                                </button>
+                                                <span className={`text-[10px] font-black uppercase tracking-widest ${
+                                                    lib.isActive !== false ? 'text-emerald-600' : 'text-slate-400'
+                                                }`}>
+                                                    {lib.isActive !== false ? 'Active' : 'Inactive'}
+                                                </span>
+                                            </div>
                                         </td>
 
                                         {/* Actions */}
-                                        <td className="px-6 py-5">
+                                        <td className="px-5 py-4">
                                             <div className="flex items-center gap-2">
                                                 {editingId === lib._id ? (
                                                     <>
-                                                        {/* Save / Cancel buttons while editing */}
                                                         <button
                                                             onClick={() => handleUpdate(lib._id)}
                                                             disabled={processingId === lib._id}
@@ -313,39 +310,16 @@ const AdminLibrariansPage = () => {
                                                     </>
                                                 ) : (
                                                     <>
-                                                        {/* Edit button */}
                                                         <button
                                                             onClick={() => startEditing(lib)}
                                                             className="px-3 py-1.5 bg-theme-pale text-theme-navy text-xs font-bold rounded-lg hover:bg-blue-100 transition-all"
-                                                            title="Edit details"
                                                         >
                                                             Edit
                                                         </button>
-
-                                                        {/* Toggle active/inactive */}
-                                                        <button
-                                                            onClick={() => handleToggleStatus(lib._id)}
-                                                            disabled={processingId === lib._id}
-                                                            className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all disabled:opacity-50 ${
-                                                                lib.isActive !== false
-                                                                    ? 'bg-amber-50 text-amber-600 hover:bg-amber-100'
-                                                                    : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'
-                                                            }`}
-                                                            title={lib.isActive !== false ? 'Deactivate' : 'Activate'}
-                                                        >
-                                                            {processingId === lib._id
-                                                                ? '...'
-                                                                : lib.isActive !== false
-                                                                    ? 'Deactivate'
-                                                                    : 'Activate'}
-                                                        </button>
-
-                                                        {/* Delete with confirm */}
                                                         <button
                                                             onClick={() => handleDelete(lib)}
                                                             disabled={processingId === lib._id}
                                                             className="px-3 py-1.5 bg-red-50 text-red-500 text-xs font-bold rounded-lg hover:bg-red-100 transition-all disabled:opacity-50"
-                                                            title="Delete permanently"
                                                         >
                                                             {processingId === lib._id ? '...' : 'Delete'}
                                                         </button>
