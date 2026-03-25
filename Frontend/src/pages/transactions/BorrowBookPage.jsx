@@ -3,19 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axiosInstance from '../../api/axiosInstance.js';
 import { borrowBook } from '../../api/transactions.api.js';
+import { searchUserByMembershipId } from '../../api/admin.api.js';
 
 // Librarians use this page to issue a book to a member.
 //
 // How it works:
 //  1. Librarian types the member's Membership ID (e.g. ST-26-0001)
-//     → We look up the user via GET /api/transactions?userId=... won't work.
-//     We use GET /api/membership-request?status=approved and filter client-side
-//     OR use a direct user search. Since no /users endpoint exists, we look
-//     up by scanning GET /api/membership-request with membershipId.
+//     → We look up the user directly via GET /api/admin/user/search?membershipId=...
+//     This resolves the user's Mongo _id regardless of borrow history.
 //
-//  2. Librarian types the Book ID (e.g. BK001) → resolved via GET /api/books/:id
-//     The listBooks endpoint doesn't filter by bookId, so we call GET /api/books
-//     and resolve by the human bookId string stored on the Book document.
+//  2. Librarian types the Book ID (e.g. BK001) → resolved via GET /api/books
+//     and matched by the human bookId string stored on the Book document.
 //
 //  3. Once both are resolved to Mongo _ids, we POST /api/transactions/borrow
 //     with { userId: <mongo_id>, bookId: <mongo_id> }.
@@ -35,55 +33,23 @@ const BorrowBookPage = () => {
     const [lookingUpBook, setLookingUpBook] = useState(false);
     const [submitting, setSubmitting] = useState(false);
 
-    // Look up a member by their membershipId using the school list endpoint.
-    // We search through approved membership requests which have the membershipId.
+    // Look up a member by their membershipId — single API call, always works
     const lookupUser = useCallback(async () => {
         if (!membershipIdInput.trim()) return;
         setLookingUpUser(true);
         setResolvedUser(null);
         try {
-            // Approved requests have a membershipId and the corresponding user _id
-            // We look at all active transactions to find the userId by membershipId.
-            // The getAllTransactions response populates userId with fullName + role. 
-            // We match by membershipId on the populated user object.
-            const res = await axiosInstance.get('/transactions', {
-                params: { limit: 1000 }
+            const res = await searchUserByMembershipId(membershipIdInput.trim());
+            const user = res.data.user;
+            setResolvedUser({
+                _id: user._id,
+                fullName: user.fullName,
+                role: user.role,
+                membershipId: user.membershipId,
             });
-            const txns = res.data.transactions || [];
-            const match = txns.find(
-                (t) => t.userId?.membershipId === membershipIdInput.trim().toUpperCase()
-            );
-
-            if (match?.userId) {
-                setResolvedUser({
-                    _id: match.userId._id,
-                    fullName: match.userId.fullName,
-                    role: match.userId.role,
-                    membershipId: match.userId.membershipId,
-                });
-            } else {
-                // Fallback: search membership requests for approved members
-                const mRes = await axiosInstance.get('/membership-request', {
-                    params: { status: 'active' }
-                });
-                const requests = mRes.data.requests || [];
-                const mMatch = requests.find(
-                    (r) => r.membershipId === membershipIdInput.trim().toUpperCase()
-                );
-                if (mMatch) {
-                    setResolvedUser({
-                        _id: mMatch.userId || null,
-                        fullName: mMatch.fullName,
-                        role: mMatch.applicantType,
-                        membershipId: mMatch.membershipId,
-                        needsMongoId: true,
-                    });
-                } else {
-                    toast.error(`No member found with Membership ID: ${membershipIdInput}`);
-                }
-            }
-        } catch {
-            toast.error('Could not look up the member. Please check the ID and try again.');
+        } catch (err) {
+            const msg = err.response?.data?.message || 'Could not look up the member.';
+            toast.error(msg);
         } finally {
             setLookingUpUser(false);
         }
