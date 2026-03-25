@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext.jsx';
 
 
 const services = [
@@ -69,7 +70,8 @@ const announcements = [
 ];
 
 const Home = () => {
-  
+    const { user } = useAuth();
+
     return (
         <div className="space-y-20 pb-16">
 
@@ -108,23 +110,26 @@ const Home = () => {
                             manage borrows, and access digital resources — all from one place.
                         </p>
 
-                        <div className="flex flex-wrap gap-4">
-                            <Link
-                                to="/register"
-                                className="px-8 py-3.5 bg-white text-[#0A2463] font-bold rounded-2xl hover:bg-[#DBEAFE] transition-all shadow-lg flex items-center gap-2 group text-sm"
-                            >
-                                Apply for Membership
-                                <svg className="h-4 w-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                                </svg>
-                            </Link>
-                            <Link
-                                to="/login"
-                                className="px-8 py-3.5 bg-white/10 backdrop-blur-sm text-white font-bold rounded-2xl hover:bg-white/20 transition-all border border-white/20 text-sm"
-                            >
-                                Sign In
-                            </Link>
-                        </div>
+                        {/* Show CTA buttons only for guests (not logged in) */}
+                        {!user && (
+                            <div className="flex flex-wrap gap-4">
+                                <Link
+                                    to="/register"
+                                    className="px-8 py-3.5 bg-white text-[#0A2463] font-bold rounded-2xl hover:bg-[#DBEAFE] transition-all shadow-lg flex items-center gap-2 group text-sm"
+                                >
+                                    Apply for Membership
+                                    <svg className="h-4 w-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                    </svg>
+                                </Link>
+                                <Link
+                                    to="/login"
+                                    className="px-8 py-3.5 bg-white/10 backdrop-blur-sm text-white font-bold rounded-2xl hover:bg-white/20 transition-all border border-white/20 text-sm"
+                                >
+                                    Sign In
+                                </Link>
+                            </div>
+                        )}
                     </div>
                 </div>
             </section>
@@ -148,7 +153,8 @@ const Home = () => {
                 </div>
             </section>
 
-            {/* ── CTA Banner ───────────────────────────────────────── */}
+            {/* CTA Banner — only for guests, hidden for logged-in users */}
+            {!user && (
             <section className="bg-[#0A2463] rounded-3xl px-10 py-12 lg:px-14 relative overflow-hidden">
                 <div className="absolute -top-12 -right-12 w-56 h-56 bg-white/5 rounded-full" />
                 <div className="absolute -bottom-8 -left-8 w-36 h-36 bg-[#DBEAFE]/10 rounded-full" />
@@ -182,6 +188,7 @@ const Home = () => {
                     </div>
                 </div>
             </section>
+            )}
 
             {/* ── Announcements ────────────────────────────────────── */}
             <section>
