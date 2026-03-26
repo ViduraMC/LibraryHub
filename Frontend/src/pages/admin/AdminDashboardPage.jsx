@@ -112,7 +112,7 @@ const AdminDashboardPage = () => {
                 {statCards.map(({ label, value, icon, link, accent, iconBg }) => (
                     <div
                         key={label}
-                        className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow group relative overflow-hidden"
+                        className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow group relative overflow-hidden"
                     >
                         {/* Top accent bar */}
                         <div className={`absolute top-0 left-0 right-0 h-1 ${accent}`} />
@@ -145,7 +145,7 @@ const AdminDashboardPage = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
                 {/* Membership Distribution Chart */}
-                <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
+                <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-6 shadow-sm">
                     <h2 className="text-xs font-black text-theme-navy uppercase tracking-widest mb-5">
                         Membership Distribution
                     </h2>
@@ -225,7 +225,7 @@ const AdminDashboardPage = () => {
                 </div>
 
                 {/* System Summary */}
-                <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
+                <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-6 shadow-sm">
                     <h2 className="text-xs font-black text-theme-navy uppercase tracking-widest mb-5">
                         System Summary
                     </h2>

@@ -51,8 +51,8 @@ const SetPasswordPage = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-theme-pale p-6">
-            <div className="bg-theme-white rounded-3xl shadow-2xl shadow-theme-navy/5 w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-500">
+        <div className="min-h-screen flex items-center justify-center bg-theme-pale dark:bg-slate-900 p-6">
+            <div className="bg-theme-white dark:bg-slate-800 rounded-3xl shadow-2xl shadow-theme-navy/5 w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-500">
                 <div className="p-1 w-full bg-gradient-to-r from-theme-navy to-theme-blue"></div>
                 
                 <div className="p-10">
@@ -64,8 +64,8 @@ const SetPasswordPage = () => {
                                 </svg>
                             </div>
                         </div>
-                        <h1 className="text-3xl font-bold text-theme-navy">Security Setup</h1>
-                        <p className="text-slate-500 mt-2 italic text-sm">Define a new password for your library account.</p>
+                        <h1 className="text-3xl font-bold text-theme-navy dark:text-white">Security Setup</h1>
+                        <p className="text-slate-500 dark:text-slate-400 mt-2 italic text-sm">Define a new password for your library account.</p>
                     </div>
 
                     {!token ? (
@@ -78,7 +78,7 @@ const SetPasswordPage = () => {
                     ) : (
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-2 ml-1">
+                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 ml-1">
                                     New Password
                                 </label>
                                 <input
@@ -89,12 +89,12 @@ const SetPasswordPage = () => {
                                     required
                                     minLength={6}
                                     placeholder="Minimum 6 characters"
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-slate-700 focus:outline-none focus:ring-2 focus:ring-theme-blue/20 focus:border-theme-blue transition-all"
+                                    className="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-3.5 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-theme-blue/20 focus:border-theme-blue transition-all"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-2 ml-1">
+                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 ml-1">
                                     Confirm New Password
                                 </label>
                                 <input
@@ -104,7 +104,7 @@ const SetPasswordPage = () => {
                                     onChange={handleChange}
                                     required
                                     placeholder="Verify your new password"
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-slate-700 focus:outline-none focus:ring-2 focus:ring-theme-blue/20 focus:border-theme-blue transition-all"
+                                    className="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-3.5 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-theme-blue/20 focus:border-theme-blue transition-all"
                                 />
                             </div>
 

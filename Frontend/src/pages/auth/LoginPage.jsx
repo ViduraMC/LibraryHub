@@ -57,29 +57,29 @@ const LoginPage = () => {
     };
 
     return (
-        <div className="min-h-screen flex flex-col lg:flex-row bg-theme-white">
+        <div className="min-h-screen flex flex-col lg:flex-row bg-theme-white dark:bg-slate-900">
             {/* Left side: branding panel (hidden on mobile) */}
-            <div className="hidden lg:flex lg:w-1/2 bg-theme-pale items-center justify-center p-12">
+            <div className="hidden lg:flex lg:w-1/2 bg-theme-pale dark:bg-slate-800 items-center justify-center p-12">
                 <div className="max-w-lg text-center lg:text-left">
-                    <span className="inline-block px-4 py-1.5 mb-6 text-xs font-semibold tracking-wider text-theme-blue uppercase bg-white rounded-full shadow-sm">
+                    <span className="inline-block px-4 py-1.5 mb-6 text-xs font-semibold tracking-wider text-theme-blue uppercase bg-white dark:bg-slate-700 rounded-full shadow-sm">
                         Digital Knowledge Hub
                     </span>
-                    <h1 className="text-5xl font-bold leading-tight text-theme-navy mb-6">
+                    <h1 className="text-5xl font-bold leading-tight text-theme-navy dark:text-white mb-6">
                         Where Every Page Opens a{' '}
                         <span className="text-theme-blue text-6xl block mt-2">New World</span>
                     </h1>
-                    <p className="text-lg text-slate-600 leading-relaxed mb-8">
+                    <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed mb-8">
                         Access thousands of academic resources, digital catalogs, and transaction
                         history — all in one place.
                     </p>
                     <div className="flex gap-4">
-                        <div className="p-4 bg-white rounded-2xl shadow-sm flex-1">
+                        <div className="p-4 bg-white dark:bg-slate-700 rounded-2xl shadow-sm flex-1">
                             <div className="h-2 w-12 bg-theme-navy rounded-full mb-3"></div>
-                            <p className="text-sm font-medium text-slate-500">Resource Access</p>
+                            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Resource Access</p>
                         </div>
-                        <div className="p-4 bg-white rounded-2xl shadow-sm flex-1">
+                        <div className="p-4 bg-white dark:bg-slate-700 rounded-2xl shadow-sm flex-1">
                             <div className="h-2 w-12 bg-theme-blue rounded-full mb-3"></div>
-                            <p className="text-sm font-medium text-slate-500">Digital Catalog</p>
+                            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Digital Catalog</p>
                         </div>
                     </div>
                 </div>
@@ -91,7 +91,7 @@ const LoginPage = () => {
                 {/* Back to home — pinned to top-left of the right panel */}
                 <Link
                     to="/"
-                    className="absolute top-6 left-6 flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-theme-navy transition-colors group"
+                    className="absolute top-6 left-6 flex items-center gap-2 text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-theme-navy dark:hover:text-white transition-colors group"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -107,19 +107,19 @@ const LoginPage = () => {
                                 <div className="w-5 h-5 bg-theme-pale rotate-45 transform translate-x-3 translate-y-3"></div>
                                 <div className="w-5 h-5 bg-white rotate-45 transform -translate-x-3 -translate-y-3"></div>
                             </div>
-                            <h2 className="text-2xl font-bold text-theme-navy tracking-tight uppercase">
+                            <h2 className="text-2xl font-bold text-theme-navy dark:text-white tracking-tight uppercase">
                                 LibraryHub
                             </h2>
                         </div>
-                        <h3 className="text-3xl font-bold text-slate-800">Welcome Back</h3>
-                        <p className="text-slate-500 mt-2 text-sm leading-relaxed">
+                        <h3 className="text-3xl font-bold text-slate-800 dark:text-white">Welcome Back</h3>
+                        <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm leading-relaxed">
                             Sign in to manage your library profile and track transactions.
                         </p>
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-2">
+                            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
                                 Email or Membership ID
                             </label>
                             <input
@@ -128,7 +128,7 @@ const LoginPage = () => {
                                 onChange={(e) => setIdentifier(e.target.value)}
                                 required
                                 placeholder="admin@email.com  or  ST-26-0001"
-                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-slate-700 focus:outline-none focus:ring-2 focus:ring-theme-blue/20 focus:border-theme-blue transition-all"
+                                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3.5 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-theme-blue/20 focus:border-theme-blue transition-all"
                             />
                             <p className="text-[10px] text-slate-400 mt-1.5 ml-1 italic">
                                 Use your email for admin/librarian login, or membership ID for members.
@@ -136,7 +136,7 @@ const LoginPage = () => {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-2">
+                            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
                                 Password
                             </label>
                             <input
@@ -145,7 +145,7 @@ const LoginPage = () => {
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
                                 placeholder="••••••••"
-                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-slate-700 focus:outline-none focus:ring-2 focus:ring-theme-blue/20 focus:border-theme-blue transition-all"
+                                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3.5 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-theme-blue/20 focus:border-theme-blue transition-all"
                             />
                         </div>
 
@@ -186,7 +186,7 @@ const LoginPage = () => {
                         </p>
                     </div>
 
-                    <footer className="mt-8 text-center border-t border-slate-100 pt-6">
+                    <footer className="mt-8 text-center border-t border-slate-100 dark:border-slate-700 pt-6">
                         <p className="text-sm text-slate-500 font-medium">
                             Need help?{' '}
                             <span className="text-theme-blue font-bold cursor-pointer hover:underline">

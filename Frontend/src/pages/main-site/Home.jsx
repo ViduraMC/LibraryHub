@@ -137,17 +137,17 @@ const Home = () => {
             {/* ── Services ─────────────────────────────────────────── */}
             <section>
                 <div className="mb-8">
-                    <p className="text-[10px] font-black text-[#0A2463] uppercase tracking-widest mb-2">What We Offer</p>
-                    <h2 className="text-3xl font-black text-[#0A2463] uppercase tracking-tight">Our Services</h2>
+                    <p className="text-[10px] font-black text-[#0A2463] dark:text-theme-pale uppercase tracking-widest mb-2">What We Offer</p>
+                    <h2 className="text-3xl font-black text-[#0A2463] dark:text-white uppercase tracking-tight">Our Services</h2>
                 </div>
                 <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
                     {services.map(({ icon, title, desc }) => (
-                        <div key={title} className="group bg-white border border-slate-100 rounded-3xl p-6 shadow-sm hover:border-[#DBEAFE] hover:shadow-md transition-all duration-300">
-                            <div className="w-12 h-12 bg-[#DBEAFE] rounded-2xl flex items-center justify-center text-[#0A2463] mb-5 group-hover:bg-[#0A2463] group-hover:text-white transition-all duration-300">
+                        <div key={title} className="group bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-3xl p-6 shadow-sm hover:border-[#DBEAFE] dark:hover:border-theme-blue hover:shadow-md transition-all duration-300">
+                            <div className="w-12 h-12 bg-[#DBEAFE] dark:bg-theme-blue/20 rounded-2xl flex items-center justify-center text-[#0A2463] dark:text-theme-pale mb-5 group-hover:bg-[#0A2463] group-hover:text-white transition-all duration-300">
                                 {icon}
                             </div>
-                            <h3 className="text-sm font-black text-[#0A2463] mb-2 uppercase tracking-tight">{title}</h3>
-                            <p className="text-sm text-slate-500 leading-relaxed">{desc}</p>
+                            <h3 className="text-sm font-black text-[#0A2463] dark:text-white mb-2 uppercase tracking-tight">{title}</h3>
+                            <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">{desc}</p>
                         </div>
                     ))}
                 </div>
@@ -193,22 +193,22 @@ const Home = () => {
             {/* ── Announcements ────────────────────────────────────── */}
             <section>
                 <div className="mb-8">
-                    <p className="text-[10px] font-black text-[#0A2463] uppercase tracking-widest mb-2">Stay Updated</p>
-                    <h2 className="text-3xl font-black text-[#0A2463] uppercase tracking-tight">Announcements</h2>
+                    <p className="text-[10px] font-black text-[#0A2463] dark:text-theme-pale uppercase tracking-widest mb-2">Stay Updated</p>
+                    <h2 className="text-3xl font-black text-[#0A2463] dark:text-white uppercase tracking-tight">Announcements</h2>
                 </div>
                 <div className="grid md:grid-cols-3 gap-5">
                     {announcements.map(({ tag, tagColor, title, date, desc }) => (
-                        <div key={title} className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm hover:border-[#DBEAFE] hover:shadow-md transition-all group">
+                        <div key={title} className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-3xl p-6 shadow-sm hover:border-[#DBEAFE] dark:hover:border-theme-blue hover:shadow-md transition-all group">
                             <div className="flex items-center justify-between mb-4">
                                 <span className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full ${tagColor}`}>
                                     {tag}
                                 </span>
                                 <span className="text-[10px] text-slate-400 font-medium">{date}</span>
                             </div>
-                            <h3 className="text-sm font-black text-[#0A2463] mb-2 leading-snug group-hover:text-blue-600 transition-colors">
+                            <h3 className="text-sm font-black text-[#0A2463] dark:text-white mb-2 leading-snug group-hover:text-blue-600 dark:group-hover:text-theme-pale transition-colors">
                                 {title}
                             </h3>
-                            <p className="text-sm text-slate-500 leading-relaxed">{desc}</p>
+                            <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">{desc}</p>
                         </div>
                     ))}
                 </div>

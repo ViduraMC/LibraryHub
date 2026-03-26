@@ -90,15 +90,15 @@ const RegisterPage = () => {
     // --- Success state ---
     if (submitted) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-theme-pale p-6">
-                <div className="bg-white rounded-3xl shadow-xl p-12 max-w-md w-full text-center">
+            <div className="min-h-screen flex items-center justify-center bg-theme-pale dark:bg-slate-900 p-6">
+                <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl p-12 max-w-md w-full text-center">
                     <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-6">
                         <svg className="h-10 w-10 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
                     </div>
-                    <h2 className="text-2xl font-bold text-theme-navy mb-3">Application Submitted!</h2>
-                    <p className="text-slate-500 text-sm leading-relaxed mb-8">
+                    <h2 className="text-2xl font-bold text-theme-navy dark:text-white mb-3">Application Submitted!</h2>
+                    <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed mb-8">
                         Your membership application has been received. The librarian will review it
                         and you will receive an email notification once a decision has been made.
                     </p>
@@ -115,7 +115,7 @@ const RegisterPage = () => {
 
     // --- Form state ---
     return (
-        <div className="min-h-screen flex flex-col lg:flex-row bg-theme-white">
+        <div className="min-h-screen flex flex-col lg:flex-row bg-theme-white dark:bg-slate-900">
             {/* Left side: info panel */}
             <div className="hidden lg:flex lg:w-2/5 bg-theme-navy flex-col justify-center p-14">
                 <div className="text-white">
@@ -157,14 +157,14 @@ const RegisterPage = () => {
             <div className="flex-1 overflow-y-auto flex items-start justify-center p-8 lg:p-12">
                 <div className="w-full max-w-lg">
                     <div className="mb-8">
-                        <h2 className="text-3xl font-black text-theme-navy">Membership Application</h2>
-                        <p className="text-slate-500 mt-2 text-sm">
+                        <h2 className="text-3xl font-black text-theme-navy dark:text-white">Membership Application</h2>
+                        <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm">
                             Fill in your details accurately. Your school ID will be verified automatically.
                         </p>
                     </div>
 
                     {/* Applicant type toggle */}
-                    <div className="flex bg-slate-50 p-1.5 rounded-2xl border border-slate-100 mb-8">
+                    <div className="flex bg-slate-50 dark:bg-slate-800 p-1.5 rounded-2xl border border-slate-100 dark:border-slate-700 mb-8">
                         {['student', 'teacher'].map((type) => (
                             <button
                                 key={type}
@@ -194,7 +194,7 @@ const RegisterPage = () => {
                                     onChange={handleChange}
                                     required
                                     placeholder={applicantType === 'student' ? 'e.g. S2024001' : 'e.g. T2024001'}
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-theme-blue/20 focus:border-theme-blue transition-all"
+                                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-700 dark:text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-theme-blue/20 focus:border-theme-blue transition-all"
                                 />
                             </div>
                             <div className="col-span-2 sm:col-span-1">
@@ -207,7 +207,7 @@ const RegisterPage = () => {
                                     onChange={handleChange}
                                     required
                                     placeholder="As on school register"
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-theme-blue/20 focus:border-theme-blue transition-all"
+                                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-700 dark:text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-theme-blue/20 focus:border-theme-blue transition-all"
                                 />
                             </div>
                         </div>
@@ -224,7 +224,7 @@ const RegisterPage = () => {
                                     onChange={handleChange}
                                     required
                                     placeholder="your@email.com"
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-theme-blue/20 focus:border-theme-blue transition-all"
+                                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-700 dark:text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-theme-blue/20 focus:border-theme-blue transition-all"
                                 />
                             </div>
                             <div className="col-span-2 sm:col-span-1">
@@ -238,7 +238,7 @@ const RegisterPage = () => {
                                     onChange={handleChange}
                                     required
                                     placeholder="07XXXXXXXX"
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-theme-blue/20 focus:border-theme-blue transition-all"
+                                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-700 dark:text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-theme-blue/20 focus:border-theme-blue transition-all"
                                 />
                             </div>
                         </div>
@@ -257,7 +257,7 @@ const RegisterPage = () => {
                                             onChange={handleChange}
                                             required
                                             placeholder="e.g. 10"
-                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-theme-blue/20 focus:border-theme-blue transition-all"
+                                            className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-700 dark:text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-theme-blue/20 focus:border-theme-blue transition-all"
                                         />
                                     </div>
                                     <div>
@@ -270,7 +270,7 @@ const RegisterPage = () => {
                                             onChange={handleChange}
                                             required
                                             placeholder="e.g. 10A"
-                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-theme-blue/20 focus:border-theme-blue transition-all"
+                                            className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-700 dark:text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-theme-blue/20 focus:border-theme-blue transition-all"
                                         />
                                     </div>
                                 </div>
@@ -279,7 +279,7 @@ const RegisterPage = () => {
                                     <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
                                         Guardian Details
                                     </p>
-                                    <div className="h-px bg-slate-100 mt-1.5"></div>
+                                    <div className="h-px bg-slate-100 dark:bg-slate-700 mt-1.5"></div>
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4">
@@ -293,7 +293,7 @@ const RegisterPage = () => {
                                             onChange={handleChange}
                                             required
                                             placeholder="Parent / Guardian"
-                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-theme-blue/20 focus:border-theme-blue transition-all"
+                                            className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-700 dark:text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-theme-blue/20 focus:border-theme-blue transition-all"
                                         />
                                     </div>
                                     <div>
@@ -307,7 +307,7 @@ const RegisterPage = () => {
                                             onChange={handleChange}
                                             required
                                             placeholder="07XXXXXXXX"
-                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-theme-blue/20 focus:border-theme-blue transition-all"
+                                            className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-700 dark:text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-theme-blue/20 focus:border-theme-blue transition-all"
                                         />
                                     </div>
                                 </div>
@@ -326,7 +326,7 @@ const RegisterPage = () => {
                                     onChange={handleChange}
                                     required
                                     placeholder="e.g. Mathematics"
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-theme-blue/20 focus:border-theme-blue transition-all"
+                                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-700 dark:text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-theme-blue/20 focus:border-theme-blue transition-all"
                                 />
                             </div>
                         )}

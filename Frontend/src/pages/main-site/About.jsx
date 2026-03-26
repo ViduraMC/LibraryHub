@@ -98,8 +98,8 @@ const About = () => {
             {/* ── Stats Bar ─────────────────────────────────────────── */}
             <section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {stats.map(({ value, label }) => (
-                    <div key={label} className="bg-white border border-slate-100 rounded-2xl p-6 text-center shadow-sm hover:shadow-md hover:border-[#DBEAFE] transition-all group">
-                        <p className="text-3xl font-black text-[#0A2463] tracking-tight group-hover:text-blue-600 transition-colors">{value}</p>
+                    <div key={label} className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-6 text-center shadow-sm hover:shadow-md hover:border-[#DBEAFE] dark:hover:border-theme-blue transition-all group">
+                        <p className="text-3xl font-black text-[#0A2463] dark:text-white tracking-tight group-hover:text-blue-600 dark:group-hover:text-theme-pale transition-colors">{value}</p>
                         <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-2">{label}</p>
                     </div>
                 ))}
@@ -127,7 +127,7 @@ const About = () => {
                     </div>
                 </div>
 
-                <div className="bg-white border border-slate-100 rounded-3xl p-8 lg:p-10 shadow-sm relative overflow-hidden">
+                <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-3xl p-8 lg:p-10 shadow-sm relative overflow-hidden">
                     <div className="absolute -top-8 -right-8 w-40 h-40 bg-[#DBEAFE]/30 rounded-full" />
                     <div className="absolute -bottom-6 -left-6 w-28 h-28 bg-[#0A2463]/5 rounded-full" />
                     <div className="relative z-10">
@@ -139,9 +139,9 @@ const About = () => {
                                     d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                             </svg>
                         </div>
-                        <p className="text-[10px] font-black text-[#0A2463] uppercase tracking-widest mb-3">Our Vision</p>
-                        <h3 className="text-2xl font-black text-[#0A2463] uppercase tracking-tight mb-4">The Library of Tomorrow</h3>
-                        <p className="text-slate-500 text-sm leading-relaxed">
+                        <p className="text-[10px] font-black text-[#0A2463] dark:text-theme-pale uppercase tracking-widest mb-3">Our Vision</p>
+                        <h3 className="text-2xl font-black text-[#0A2463] dark:text-white uppercase tracking-tight mb-4">The Library of Tomorrow</h3>
+                        <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
                             To become the leading school library management platform — a place where
                             physical books and digital resources converge, where every borrow is tracked
                             effortlessly, and where the love of reading is cultivated in every student.
@@ -153,17 +153,17 @@ const About = () => {
             {/* ── Core Values ─────────────────────────────────────── */}
             <section>
                 <div className="mb-8">
-                    <p className="text-[10px] font-black text-[#0A2463] uppercase tracking-widest mb-2">What Drives Us</p>
-                    <h2 className="text-3xl font-black text-[#0A2463] uppercase tracking-tight">Our Values</h2>
+                    <p className="text-[10px] font-black text-[#0A2463] dark:text-theme-pale uppercase tracking-widest mb-2">What Drives Us</p>
+                    <h2 className="text-3xl font-black text-[#0A2463] dark:text-white uppercase tracking-tight">Our Values</h2>
                 </div>
                 <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
                     {values.map(({ icon, title, desc }) => (
-                        <div key={title} className="group bg-white border border-slate-100 rounded-3xl p-6 shadow-sm hover:border-[#DBEAFE] hover:shadow-md transition-all duration-300">
-                            <div className="w-12 h-12 bg-[#DBEAFE] rounded-2xl flex items-center justify-center text-[#0A2463] mb-5 group-hover:bg-[#0A2463] group-hover:text-white transition-all duration-300">
+                        <div key={title} className="group bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-3xl p-6 shadow-sm hover:border-[#DBEAFE] dark:hover:border-theme-blue hover:shadow-md transition-all duration-300">
+                            <div className="w-12 h-12 bg-[#DBEAFE] dark:bg-theme-blue/20 rounded-2xl flex items-center justify-center text-[#0A2463] dark:text-theme-pale mb-5 group-hover:bg-[#0A2463] group-hover:text-white transition-all duration-300">
                                 {icon}
                             </div>
-                            <h3 className="text-sm font-black text-[#0A2463] mb-2 uppercase tracking-tight">{title}</h3>
-                            <p className="text-sm text-slate-500 leading-relaxed">{desc}</p>
+                            <h3 className="text-sm font-black text-[#0A2463] dark:text-white mb-2 uppercase tracking-tight">{title}</h3>
+                            <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">{desc}</p>
                         </div>
                     ))}
                 </div>
@@ -172,13 +172,13 @@ const About = () => {
             {/* ── Journey Timeline ────────────────────────────────── */}
             <section>
                 <div className="mb-8">
-                    <p className="text-[10px] font-black text-[#0A2463] uppercase tracking-widest mb-2">Our Story</p>
-                    <h2 className="text-3xl font-black text-[#0A2463] uppercase tracking-tight">The Journey</h2>
+                    <p className="text-[10px] font-black text-[#0A2463] dark:text-theme-pale uppercase tracking-widest mb-2">Our Story</p>
+                    <h2 className="text-3xl font-black text-[#0A2463] dark:text-white uppercase tracking-tight">The Journey</h2>
                 </div>
 
                 <div className="relative">
                     {/* Timeline line */}
-                    <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-px bg-slate-200 -translate-x-1/2" />
+                    <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-px bg-slate-200 dark:bg-slate-700 -translate-x-1/2" />
 
                     <div className="space-y-8 md:space-y-0 md:grid md:grid-cols-2 md:gap-x-12 md:gap-y-10">
                         {timeline.map(({ year, title, desc }, i) => (
@@ -194,10 +194,10 @@ const About = () => {
                                     }
                                 />
 
-                                <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-[#DBEAFE] transition-all">
-                                    <span className="text-[10px] font-black text-theme-blue uppercase tracking-widest">{year}</span>
-                                    <h4 className="text-sm font-black text-[#0A2463] uppercase tracking-tight mt-1 mb-2">{title}</h4>
-                                    <p className="text-sm text-slate-500 leading-relaxed">{desc}</p>
+                                <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-[#DBEAFE] dark:hover:border-theme-blue transition-all">
+                                    <span className="text-[10px] font-black text-theme-blue dark:text-theme-pale uppercase tracking-widest">{year}</span>
+                                    <h4 className="text-sm font-black text-[#0A2463] dark:text-white uppercase tracking-tight mt-1 mb-2">{title}</h4>
+                                    <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">{desc}</p>
                                 </div>
                             </div>
                         ))}
@@ -215,17 +215,17 @@ const About = () => {
                     />
                 </div>
                 <div className="space-y-5">
-                    <p className="text-[10px] font-black text-[#0A2463] uppercase tracking-widest">Built With Purpose</p>
-                    <h2 className="text-3xl font-black text-[#0A2463] uppercase tracking-tight leading-tight">
+                    <p className="text-[10px] font-black text-[#0A2463] dark:text-theme-pale uppercase tracking-widest">Built With Purpose</p>
+                    <h2 className="text-3xl font-black text-[#0A2463] dark:text-white uppercase tracking-tight leading-tight">
                         A System Designed<br />For Real Schools
                     </h2>
-                    <p className="text-sm text-slate-500 leading-relaxed">
+                    <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
                         LibraryHub was born out of a real need — managing thousands of books,
                         hundreds of members, and countless daily transactions in a school
                         library is complex. Pen-and-paper systems and basic spreadsheets
                         simply can't keep up.
                     </p>
-                    <p className="text-sm text-slate-500 leading-relaxed">
+                    <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
                         We built LibraryHub to solve this. From automated borrowing workflows
                         and smart reservation queues to fine management and detailed analytics,
                         every feature is designed with librarians, students, and teachers in mind.

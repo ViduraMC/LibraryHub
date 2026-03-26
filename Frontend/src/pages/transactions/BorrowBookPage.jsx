@@ -176,7 +176,7 @@ const BorrowBookPage = () => {
                 </p>
             </div>
 
-            <div className="bg-white border border-slate-100 rounded-3xl shadow-xl shadow-slate-200/40 overflow-hidden">
+            <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-3xl shadow-xl shadow-slate-200/40 dark:shadow-none overflow-hidden">
                 <div className="h-1 w-full bg-gradient-to-r from-theme-blue to-theme-navy" />
 
                 <form onSubmit={handleSubmit} className="p-10 space-y-8">
@@ -226,7 +226,7 @@ const BorrowBookPage = () => {
 
                         {/* Dropdown results */}
                         {showMemberDropdown && memberResults.length > 0 && !selectedMember && (
-                            <div className="absolute z-10 w-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-lg overflow-hidden max-h-60 overflow-y-auto">
+                            <div className="absolute z-10 w-full mt-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-lg overflow-hidden max-h-60 overflow-y-auto">
                                 {memberResults.map((u) => (
                                     <button
                                         key={u._id}
@@ -247,7 +247,7 @@ const BorrowBookPage = () => {
                         )}
 
                         {showMemberDropdown && debouncedMemberQuery.trim().length >= 2 && memberResults.length === 0 && !memberLoading && !selectedMember && (
-                            <div className="absolute z-10 w-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-lg px-5 py-4 text-sm text-slate-400 italic">
+                            <div className="absolute z-10 w-full mt-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-lg px-5 py-4 text-sm text-slate-400 italic">
                                 No members found matching "{debouncedMemberQuery}"
                             </div>
                         )}
@@ -313,7 +313,7 @@ const BorrowBookPage = () => {
 
                         {/* Dropdown results */}
                         {showBookDropdown && bookResults.length > 0 && !selectedBook && (
-                            <div className="absolute z-10 w-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-lg overflow-hidden max-h-60 overflow-y-auto">
+                            <div className="absolute z-10 w-full mt-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-lg overflow-hidden max-h-60 overflow-y-auto">
                                 {bookResults.map((b) => (
                                     <button
                                         key={b._id}
@@ -336,7 +336,7 @@ const BorrowBookPage = () => {
                         )}
 
                         {showBookDropdown && debouncedBookQuery.trim().length >= 2 && bookResults.length === 0 && !bookLoading && !selectedBook && (
-                            <div className="absolute z-10 w-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-lg px-5 py-4 text-sm text-slate-400 italic">
+                            <div className="absolute z-10 w-full mt-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-lg px-5 py-4 text-sm text-slate-400 italic">
                                 No books found matching "{debouncedBookQuery}"
                             </div>
                         )}
