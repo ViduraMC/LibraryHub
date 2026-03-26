@@ -60,4 +60,7 @@ BookSchema.pre(['updateOne', 'findOneAndUpdate', 'updateMany'], async function (
     }
 });
 
+// Text index for search — enables $text queries on name, author, bookId
+BookSchema.index({ name: 'text', author: 'text', bookId: 'text' });
+
 export default mongoose.model('Book', BookSchema);
