@@ -132,6 +132,22 @@ export const returnBook = async (req, res) => {
             });
         }
 
+        // check for unpaid fines on this specific transaction
+        const unpaidFine = await Fine.findOne({
+            bookTransactionId: id,
+            fineStatus: "unpaid",
+        }).session(session);
+
+        if (unpaidFine) {
+            await session.abortTransaction();
+            session.endSession();
+            return res.status(400).json({
+                success: false,
+                message: `Cannot return — unpaid fine of Rs.${unpaidFine.fineAmount.toFixed(2)}. Fine must be settled first.`,
+                fine: unpaidFine,
+            });
+        }
+
         // set return date and check if late
         const returnDate = new Date();
         const isLate = returnDate > transaction.dueDate;
@@ -330,7 +346,7 @@ export const getSingleTransaction = async (req, res) => {
         const { id } = req.params;
 
         const transaction = await BookTransaction.findOne({ _id: id, isDeleted: false })
-            .populate("bookId", "bookId name author grade type value")
+            .populate("bookId", "bookId name author grade type value availableCopies totalCopies")
             .populate("userId", "fullName email role membershipId");
 
         if (!transaction) {
@@ -349,6 +365,49 @@ export const getSingleTransaction = async (req, res) => {
         res.status(500).json({
             success: false,
             message: "Server error while fetching transaction",
+        });
+    }
+};
+
+// get full return details for a transaction (used by the return confirmation modal)
+// combines transaction + book (with availability) + user + fine data
+export const getTransactionReturnDetails = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const transaction = await BookTransaction.findOne({ _id: id, isDeleted: false })
+            .populate("bookId", "bookId name author grade type value availableCopies totalCopies")
+            .populate("userId", "fullName email role membershipId");
+
+        if (!transaction) {
+            return res.status(404).json({
+                success: false,
+                message: "Transaction not found",
+            });
+        }
+
+        // check for fine on this transaction
+        const fine = await Fine.findOne({ bookTransactionId: id });
+
+        // calculate overdue days
+        const now = new Date();
+        const dueDate = new Date(transaction.dueDate);
+        let overdueDays = 0;
+        if (now > dueDate && (transaction.status === "active" || transaction.status === "overdue")) {
+            overdueDays = Math.ceil((now - dueDate) / (1000 * 60 * 60 * 24));
+        }
+
+        res.status(200).json({
+            success: true,
+            transaction,
+            fine: fine || null,
+            overdueDays,
+        });
+    } catch (error) {
+        console.error("Get return details error:", error.message);
+        res.status(500).json({
+            success: false,
+            message: "Server error while fetching return details",
         });
     }
 };
