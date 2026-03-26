@@ -2,8 +2,8 @@ import axiosInstance from "./axiosInstance";
 
 //LIBRARIAN
 //get all reservations
-export const getAllReservations = ()=> {
-  axiosInstance.get('/book-reservation');
+export const getAllReservations = (params)=> {
+  axiosInstance.get('/book-reservation', {params});
 }
 
 //get reservation by ID
@@ -24,9 +24,11 @@ export const createReservation = (data)=> {
 } 
 
 //get my reservations
-export const getMyReservations = ()=> {
-  axiosInstance.get('/book-reservation/my-reservations');
-}
+export const getMyReservations = ({ tab = "active" } = {}) => {
+  return axiosInstance.get("/book-reservation/my-reservations", {
+    params: { tab },
+  });
+};
 
 //cancel a reservation
 export const cancelReservation = (id)=> {
