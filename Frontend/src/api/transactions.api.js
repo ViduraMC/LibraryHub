@@ -8,6 +8,10 @@ export const borrowBook = (data) =>
 export const returnBook = (id) => 
     axiosInstance.put(`/transactions/${id}/return`);
 
+// get full return details (transaction + book + fine + overdue info)
+export const getTransactionReturnDetails = (id) =>
+    axiosInstance.get(`/transactions/${id}/return-details`);
+
 // renew a book
 export const renewBook = (id) => 
     axiosInstance.put(`/transactions/${id}/renew`);

@@ -6,6 +6,7 @@ import {
     getMyTransactions,
     getAllTransactions,
     getSingleTransaction,
+    getTransactionReturnDetails,
     softDeleteTransaction,
     restoreTransaction,
     getDeletedTransactions,
@@ -36,6 +37,9 @@ router.get("/deleted", auth, roleAuth("librarian", "admin"), getDeletedTransacti
 
 // GET /api/transactions — all (admin/librarian), supports ?status=&userId=
 router.get("/", auth, roleAuth("librarian", "admin"), getAllTransactions);
+
+// GET /api/transactions/:id/return-details — full return info (librarian/admin)
+router.get("/:id/return-details", auth, roleAuth("librarian", "admin"), getTransactionReturnDetails);
 
 // GET /api/transactions/:id — single transaction detail
 router.get("/:id", auth, getSingleTransaction);
