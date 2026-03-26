@@ -140,36 +140,52 @@ export const setPassword = async (req, res) => {
             });
         }
 
-        // create actual user account based on applicant type
+        // Check if a user with this email or membershipId already exists
+        // (can happen if a previous set-password attempt partially succeeded)
+        const existingUser = await User.findOne({
+            $or: [
+                { email: request.email.toLowerCase() },
+                { membershipId: request.membershipId },
+            ],
+        });
+
         let newUser;
 
-        if (request.applicantType === "student") {
-            newUser = await Student.create({
-                fullName: request.fullName,
-                email: request.email,
-                password: password,
-                phone: request.phone || "",
-                address: request.address || "",
-                role: "student",
-                studentId: request.studentId,
-                membershipId: request.membershipId,
-                grade: request.grade || "",
-                classRoom: request.classRoom || "",
-                guardianName: request.guardianName || "",
-                guardianPhone: request.guardianPhone || "",
-            });
+        if (existingUser) {
+            // User already exists from a previous attempt — just update their password
+            existingUser.password = password;
+            await existingUser.save(); // pre-save hook will hash the password
+            newUser = existingUser;
         } else {
-            newUser = await Teacher.create({
-                fullName: request.fullName,
-                email: request.email,
-                password: password,
-                phone: request.phone || "",
-                address: request.address || "",
-                role: "teacher",
-                teacherId: request.teacherId,
-                membershipId: request.membershipId,
-                subject: request.subject || "",
-            });
+            // create actual user account based on applicant type
+            if (request.applicantType === "student") {
+                newUser = await Student.create({
+                    fullName: request.fullName,
+                    email: request.email,
+                    password: password,
+                    phone: request.phone || "",
+                    address: request.address || "",
+                    role: "student",
+                    studentId: request.studentId,
+                    membershipId: request.membershipId,
+                    grade: request.grade || "",
+                    classRoom: request.classRoom || "",
+                    guardianName: request.guardianName || "",
+                    guardianPhone: request.guardianPhone || "",
+                });
+            } else {
+                newUser = await Teacher.create({
+                    fullName: request.fullName,
+                    email: request.email,
+                    password: password,
+                    phone: request.phone || "",
+                    address: request.address || "",
+                    role: "teacher",
+                    teacherId: request.teacherId,
+                    membershipId: request.membershipId,
+                    subject: request.subject || "",
+                });
+            }
         }
 
         // mark request as active and clear token
@@ -188,7 +204,16 @@ export const setPassword = async (req, res) => {
             user: userResponse,
         });
     } catch (error) {
-        console.error("Set password error:", error.message);
+        console.error("Set password error:", error);
+
+        // Provide descriptive error for duplicate key issues
+        if (error.code === 11000) {
+            return res.status(409).json({
+                success: false,
+                message: "An account with this email or membership ID already exists. Try logging in instead.",
+            });
+        }
+
         res.status(500).json({
             success: false,
             message: "Server error",
