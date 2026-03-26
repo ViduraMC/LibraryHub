@@ -11,7 +11,7 @@ import {
 } from '../../api/admin.api.js';
 
 /**
- * Admin: School Lists Management — full CRUD with CSV validation.
+ * Admin: School Lists Management - full CRUD with CSV validation.
  * Upload, view, edit, delete, and clear student/teacher lists.
  */
 const AdminSchoolListsPage = () => {

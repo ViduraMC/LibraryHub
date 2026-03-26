@@ -9,7 +9,7 @@ import {
 } from '../../api/admin.api.js';
 
 /**
- * Admin: Librarian Management — Full CRUD with toggle switch for status.
+ * Admin: Librarian Management - Full CRUD with toggle switch for status.
  * 60-30-10 theme: White backgrounds, Pale Blue accents, Navy/Blue highlights.
  */
 const AdminLibrariansPage = () => {
@@ -127,7 +127,7 @@ const AdminLibrariansPage = () => {
                         Librarians
                     </h1>
                     <p className="text-slate-500 mt-2 text-sm">
-                        Manage librarian accounts — create, edit, activate/deactivate, or remove.
+                        Manage librarian accounts: create, edit, activate/deactivate, or remove.
                     </p>
                 </div>
                 <button
@@ -244,7 +244,7 @@ const AdminLibrariansPage = () => {
                                         {/* Librarian ID */}
                                         <td className="px-5 py-4">
                                             <span className="text-xs font-mono font-bold text-theme-blue">
-                                                {lib.librarianId || '—'}
+                                                {lib.librarianId || '-'}
                                             </span>
                                         </td>
 
@@ -262,7 +262,7 @@ const AdminLibrariansPage = () => {
                                             )}
                                         </td>
 
-                                        {/* Status — Toggle Switch */}
+                                        {/* Status - Toggle Switch */}
                                         <td className="px-5 py-4">
                                             <div className="flex items-center gap-2">
                                                 <button

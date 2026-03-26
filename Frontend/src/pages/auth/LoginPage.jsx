@@ -61,7 +61,7 @@ const LoginPage = () => {
             {/* Left side: branding panel (hidden on mobile) */}
             <div className="hidden lg:flex lg:w-1/2 bg-theme-pale dark:bg-slate-800 items-center justify-center p-12">
                 <div className="max-w-lg text-center lg:text-left">
-                    <span className="inline-block px-4 py-1.5 mb-6 text-xs font-semibold tracking-wider text-theme-blue uppercase bg-white dark:bg-slate-700 rounded-full shadow-sm">
+                    <span className="inline-block px-4 py-1.5 mb-6 text-xs font-semibold tracking-wider text-theme-blue dark:text-[#DBEAFE] uppercase bg-white dark:bg-slate-700 rounded-full shadow-sm">
                         Digital Knowledge Hub
                     </span>
                     <h1 className="text-5xl font-bold leading-tight text-theme-navy dark:text-white mb-6">
@@ -70,7 +70,7 @@ const LoginPage = () => {
                     </h1>
                     <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed mb-8">
                         Access thousands of academic resources, digital catalogs, and transaction
-                        history — all in one place.
+                        history, all in one place.
                     </p>
                     <div className="flex gap-4">
                         <div className="p-4 bg-white dark:bg-slate-700 rounded-2xl shadow-sm flex-1">
@@ -86,9 +86,9 @@ const LoginPage = () => {
             </div>
 
             {/* Right side: login form */}
-            <div className="flex-1 flex items-center justify-center p-8 lg:p-16">
+            <div className="flex-1 flex items-center justify-center p-8 lg:p-16 dark:bg-slate-900">
 
-                {/* Back to home — pinned to top-left of the right panel */}
+                {/* Back to home - pinned to top-left of the right panel */}
                 <Link
                     to="/"
                     className="absolute top-6 left-6 flex items-center gap-2 text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-theme-navy dark:hover:text-white transition-colors group"
@@ -130,7 +130,7 @@ const LoginPage = () => {
                                 placeholder="admin@email.com  or  ST-26-0001"
                                 className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3.5 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-theme-blue/20 focus:border-theme-blue transition-all"
                             />
-                            <p className="text-[10px] text-slate-400 mt-1.5 ml-1 italic">
+                            <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1.5 ml-1 italic">
                                 Use your email for admin/librarian login, or membership ID for members.
                             </p>
                         </div>

@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
 /**
- * ScrollToTop — scrolls the window to the top whenever the route changes.
+ * ScrollToTop - scrolls the window to the top whenever the route changes.
  * Place this once inside <Router> to ensure all navigation (links, footer, etc.)
  * starts from the top of the page.
  */

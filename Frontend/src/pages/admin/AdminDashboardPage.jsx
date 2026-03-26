@@ -4,7 +4,7 @@ import { getAllLibrarians, getStudentList, getTeacherList } from '../../api/admi
 import { getMembershipRequests } from '../../api/membership.api.js';
 
 /**
- * Admin Dashboard — system overview with stats, distribution chart, and recent activity.
+ * Admin Dashboard - system overview with stats, distribution chart, and recent activity.
  * Follows 60-30-10 color theme: White 60%, Pale Blue (#DBEAFE) 30%, Navy (#0A2463) 10%.
  */
 const AdminDashboardPage = () => {
@@ -27,10 +27,10 @@ const AdminDashboardPage = () => {
                 ]);
 
                 setStats({
-                    librarians: libRes.status === 'fulfilled' ? libRes.value.data.librarians?.length ?? 0 : '—',
-                    students:   stuRes.status === 'fulfilled' ? stuRes.value.data.students?.length ?? 0 : '—',
-                    teachers:   tchRes.status === 'fulfilled' ? tchRes.value.data.teachers?.length ?? 0 : '—',
-                    pendingRequests: reqRes.status === 'fulfilled' ? reqRes.value.data.requests?.length ?? 0 : '—',
+                    librarians: libRes.status === 'fulfilled' ? libRes.value.data.librarians?.length ?? 0 : '-',
+                    students:   stuRes.status === 'fulfilled' ? stuRes.value.data.students?.length ?? 0 : '-',
+                    teachers:   tchRes.status === 'fulfilled' ? tchRes.value.data.teachers?.length ?? 0 : '-',
+                    pendingRequests: reqRes.status === 'fulfilled' ? reqRes.value.data.requests?.length ?? 0 : '-',
                 });
             } finally {
                 setLoading(false);
@@ -103,7 +103,7 @@ const AdminDashboardPage = () => {
                     Dashboard
                 </h1>
                 <p className="text-slate-500 mt-2 text-sm">
-                    System overview — monitor librarians, membership registers, and approvals.
+                    System overview. Monitor librarians, membership registers, and approvals.
                 </p>
             </div>
 
@@ -132,7 +132,7 @@ const AdminDashboardPage = () => {
                         </div>
 
                         <p className={`text-4xl font-black ${loading ? 'text-slate-200 animate-pulse' : 'text-theme-navy'} mb-1`}>
-                            {loading ? '—' : value}
+                            {loading ? '-' : value}
                         </p>
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                             {label}
@@ -233,25 +233,25 @@ const AdminDashboardPage = () => {
                     <div className="space-y-3">
                         <SummaryRow
                             label="Active Librarians"
-                            value={loading ? '—' : stats.librarians}
+                            value={loading ? '-' : stats.librarians}
                             link="/admin/librarians"
                             color="text-theme-navy"
                         />
                         <SummaryRow
                             label="Students on Register"
-                            value={loading ? '—' : stats.students}
+                            value={loading ? '-' : stats.students}
                             link="/admin/school-lists"
                             color="text-theme-blue"
                         />
                         <SummaryRow
                             label="Teachers on Register"
-                            value={loading ? '—' : stats.teachers}
+                            value={loading ? '-' : stats.teachers}
                             link="/admin/school-lists"
                             color="text-theme-blue"
                         />
                         <SummaryRow
                             label="Pending Membership Approvals"
-                            value={loading ? '—' : stats.pendingRequests}
+                            value={loading ? '-' : stats.pendingRequests}
                             link={null}
                             color="text-amber-600"
                             highlight={typeof stats.pendingRequests === 'number' && stats.pendingRequests > 0}

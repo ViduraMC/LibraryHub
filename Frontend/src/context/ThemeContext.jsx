@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 
 /**
- * ThemeProvider — manages light/dark mode for the entire app.
+ * ThemeProvider - manages light/dark mode for the entire app.
  *
  * Behaviour:
  *   1. On first load, reads the OS preference via `prefers-color-scheme`.

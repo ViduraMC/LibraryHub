@@ -8,7 +8,7 @@ import {
 
 // Shows all soft-deleted transaction records.
 // Librarians can restore a record back to active,
-// or permanently delete it (irreversible — requires confirmation).
+// or permanently delete it (irreversible, requires confirmation).
 const RecycleBinPage = () => {
     const [transactions, setTransactions] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -133,7 +133,7 @@ const RecycleBinPage = () => {
                                         <td className="px-6 py-5 text-sm text-slate-500">
                                             {t.deletedAt
                                                 ? new Date(t.deletedAt).toLocaleDateString()
-                                                : '—'}
+                                                : '-'}
                                         </td>
 
                                         {/* Restore / Permanent delete */}

@@ -87,7 +87,7 @@ const About = () => {
                         </h1>
 
                         <p className="text-slate-200 text-base leading-relaxed max-w-lg">
-                            LibraryHub is more than a library management system — it's a gateway
+                            LibraryHub is more than a library management system. It's a gateway
                             to knowledge, connecting students and teachers with the resources
                             they need to learn, grow, and succeed.
                         </p>
@@ -121,7 +121,7 @@ const About = () => {
                         <h3 className="text-2xl font-black text-white uppercase tracking-tight mb-4">Democratizing Access to Knowledge</h3>
                         <p className="text-slate-300 text-sm leading-relaxed">
                             To provide every student and teacher with seamless, equitable access to books,
-                            digital resources, and learning materials — breaking down barriers between
+                            digital resources, and learning materials, breaking down barriers between
                             curiosity and knowledge through a modern, intuitive library platform.
                         </p>
                     </div>
@@ -142,7 +142,7 @@ const About = () => {
                         <p className="text-[10px] font-black text-[#0A2463] dark:text-theme-pale uppercase tracking-widest mb-3">Our Vision</p>
                         <h3 className="text-2xl font-black text-[#0A2463] dark:text-white uppercase tracking-tight mb-4">The Library of Tomorrow</h3>
                         <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
-                            To become the leading school library management platform — a place where
+                            To become the leading school library management platform, a place where
                             physical books and digital resources converge, where every borrow is tracked
                             effortlessly, and where the love of reading is cultivated in every student.
                         </p>
@@ -220,7 +220,7 @@ const About = () => {
                         A System Designed<br />For Real Schools
                     </h2>
                     <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-                        LibraryHub was born out of a real need — managing thousands of books,
+                        LibraryHub was born out of a real need: managing thousands of books,
                         hundreds of members, and countless daily transactions in a school
                         library is complex. Pen-and-paper systems and basic spreadsheets
                         simply can't keep up.

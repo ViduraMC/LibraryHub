@@ -91,7 +91,7 @@ function App() {
                             }
                         />
 
-                        {/* Student / Teacher routes — explicit paths instead of catch-all /* */}
+                        {/* Student / Teacher routes - explicit paths instead of catch-all /* */}
                         <Route path="/my-transactions" element={
                             <ProtectedRoute allowedRoles={['student', 'teacher']}><MyTransactionsPage /></ProtectedRoute>
                         } />

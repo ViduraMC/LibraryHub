@@ -144,7 +144,7 @@ const MyTransactionsPage = () => {
 
                             {/* Action area */}
                             <div className="mt-6">
-                                {/* Renew button — only shown when active and not yet renewed */}
+                                {/* Renew button - only shown when active and not yet renewed */}
                                 {t.status === 'active' && !t.renewed && (
                                     <button
                                         onClick={() => handleRenew(t._id)}
@@ -165,7 +165,7 @@ const MyTransactionsPage = () => {
                                     </button>
                                 )}
 
-                                {/* Already renewed — show a disabled info label */}
+                                {/* Already renewed - show a disabled info label */}
                                 {t.status === 'active' && t.renewed && (
                                     <div className="w-full py-3 bg-slate-50 text-slate-400 rounded-2xl font-bold text-sm text-center border border-slate-100">
                                         Renewal already used

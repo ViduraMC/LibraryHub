@@ -39,7 +39,7 @@ const Footer = () => {
                         </div>
                         <p className="text-xs text-slate-400 leading-relaxed">
                             Your school library, reimagined. Modern book management,
-                            digital resources, and seamless borrowing — all in one platform.
+                            digital resources, and seamless borrowing, all in one platform.
                         </p>
                     </div>
 

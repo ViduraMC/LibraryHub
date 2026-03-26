@@ -119,7 +119,7 @@ const AllTransactionsPage = () => {
         : transactions;
 
     // Helper: format date
-    const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
+    const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '-';
 
     // Helper: days until/since due
     const getDaysLabel = (t) => {
@@ -237,7 +237,7 @@ const AllTransactionsPage = () => {
                                                 <p className="text-[10px] text-slate-400 font-mono mt-0.5">{t.bookId?.bookId}</p>
                                             </td>
 
-                                            {/* Status — consolidated */}
+                                            {/* Status - consolidated */}
                                             <td className="px-6 py-5">
                                                 <div className="flex flex-col items-start gap-1">
                                                     <span className={`px-2.5 py-1 text-[9px] font-black uppercase tracking-widest rounded-md border ${sc.bg} ${sc.text} ${sc.border}`}>
@@ -392,7 +392,7 @@ const AllTransactionsPage = () => {
                                                 </svg>
                                             </div>
                                             <div>
-                                                <p className="font-bold text-red-700 text-sm">Unpaid Fine — Cannot Return</p>
+                                                <p className="font-bold text-red-700 text-sm">Unpaid Fine: Cannot Return</p>
                                                 <p className="text-xs text-red-600 mt-1">
                                                     This transaction has an unpaid fine of <strong>Rs.{returnModal.fine.fineAmount.toFixed(2)}</strong> ({returnModal.fine.daysOverdue} days overdue).
                                                     The fine must be settled before the book can be returned.
@@ -423,7 +423,7 @@ const AllTransactionsPage = () => {
                                                 </svg>
                                             </div>
                                             <div>
-                                                <p className="font-bold text-amber-700 text-sm">Overdue — No Fine Recorded Yet</p>
+                                                <p className="font-bold text-amber-700 text-sm">Overdue: No Fine Recorded Yet</p>
                                                 <p className="text-xs text-amber-600">Book is {returnModal.overdueDays} days past due. A fine may be applied by the fine management team.</p>
                                             </div>
                                         </div>

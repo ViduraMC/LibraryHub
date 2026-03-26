@@ -56,7 +56,7 @@ const announcements = [
     {
         tag: 'Notice',
         tagColor: 'bg-amber-100 text-amber-700',
-        title: 'Library Hours — Term Break',
+        title: 'Library Hours: Term Break',
         date: 'March 15, 2025',
         desc: 'During the upcoming term break, the library will operate from 9 AM to 1 PM on weekdays only. Normal hours resume April 7.',
     },
@@ -85,7 +85,7 @@ const Home = () => {
                     className="absolute inset-0 w-full h-full object-cover object-center"
                 />
 
-                {/* Gradient overlay — dark at bottom, lighter toward top */}
+                {/* Gradient overlay - dark at bottom, lighter toward top */}
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0A2463]/90 via-[#0A2463]/50 to-[#0A2463]/10" />
 
                 {/* Subtle top-left tint for legibility if text were placed there */}
@@ -107,7 +107,7 @@ const Home = () => {
 
                         <p className="text-slate-200 text-base leading-relaxed mb-9 max-w-md">
                             Your school library, reimagined. Browse thousands of books,
-                            manage borrows, and access digital resources — all from one place.
+                            manage borrows, and access digital resources, all from one place.
                         </p>
 
                         {/* Show CTA buttons only for guests (not logged in) */}
@@ -153,7 +153,7 @@ const Home = () => {
                 </div>
             </section>
 
-            {/* CTA Banner — only for guests, hidden for logged-in users */}
+            {/* CTA Banner - only for guests, hidden for logged-in users */}
             {!user && (
             <section className="bg-[#0A2463] rounded-3xl px-10 py-12 lg:px-14 relative overflow-hidden">
                 <div className="absolute -top-12 -right-12 w-56 h-56 bg-white/5 rounded-full" />

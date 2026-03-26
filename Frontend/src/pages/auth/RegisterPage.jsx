@@ -53,7 +53,7 @@ const RegisterPage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Backend expects `studentId` for students and `teacherId` for teachers —
+        // Backend expects `studentId` for students and `teacherId` for teachers.
         // not a generic `schoolId`. The fields are used for school list verification.
         const payload = {
             applicantType,
@@ -154,7 +154,7 @@ const RegisterPage = () => {
             </div>
 
             {/* Right side: form */}
-            <div className="flex-1 overflow-y-auto flex items-start justify-center p-8 lg:p-12">
+            <div className="flex-1 overflow-y-auto flex items-start justify-center p-8 lg:p-12 dark:bg-slate-900">
                 <div className="w-full max-w-lg">
                     <div className="mb-8">
                         <h2 className="text-3xl font-black text-theme-navy dark:text-white">Membership Application</h2>
@@ -174,7 +174,7 @@ const RegisterPage = () => {
                                     applicantType === type
                                         ? 'bg-theme-navy text-white shadow-md'
                                         : 'text-slate-400 hover:text-slate-600'
-                                }`}
+                                } dark:text-slate-500 dark:hover:text-slate-300`}
                             >
                                 {type}
                             </button>
@@ -185,7 +185,7 @@ const RegisterPage = () => {
                         {/* --- Common fields --- */}
                         <div className="grid grid-cols-2 gap-4">
                             <div className="col-span-2 sm:col-span-1">
-                                <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">
+                                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5">
                                     School ID *
                                 </label>
                                 <input
@@ -198,7 +198,7 @@ const RegisterPage = () => {
                                 />
                             </div>
                             <div className="col-span-2 sm:col-span-1">
-                                <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">
+                                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5">
                                     Full Name *
                                 </label>
                                 <input
@@ -214,7 +214,7 @@ const RegisterPage = () => {
 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="col-span-2 sm:col-span-1">
-                                <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">
+                                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5">
                                     Email Address *
                                 </label>
                                 <input
@@ -228,7 +228,7 @@ const RegisterPage = () => {
                                 />
                             </div>
                             <div className="col-span-2 sm:col-span-1">
-                                <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">
+                                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5">
                                     Phone Number *
                                 </label>
                                 <input
@@ -248,7 +248,7 @@ const RegisterPage = () => {
                             <>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">
+                                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5">
                                             Grade *
                                         </label>
                                         <input
@@ -261,7 +261,7 @@ const RegisterPage = () => {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">
+                                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5">
                                             Class / Section *
                                         </label>
                                         <input
@@ -284,7 +284,7 @@ const RegisterPage = () => {
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">
+                                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5">
                                             Guardian Name *
                                         </label>
                                         <input
@@ -297,7 +297,7 @@ const RegisterPage = () => {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">
+                                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5">
                                             Guardian Phone *
                                         </label>
                                         <input
@@ -317,7 +317,7 @@ const RegisterPage = () => {
                         {/* --- Teacher-only fields --- */}
                         {applicantType === 'teacher' && (
                             <div>
-                                <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">
+                                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5">
                                     Subject *
                                 </label>
                                 <input

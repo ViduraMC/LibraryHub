@@ -6,7 +6,7 @@ import { borrowBook } from '../../api/transactions.api.js';
 import { searchMembers } from '../../api/admin.api.js';
 
 /**
- * BorrowBookPage — Librarian issues a book to a member
+ * BorrowBookPage - Librarian issues a book to a member
  *
  * Features:
  *   - Live search-as-you-type for both member and book
@@ -16,7 +16,7 @@ import { searchMembers } from '../../api/admin.api.js';
  *   - Confirm Issue sends POST /api/transactions/borrow
  */
 
-// Debounce helper — delays API calls until user stops typing
+// Debounce helper - delays API calls until user stops typing
 const useDebounce = (value, delay) => {
     const [debounced, setDebounced] = useState(value);
     useEffect(() => {
@@ -184,7 +184,7 @@ const BorrowBookPage = () => {
                     {/* Step 1: Member search */}
                     <div ref={memberRef} className="relative">
                         <label className="block text-sm font-bold text-slate-700 mb-2">
-                            Step 1 — Find Member
+                            Step 1: Find Member
                         </label>
                         <div className="relative">
                             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -271,7 +271,7 @@ const BorrowBookPage = () => {
                     {/* Step 2: Book search */}
                     <div ref={bookRef} className="relative">
                         <label className="block text-sm font-bold text-slate-700 mb-2">
-                            Step 2 — Find Book
+                            Step 2: Find Book
                         </label>
                         <div className="relative">
                             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
