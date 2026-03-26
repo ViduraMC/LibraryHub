@@ -313,3 +313,69 @@ export const rejectRequest = async (req, res) => {
         });
     }
 };
+
+// update a membership request's details (librarian only)
+// Allows editing applicant details on approved/rejected requests
+export const updateRequest = async (req, res) => {
+    try {
+        const request = await MembershipRequest.findById(req.params.id);
+
+        if (!request) {
+            return res.status(404).json({
+                success: false,
+                message: "Request not found",
+            });
+        }
+
+        const { fullName, email, phone, address, grade, classRoom, subject, guardianName, guardianPhone } = req.body;
+
+        if (fullName) request.fullName = fullName;
+        if (email) request.email = email;
+        if (phone !== undefined) request.phone = phone;
+        if (address !== undefined) request.address = address;
+        if (grade !== undefined) request.grade = grade;
+        if (classRoom !== undefined) request.classRoom = classRoom;
+        if (subject !== undefined) request.subject = subject;
+        if (guardianName !== undefined) request.guardianName = guardianName;
+        if (guardianPhone !== undefined) request.guardianPhone = guardianPhone;
+
+        await request.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Request updated",
+            request,
+        });
+    } catch (error) {
+        console.error("Update request error:", error.message);
+        res.status(500).json({
+            success: false,
+            message: "Server error",
+        });
+    }
+};
+
+// permanently delete a membership request (librarian only)
+export const deleteRequest = async (req, res) => {
+    try {
+        const request = await MembershipRequest.findByIdAndDelete(req.params.id);
+
+        if (!request) {
+            return res.status(404).json({
+                success: false,
+                message: "Request not found",
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Request permanently deleted",
+        });
+    } catch (error) {
+        console.error("Delete request error:", error.message);
+        res.status(500).json({
+            success: false,
+            message: "Server error",
+        });
+    }
+};

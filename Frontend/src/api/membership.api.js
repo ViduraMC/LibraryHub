@@ -18,3 +18,12 @@ export const approveRequest = (id) =>
 // Body: { reason }
 export const rejectRequest = (id, reason) =>
     axiosInstance.put(`/membership-request/${id}/reject`, { reason });
+
+// PUT /api/membership-request/:id  (librarian only)
+// Update membership request details
+export const updateMembershipRequest = (id, data) =>
+    axiosInstance.put(`/membership-request/${id}`, data);
+
+// DELETE /api/membership-request/:id  (librarian only)
+export const deleteMembershipRequest = (id) =>
+    axiosInstance.delete(`/membership-request/${id}`);
