@@ -28,6 +28,11 @@ export const deleteLibrarian = (id) =>
 export const searchUserByMembershipId = (membershipId) =>
     axiosInstance.get('/admin/user/search', { params: { membershipId } });
 
+// GET /api/admin/user/search-members?q=...  (admin + librarian)
+// Returns up to 10 members matching the query (name or membershipId) — for autocomplete
+export const searchMembers = (q) =>
+    axiosInstance.get('/admin/user/search-members', { params: { q } });
+
 // POST /api/school-list/students/upload  (admin only, multipart/form-data)
 export const uploadStudentList = (formData) =>
     axiosInstance.post('/school-list/students/upload', formData, {

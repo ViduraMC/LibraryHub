@@ -224,3 +224,34 @@ export const searchUserByMembershipId = async (req, res) => {
         res.status(500).json({ success: false, message: "Server error" });
     }
 };
+
+// search members (students/teachers) by name or membershipId — for autocomplete
+// used by BorrowBookPage live search
+export const searchMembers = async (req, res) => {
+    try {
+        const { q } = req.query;
+
+        if (!q || q.trim().length < 2) {
+            return res.status(200).json({ success: true, users: [] });
+        }
+
+        const escaped = q.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(escaped, 'i');
+
+        const users = await User.find({
+            role: { $in: ['student', 'teacher'] },
+            $or: [
+                { fullName: regex },
+                { membershipId: regex },
+            ],
+        })
+            .select("fullName role membershipId isActive")
+            .limit(10)
+            .sort({ fullName: 1 });
+
+        res.status(200).json({ success: true, users });
+    } catch (error) {
+        console.error("Search members error:", error.message);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+};

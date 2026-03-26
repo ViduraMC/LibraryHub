@@ -28,7 +28,16 @@ export const listBooks = async (req, res, next) => {
         if (type) filter.type = type;
         if (typeof available !== 'undefined') filter.available = available === 'true' || available === '1';
         if (tags) filter.tags = { $in: Array.isArray(tags) ? tags : tags.split(',').map(t => t.trim())};
-        if (q) filter.$text = { $search: q };
+        if (q) {
+            // Try $text search first; fall back to regex on bookId/name/author
+            // so that exact bookId lookups (e.g. "BK002") always work
+            const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            filter.$or = [
+                { bookId: { $regex: escaped, $options: 'i' } },
+                { name:   { $regex: escaped, $options: 'i' } },
+                { author: { $regex: escaped, $options: 'i' } },
+            ];
+        }
 
         const skip = (Math.max(Number(page), 1) - 1) * Number(limit);
         const sort = { [sortBy]: order === 'asc' ? 1 : -1 };

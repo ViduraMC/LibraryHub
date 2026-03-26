@@ -8,6 +8,7 @@ import {
     toggleLibrarianStatus,
     deleteLibrarian,
     searchUserByMembershipId,
+    searchMembers,
 } from "../controller/admin.controller.js";
 
 const router = express.Router();
@@ -22,5 +23,7 @@ router.delete("/librarian/:id", auth, roleAuth("admin"), deleteLibrarian);
 // user lookup by membershipId (admin + librarian — needed for BorrowBookPage)
 router.get("/user/search", auth, roleAuth("admin", "librarian"), searchUserByMembershipId);
 
-export default router;
+// search members by name or membershipId — for autocomplete (admin + librarian)
+router.get("/user/search-members", auth, roleAuth("admin", "librarian"), searchMembers);
 
+export default router;

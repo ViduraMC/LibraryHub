@@ -1,110 +1,162 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axiosInstance from '../../api/axiosInstance.js';
 import { borrowBook } from '../../api/transactions.api.js';
-import { searchUserByMembershipId } from '../../api/admin.api.js';
+import { searchMembers } from '../../api/admin.api.js';
 
-// Librarians use this page to issue a book to a member.
-//
-// How it works:
-//  1. Librarian types the member's Membership ID (e.g. ST-26-0001)
-//     → We look up the user directly via GET /api/admin/user/search?membershipId=...
-//     This resolves the user's Mongo _id regardless of borrow history.
-//
-//  2. Librarian types the Book ID (e.g. BK001) → resolved via GET /api/books
-//     and matched by the human bookId string stored on the Book document.
-//
-//  3. Once both are resolved to Mongo _ids, we POST /api/transactions/borrow
-//     with { userId: <mongo_id>, bookId: <mongo_id> }.
+/**
+ * BorrowBookPage — Librarian issues a book to a member
+ *
+ * Features:
+ *   - Live search-as-you-type for both member and book
+ *   - Type a name, membership ID, book title, or book ID
+ *   - Dropdown suggestions appear after 2+ characters
+ *   - Click a suggestion to select
+ *   - Confirm Issue sends POST /api/transactions/borrow
+ */
+
+// Debounce helper — delays API calls until user stops typing
+const useDebounce = (value, delay) => {
+    const [debounced, setDebounced] = useState(value);
+    useEffect(() => {
+        const timer = setTimeout(() => setDebounced(value), delay);
+        return () => clearTimeout(timer);
+    }, [value, delay]);
+    return debounced;
+};
+
 const BorrowBookPage = () => {
     const navigate = useNavigate();
 
-    // What the librarian types
-    const [membershipIdInput, setMembershipIdInput] = useState('');
-    const [bookIdInput, setBookIdInput] = useState('');
+    // Member search
+    const [memberQuery, setMemberQuery] = useState('');
+    const [memberResults, setMemberResults] = useState([]);
+    const [selectedMember, setSelectedMember] = useState(null);
+    const [memberLoading, setMemberLoading] = useState(false);
+    const [showMemberDropdown, setShowMemberDropdown] = useState(false);
+    const memberRef = useRef(null);
 
-    // Resolved records after lookup
-    const [resolvedUser, setResolvedUser] = useState(null);
-    const [resolvedBook, setResolvedBook] = useState(null);
+    // Book search
+    const [bookQuery, setBookQuery] = useState('');
+    const [bookResults, setBookResults] = useState([]);
+    const [selectedBook, setSelectedBook] = useState(null);
+    const [bookLoading, setBookLoading] = useState(false);
+    const [showBookDropdown, setShowBookDropdown] = useState(false);
+    const bookRef = useRef(null);
 
-    // Loading states per field
-    const [lookingUpUser, setLookingUpUser] = useState(false);
-    const [lookingUpBook, setLookingUpBook] = useState(false);
     const [submitting, setSubmitting] = useState(false);
 
-    // Look up a member by their membershipId — single API call, always works
-    const lookupUser = useCallback(async () => {
-        if (!membershipIdInput.trim()) return;
-        setLookingUpUser(true);
-        setResolvedUser(null);
-        try {
-            const res = await searchUserByMembershipId(membershipIdInput.trim());
-            const user = res.data.user;
-            setResolvedUser({
-                _id: user._id,
-                fullName: user.fullName,
-                role: user.role,
-                membershipId: user.membershipId,
-            });
-        } catch (err) {
-            const msg = err.response?.data?.message || 'Could not look up the member.';
-            toast.error(msg);
-        } finally {
-            setLookingUpUser(false);
-        }
-    }, [membershipIdInput]);
+    const debouncedMemberQuery = useDebounce(memberQuery, 300);
+    const debouncedBookQuery = useDebounce(bookQuery, 300);
 
-    // Look up a book by its human-readable bookId (e.g. BK001).
-    // The backend stores bookId as a String field on the Book model.
-    // We use GET /api/books with free-text search and match manually.
-    const lookupBook = useCallback(async () => {
-        if (!bookIdInput.trim()) return;
-        setLookingUpBook(true);
-        setResolvedBook(null);
-        try {
-            const res = await axiosInstance.get('/books', {
-                params: { q: bookIdInput.trim(), limit: 50 }
-            });
-            const books = res.data.data || [];
-            // Exact match on the bookId string field
-            const match = books.find(
-                (b) => b.bookId?.toLowerCase() === bookIdInput.trim().toLowerCase()
-            );
-            if (match) {
-                setResolvedBook(match);
-            } else {
-                toast.error(`No book found with ID: ${bookIdInput}`);
+    // Close dropdowns on outside click
+    useEffect(() => {
+        const handler = (e) => {
+            if (memberRef.current && !memberRef.current.contains(e.target)) {
+                setShowMemberDropdown(false);
             }
-        } catch {
-            toast.error('Could not look up the book. Please check the ID and try again.');
-        } finally {
-            setLookingUpBook(false);
+            if (bookRef.current && !bookRef.current.contains(e.target)) {
+                setShowBookDropdown(false);
+            }
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, []);
+
+    // Fetch member suggestions
+    useEffect(() => {
+        if (selectedMember) return; // don't re-search after selection
+        if (debouncedMemberQuery.trim().length < 2) {
+            setMemberResults([]);
+            return;
         }
-    }, [bookIdInput]);
+        const fetchMembers = async () => {
+            setMemberLoading(true);
+            try {
+                const res = await searchMembers(debouncedMemberQuery.trim());
+                setMemberResults(res.data.users || []);
+                setShowMemberDropdown(true);
+            } catch {
+                setMemberResults([]);
+            } finally {
+                setMemberLoading(false);
+            }
+        };
+        fetchMembers();
+    }, [debouncedMemberQuery, selectedMember]);
+
+    // Fetch book suggestions
+    useEffect(() => {
+        if (selectedBook) return;
+        if (debouncedBookQuery.trim().length < 2) {
+            setBookResults([]);
+            return;
+        }
+        const fetchBooks = async () => {
+            setBookLoading(true);
+            try {
+                const res = await axiosInstance.get('/books', {
+                    params: { q: debouncedBookQuery.trim(), limit: 10 },
+                });
+                setBookResults(res.data.data || []);
+                setShowBookDropdown(true);
+            } catch {
+                setBookResults([]);
+            } finally {
+                setBookLoading(false);
+            }
+        };
+        fetchBooks();
+    }, [debouncedBookQuery, selectedBook]);
+
+    // Select handlers
+    const selectMember = (user) => {
+        setSelectedMember(user);
+        setMemberQuery(user.fullName);
+        setShowMemberDropdown(false);
+    };
+
+    const selectBook = (book) => {
+        setSelectedBook(book);
+        setBookQuery(book.name);
+        setShowBookDropdown(false);
+    };
+
+    // Clear handlers
+    const clearMember = () => {
+        setSelectedMember(null);
+        setMemberQuery('');
+        setMemberResults([]);
+    };
+
+    const clearBook = () => {
+        setSelectedBook(null);
+        setBookQuery('');
+        setBookResults([]);
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!resolvedUser || !resolvedBook) {
-            toast.error('Please look up and confirm both the member and the book first.');
+        if (!selectedMember || !selectedBook) {
+            toast.error('Please search and select both a member and a book first.');
             return;
         }
 
-        if (!resolvedUser._id) {
+        if (!selectedMember._id) {
             toast.error('Member resolved but no system ID found. Please contact the admin.');
             return;
         }
 
         setSubmitting(true);
         try {
-            // Backend expects MongoDB _id for both userId and bookId
             await borrowBook({
-                userId: resolvedUser._id,
-                bookId: resolvedBook._id,
+                userId: selectedMember._id,
+                bookId: selectedBook._id,
             });
             toast.success('Book issued successfully!');
-            navigate('/transactions');
+            navigate('/librarian/transactions');
         } catch (err) {
             toast.error(err.response?.data?.message || 'Checkout failed. Please try again.');
         } finally {
@@ -120,7 +172,7 @@ const BorrowBookPage = () => {
                     Issue Book
                 </h1>
                 <p className="text-slate-500 mt-2 text-sm">
-                    Enter the Membership ID and Book ID to look them up, then confirm the issue.
+                    Search for a member and a book by name or ID, then confirm the issue.
                 </p>
             </div>
 
@@ -129,35 +181,79 @@ const BorrowBookPage = () => {
 
                 <form onSubmit={handleSubmit} className="p-10 space-y-8">
 
-                    {/* Step 1: Member lookup */}
-                    <div>
+                    {/* Step 1: Member search */}
+                    <div ref={memberRef} className="relative">
                         <label className="block text-sm font-bold text-slate-700 mb-2">
-                            Step 1 — Member's Membership ID
+                            Step 1 — Find Member
                         </label>
-                        <div className="flex gap-3">
+                        <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <svg className="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </div>
                             <input
                                 type="text"
-                                value={membershipIdInput}
+                                value={memberQuery}
                                 onChange={(e) => {
-                                    setMembershipIdInput(e.target.value);
-                                    setResolvedUser(null); // reset if typing changes
+                                    setMemberQuery(e.target.value);
+                                    setSelectedMember(null);
+                                    setShowMemberDropdown(true);
                                 }}
-                                placeholder="e.g. ST-26-0001"
-                                className="flex-1 bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-slate-700 font-mono focus:outline-none focus:ring-4 focus:ring-theme-blue/10 focus:border-theme-blue transition-all"
+                                onFocus={() => {
+                                    if (memberResults.length > 0 && !selectedMember) {
+                                        setShowMemberDropdown(true);
+                                    }
+                                }}
+                                placeholder="Type member name or membership ID (e.g. 'John' or 'ST-26-0001')"
+                                className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-11 pr-12 py-4 text-slate-700 focus:outline-none focus:ring-4 focus:ring-theme-blue/10 focus:border-theme-blue transition-all"
                             />
-                            <button
-                                type="button"
-                                onClick={lookupUser}
-                                disabled={lookingUpUser || !membershipIdInput.trim()}
-                                className="px-5 py-4 bg-theme-pale text-theme-blue rounded-2xl font-bold text-sm hover:bg-theme-blue hover:text-white transition-all disabled:opacity-50"
-                            >
-                                {lookingUpUser ? (
-                                    <span className="w-4 h-4 border-2 border-theme-blue border-t-white rounded-full animate-spin inline-block" />
-                                ) : 'Look Up'}
-                            </button>
+                            {selectedMember && (
+                                <button
+                                    type="button"
+                                    onClick={clearMember}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 bg-slate-200 hover:bg-red-100 text-slate-500 hover:text-red-500 rounded-full flex items-center justify-center transition-all text-xs font-bold"
+                                >
+                                    ✕
+                                </button>
+                            )}
+                            {memberLoading && (
+                                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                    <span className="w-5 h-5 border-2 border-theme-blue/30 border-t-theme-blue rounded-full animate-spin inline-block" />
+                                </div>
+                            )}
                         </div>
-                        {/* Member preview card */}
-                        {resolvedUser && (
+
+                        {/* Dropdown results */}
+                        {showMemberDropdown && memberResults.length > 0 && !selectedMember && (
+                            <div className="absolute z-10 w-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-lg overflow-hidden max-h-60 overflow-y-auto">
+                                {memberResults.map((u) => (
+                                    <button
+                                        key={u._id}
+                                        type="button"
+                                        onClick={() => selectMember(u)}
+                                        className="w-full px-5 py-3 text-left hover:bg-theme-pale/50 transition-colors flex items-center justify-between gap-3 border-b border-slate-50 last:border-0"
+                                    >
+                                        <div>
+                                            <p className="font-bold text-sm text-slate-800">{u.fullName}</p>
+                                            <p className="text-[11px] text-slate-400 uppercase tracking-wide">{u.role} · {u.membershipId}</p>
+                                        </div>
+                                        {!u.isActive && (
+                                            <span className="text-[9px] bg-red-50 text-red-500 px-2 py-0.5 rounded-full font-bold">INACTIVE</span>
+                                        )}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+
+                        {showMemberDropdown && debouncedMemberQuery.trim().length >= 2 && memberResults.length === 0 && !memberLoading && !selectedMember && (
+                            <div className="absolute z-10 w-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-lg px-5 py-4 text-sm text-slate-400 italic">
+                                No members found matching "{debouncedMemberQuery}"
+                            </div>
+                        )}
+
+                        {/* Selected member preview */}
+                        {selectedMember && (
                             <div className="mt-3 bg-emerald-50 border border-emerald-100 rounded-2xl px-5 py-3 flex items-center gap-3">
                                 <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600">
                                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -165,42 +261,88 @@ const BorrowBookPage = () => {
                                     </svg>
                                 </div>
                                 <div>
-                                    <p className="text-sm font-bold text-slate-800">{resolvedUser.fullName}</p>
-                                    <p className="text-xs text-emerald-600 uppercase font-bold">{resolvedUser.role} · {resolvedUser.membershipId}</p>
+                                    <p className="text-sm font-bold text-slate-800">{selectedMember.fullName}</p>
+                                    <p className="text-xs text-emerald-600 uppercase font-bold">{selectedMember.role} · {selectedMember.membershipId}</p>
                                 </div>
                             </div>
                         )}
                     </div>
 
-                    {/* Step 2: Book lookup */}
-                    <div>
+                    {/* Step 2: Book search */}
+                    <div ref={bookRef} className="relative">
                         <label className="block text-sm font-bold text-slate-700 mb-2">
-                            Step 2 — Book ID
+                            Step 2 — Find Book
                         </label>
-                        <div className="flex gap-3">
+                        <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <svg className="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                </svg>
+                            </div>
                             <input
                                 type="text"
-                                value={bookIdInput}
+                                value={bookQuery}
                                 onChange={(e) => {
-                                    setBookIdInput(e.target.value);
-                                    setResolvedBook(null);
+                                    setBookQuery(e.target.value);
+                                    setSelectedBook(null);
+                                    setShowBookDropdown(true);
                                 }}
-                                placeholder="e.g. BK001"
-                                className="flex-1 bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-slate-700 font-mono focus:outline-none focus:ring-4 focus:ring-theme-blue/10 focus:border-theme-blue transition-all"
+                                onFocus={() => {
+                                    if (bookResults.length > 0 && !selectedBook) {
+                                        setShowBookDropdown(true);
+                                    }
+                                }}
+                                placeholder="Type book title, author, or book ID (e.g. 'Harry Potter' or 'BK001')"
+                                className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-11 pr-12 py-4 text-slate-700 focus:outline-none focus:ring-4 focus:ring-theme-blue/10 focus:border-theme-blue transition-all"
                             />
-                            <button
-                                type="button"
-                                onClick={lookupBook}
-                                disabled={lookingUpBook || !bookIdInput.trim()}
-                                className="px-5 py-4 bg-theme-pale text-theme-blue rounded-2xl font-bold text-sm hover:bg-theme-blue hover:text-white transition-all disabled:opacity-50"
-                            >
-                                {lookingUpBook ? (
-                                    <span className="w-4 h-4 border-2 border-theme-blue border-t-white rounded-full animate-spin inline-block" />
-                                ) : 'Look Up'}
-                            </button>
+                            {selectedBook && (
+                                <button
+                                    type="button"
+                                    onClick={clearBook}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 bg-slate-200 hover:bg-red-100 text-slate-500 hover:text-red-500 rounded-full flex items-center justify-center transition-all text-xs font-bold"
+                                >
+                                    ✕
+                                </button>
+                            )}
+                            {bookLoading && (
+                                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                    <span className="w-5 h-5 border-2 border-theme-blue/30 border-t-theme-blue rounded-full animate-spin inline-block" />
+                                </div>
+                            )}
                         </div>
-                        {/* Book preview card */}
-                        {resolvedBook && (
+
+                        {/* Dropdown results */}
+                        {showBookDropdown && bookResults.length > 0 && !selectedBook && (
+                            <div className="absolute z-10 w-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-lg overflow-hidden max-h-60 overflow-y-auto">
+                                {bookResults.map((b) => (
+                                    <button
+                                        key={b._id}
+                                        type="button"
+                                        onClick={() => selectBook(b)}
+                                        className="w-full px-5 py-3 text-left hover:bg-theme-pale/50 transition-colors flex items-center justify-between gap-3 border-b border-slate-50 last:border-0"
+                                    >
+                                        <div className="min-w-0">
+                                            <p className="font-bold text-sm text-slate-800 truncate">{b.name}</p>
+                                            <p className="text-[11px] text-slate-400">
+                                                By {b.author} · <span className="font-mono">{b.bookId}</span> · {b.availableCopies}/{b.totalCopies} available
+                                            </p>
+                                        </div>
+                                        {b.availableCopies === 0 && (
+                                            <span className="text-[9px] bg-red-50 text-red-500 px-2 py-0.5 rounded-full font-bold shrink-0">UNAVAILABLE</span>
+                                        )}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+
+                        {showBookDropdown && debouncedBookQuery.trim().length >= 2 && bookResults.length === 0 && !bookLoading && !selectedBook && (
+                            <div className="absolute z-10 w-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-lg px-5 py-4 text-sm text-slate-400 italic">
+                                No books found matching "{debouncedBookQuery}"
+                            </div>
+                        )}
+
+                        {/* Selected book preview */}
+                        {selectedBook && (
                             <div className="mt-3 bg-emerald-50 border border-emerald-100 rounded-2xl px-5 py-3 flex items-center gap-3">
                                 <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600">
                                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -208,9 +350,9 @@ const BorrowBookPage = () => {
                                     </svg>
                                 </div>
                                 <div>
-                                    <p className="text-sm font-bold text-slate-800">{resolvedBook.name}</p>
+                                    <p className="text-sm font-bold text-slate-800">{selectedBook.name}</p>
                                     <p className="text-xs text-emerald-600 font-bold">
-                                        By {resolvedBook.author} · {resolvedBook.availableCopies} {resolvedBook.availableCopies === 1 ? 'copy' : 'copies'} available
+                                        By {selectedBook.author} · <span className="font-mono">{selectedBook.bookId}</span> · {selectedBook.availableCopies} {selectedBook.availableCopies === 1 ? 'copy' : 'copies'} available
                                     </p>
                                 </div>
                             </div>
@@ -238,7 +380,7 @@ const BorrowBookPage = () => {
                         </button>
                         <button
                             type="submit"
-                            disabled={submitting || !resolvedUser || !resolvedBook}
+                            disabled={submitting || !selectedMember || !selectedBook}
                             className="flex-[2] py-4 bg-theme-navy text-white rounded-2xl font-bold hover:bg-slate-800 transition-all shadow-lg shadow-theme-navy/20 disabled:opacity-50 flex items-center justify-center gap-2"
                         >
                             {submitting ? (
