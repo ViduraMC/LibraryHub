@@ -7,6 +7,8 @@ import {
     getRequestById,
     approveRequest,
     rejectRequest,
+    updateRequest,
+    deleteRequest,
 } from "../controller/membershipRequest.controller.js";
 
 const router = express.Router();
@@ -22,4 +24,9 @@ router.get("/:id", auth, roleAuth("librarian", "admin"), getRequestById);
 router.put("/:id/approve", auth, roleAuth("librarian"), approveRequest);
 router.put("/:id/reject", auth, roleAuth("librarian"), rejectRequest);
 
+// edit / delete membership requests (librarian only)
+router.put("/:id", auth, roleAuth("librarian"), updateRequest);
+router.delete("/:id", auth, roleAuth("librarian"), deleteRequest);
+
 export default router;
+

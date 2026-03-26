@@ -4,18 +4,17 @@ import {
     getMembershipRequests,
     approveRequest,
     rejectRequest,
+    updateMembershipRequest,
+    deleteMembershipRequest,
 } from '../../api/membership.api.js';
 
 /**
  * Librarian: Membership Request Management
  *
- * Shows all membership applications that passed the auto-verification step
- * (status = "verified"). The librarian can:
- *   - Approve → sends a password-setup email to the applicant
- *   - Reject  → requires a reason; sends a rejection notification
- *
- * "Pending" applications (not yet verified by the system) are also shown
- * but cannot be acted on until the system has verified them.
+ * Tabs: Verified, Approved, Rejected (Pending removed — not applicable).
+ * - Verified  → Approve / Reject actions
+ * - Approved  → Edit details / Remove with confirmation
+ * - Rejected  → Edit details / Remove with confirmation
  */
 const LibrarianMembershipPage = () => {
     const [requests, setRequests] = useState([]);
@@ -23,6 +22,10 @@ const LibrarianMembershipPage = () => {
     const [tab, setTab] = useState('verified');
     const [processingId, setProcessingId] = useState(null);
     const [rejectState, setRejectState] = useState({ id: null, reason: '' });
+
+    // Edit state
+    const [editingId, setEditingId] = useState(null);
+    const [editForm, setEditForm] = useState({});
 
     const fetchRequests = async (status) => {
         setLoading(true);
@@ -40,6 +43,7 @@ const LibrarianMembershipPage = () => {
         fetchRequests(tab);
     }, [tab]);
 
+    // --- Verify tab actions ---
     const handleApprove = async (id) => {
         setProcessingId(id);
         try {
@@ -79,9 +83,56 @@ const LibrarianMembershipPage = () => {
         }
     };
 
+    // --- Edit actions (Approved / Rejected tabs) ---
+    const startEditing = (req) => {
+        setEditingId(req._id);
+        setEditForm({
+            fullName: req.fullName || '',
+            email: req.email || '',
+            phone: req.phone || '',
+        });
+    };
+
+    const cancelEditing = () => {
+        setEditingId(null);
+        setEditForm({});
+    };
+
+    const handleUpdate = async (id) => {
+        setProcessingId(id);
+        try {
+            await updateMembershipRequest(id, editForm);
+            toast.success('Request details updated.');
+            setEditingId(null);
+            fetchRequests(tab);
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Update failed.');
+        } finally {
+            setProcessingId(null);
+        }
+    };
+
+    // --- Delete action (Approved / Rejected tabs) ---
+    const handleDelete = async (req) => {
+        const confirmed = window.confirm(
+            `Are you sure you want to permanently remove ${req.fullName}'s membership request?\n\nThis action cannot be undone.`
+        );
+        if (!confirmed) return;
+
+        setProcessingId(req._id);
+        try {
+            await deleteMembershipRequest(req._id);
+            toast.success('Request permanently removed.');
+            fetchRequests(tab);
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Delete failed.');
+        } finally {
+            setProcessingId(null);
+        }
+    };
+
     // Status badge colours
     const statusStyle = {
-        pending: 'bg-amber-50 text-amber-600 border-amber-100',
         verified: 'bg-blue-50 text-blue-600 border-blue-100',
         approved: 'bg-emerald-50 text-emerald-600 border-emerald-100',
         rejected: 'bg-red-50 text-red-600 border-red-100',
@@ -99,12 +150,12 @@ const LibrarianMembershipPage = () => {
                 </p>
             </div>
 
-            {/* Tab filter */}
+            {/* Tab filter — Pending removed */}
             <div className="flex bg-slate-50 p-1.5 rounded-2xl border border-slate-100 w-fit gap-1">
-                {['verified', 'pending', 'approved', 'rejected'].map((s) => (
+                {['verified', 'approved', 'rejected'].map((s) => (
                     <button
                         key={s}
-                        onClick={() => setTab(s)}
+                        onClick={() => { setTab(s); cancelEditing(); }}
                         className={`px-5 py-2 rounded-xl text-xs font-bold transition-all capitalize ${
                             tab === s
                                 ? 'bg-theme-navy text-white shadow-md'
@@ -162,22 +213,51 @@ const LibrarianMembershipPage = () => {
                                 requests.map((req) => (
                                     <>
                                         <tr key={req._id} className="hover:bg-slate-50/30 transition-colors">
+                                            {/* Applicant Name — editable */}
                                             <td className="px-6 py-5">
-                                                <p className="font-bold text-slate-800">{req.fullName}</p>
+                                                {editingId === req._id ? (
+                                                    <input
+                                                        value={editForm.fullName}
+                                                        onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })}
+                                                        className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-sm w-full focus:outline-none focus:ring-2 focus:ring-theme-blue/20"
+                                                    />
+                                                ) : (
+                                                    <p className="font-bold text-slate-800">{req.fullName}</p>
+                                                )}
                                             </td>
+
+                                            {/* Type */}
                                             <td className="px-6 py-5">
                                                 <span className="text-xs font-bold text-theme-blue uppercase tracking-widest">
                                                     {req.applicantType}
                                                 </span>
                                             </td>
+
+                                            {/* School ID */}
                                             <td className="px-6 py-5 font-mono text-xs text-slate-600">
-                                                {/* MembershipRequest has studentId for students, teacherId for teachers */}
                                                 {req.applicantType === 'student' ? req.studentId : req.teacherId}
                                             </td>
-                                            <td className="px-6 py-5 text-sm text-slate-500">{req.email}</td>
+
+                                            {/* Email — editable */}
+                                            <td className="px-6 py-5">
+                                                {editingId === req._id ? (
+                                                    <input
+                                                        type="email"
+                                                        value={editForm.email}
+                                                        onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                                                        className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-sm w-full focus:outline-none focus:ring-2 focus:ring-theme-blue/20"
+                                                    />
+                                                ) : (
+                                                    <span className="text-sm text-slate-500">{req.email}</span>
+                                                )}
+                                            </td>
+
+                                            {/* Submitted */}
                                             <td className="px-6 py-5 text-xs text-slate-400">
                                                 {new Date(req.createdAt).toLocaleDateString()}
                                             </td>
+
+                                            {/* Status */}
                                             <td className="px-6 py-5">
                                                 <span
                                                     className={`px-2.5 py-1 text-[9px] font-black uppercase tracking-widest rounded-md border ${
@@ -186,7 +266,6 @@ const LibrarianMembershipPage = () => {
                                                 >
                                                     {req.status}
                                                 </span>
-                                                {/* Show the generated membership ID on approved records */}
                                                 {req.status === 'approved' && req.membershipId && (
                                                     <p className="text-[10px] text-emerald-600 font-bold mt-1">{req.membershipId}</p>
                                                 )}
@@ -194,7 +273,10 @@ const LibrarianMembershipPage = () => {
                                                     <p className="text-[10px] text-red-400 mt-1">{req.rejectionReason}</p>
                                                 )}
                                             </td>
+
+                                            {/* Actions */}
                                             <td className="px-6 py-5">
+                                                {/* Verified tab → Approve / Reject */}
                                                 {req.status === 'verified' && (
                                                     <div className="flex gap-2">
                                                         <button
@@ -211,6 +293,45 @@ const LibrarianMembershipPage = () => {
                                                         >
                                                             Reject
                                                         </button>
+                                                    </div>
+                                                )}
+
+                                                {/* Approved / Rejected tabs → Edit / Remove */}
+                                                {(req.status === 'approved' || req.status === 'rejected') && (
+                                                    <div className="flex gap-2">
+                                                        {editingId === req._id ? (
+                                                            <>
+                                                                <button
+                                                                    onClick={() => handleUpdate(req._id)}
+                                                                    disabled={processingId === req._id}
+                                                                    className="px-3 py-1.5 bg-emerald-500 text-white text-xs font-bold rounded-lg hover:bg-emerald-600 transition-all disabled:opacity-50"
+                                                                >
+                                                                    {processingId === req._id ? '...' : 'Save'}
+                                                                </button>
+                                                                <button
+                                                                    onClick={cancelEditing}
+                                                                    className="px-3 py-1.5 bg-slate-100 text-slate-500 text-xs font-bold rounded-lg hover:bg-slate-200 transition-all"
+                                                                >
+                                                                    Cancel
+                                                                </button>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <button
+                                                                    onClick={() => startEditing(req)}
+                                                                    className="px-3 py-1.5 bg-theme-pale text-theme-navy text-xs font-bold rounded-lg hover:bg-blue-100 transition-all"
+                                                                >
+                                                                    Edit
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => handleDelete(req)}
+                                                                    disabled={processingId === req._id}
+                                                                    className="px-3 py-1.5 bg-red-50 text-red-500 text-xs font-bold rounded-lg hover:bg-red-100 transition-all disabled:opacity-50"
+                                                                >
+                                                                    {processingId === req._id ? '...' : 'Remove'}
+                                                                </button>
+                                                            </>
+                                                        )}
                                                     </div>
                                                 )}
                                             </td>
