@@ -56,10 +56,11 @@ const AllTransactionsPage = () => {
     }, [statusFilter]);
 
     // --- Return flow ---
-    const openReturnModal = async (transactionId) => {
-        setReturnModal({ open: true, loading: true, transaction: null, fine: null, overdueDays: 0 });
+    const openReturnModal = async (rowTransaction) => {
+        // Show the modal immediately with row data (instant), load fine details in background
+        setReturnModal({ open: true, loading: true, transaction: rowTransaction, fine: null, overdueDays: 0 });
         try {
-            const res = await getTransactionReturnDetails(transactionId);
+            const res = await getTransactionReturnDetails(rowTransaction._id);
             setReturnModal({
                 open: true,
                 loading: false,
@@ -68,8 +69,9 @@ const AllTransactionsPage = () => {
                 overdueDays: res.data.overdueDays,
             });
         } catch {
-            toast.error('Could not load return details.');
-            setReturnModal({ open: false, loading: false, transaction: null, fine: null, overdueDays: 0 });
+            // Still show the modal with row data, just no fine info
+            setReturnModal((prev) => ({ ...prev, loading: false }));
+            toast.error('Could not load fine details.');
         }
     };
 
@@ -280,7 +282,7 @@ const AllTransactionsPage = () => {
                                                 <div className="flex items-center justify-end gap-2">
                                                     {(t.status === 'active' || t.status === 'overdue') && (
                                                         <button
-                                                            onClick={() => openReturnModal(t._id)}
+                                                            onClick={() => openReturnModal(t)}
                                                             className="px-4 py-2 bg-theme-navy text-white rounded-xl text-xs font-bold hover:bg-slate-800 transition-all"
                                                         >
                                                             Return
@@ -311,7 +313,7 @@ const AllTransactionsPage = () => {
 
             {/* ====== RETURN CONFIRMATION MODAL ====== */}
             {returnModal.open && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm">
                     <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden">
                         {/* Modal header */}
                         <div className="bg-theme-navy px-8 py-5 flex items-center justify-between">
@@ -323,11 +325,7 @@ const AllTransactionsPage = () => {
                             </button>
                         </div>
 
-                        {returnModal.loading ? (
-                            <div className="p-10 flex items-center justify-center">
-                                <span className="w-8 h-8 border-3 border-theme-blue/30 border-t-theme-blue rounded-full animate-spin" />
-                            </div>
-                        ) : returnModal.transaction ? (
+                        {returnModal.transaction ? (
                             <div className="p-8 space-y-6">
                                 {/* Member info */}
                                 <div className="flex items-center gap-4">
@@ -378,8 +376,13 @@ const AllTransactionsPage = () => {
                                     </div>
                                 </div>
 
-                                {/* Fine warning */}
-                                {returnModal.fine && returnModal.fine.fineStatus === 'unpaid' ? (
+                                {/* Fine / status section */}
+                                {returnModal.loading ? (
+                                    <div className="bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 flex items-center gap-3">
+                                        <span className="w-4 h-4 border-2 border-theme-blue/30 border-t-theme-blue rounded-full animate-spin" />
+                                        <p className="text-sm text-slate-500">Checking fine status…</p>
+                                    </div>
+                                ) : returnModal.fine && returnModal.fine.fineStatus === 'unpaid' ? (
                                     <div className="bg-red-50 border border-red-200 rounded-2xl px-5 py-4">
                                         <div className="flex items-start gap-3">
                                             <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center shrink-0 mt-0.5">
@@ -437,6 +440,7 @@ const AllTransactionsPage = () => {
                                     <button
                                         onClick={confirmReturn}
                                         disabled={
+                                            returnModal.loading ||
                                             processingId === returnModal.transaction._id ||
                                             (returnModal.fine && returnModal.fine.fineStatus === 'unpaid')
                                         }
