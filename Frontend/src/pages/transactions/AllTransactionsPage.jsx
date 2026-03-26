@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { toast } from 'react-toastify';
 import {
     getAllTransactions,
@@ -311,8 +312,8 @@ const AllTransactionsPage = () => {
                 </div>
             </div>
 
-            {/* ====== RETURN CONFIRMATION MODAL ====== */}
-            {returnModal.open && (
+            {/* ====== RETURN CONFIRMATION MODAL (portal to body) ====== */}
+            {returnModal.open && createPortal(
                 <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm">
                     <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden">
                         {/* Modal header */}
@@ -461,7 +462,8 @@ const AllTransactionsPage = () => {
                             </div>
                         ) : null}
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </div>
     );
