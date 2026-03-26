@@ -119,7 +119,7 @@ const AllTransactionsPage = () => {
         : transactions;
 
     // Helper: format date
-    const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
+    const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '-';
 
     // Helper: days until/since due
     const getDaysLabel = (t) => {
@@ -181,12 +181,12 @@ const AllTransactionsPage = () => {
                     placeholder="Search by member name, membership ID, book title, or book ID..."
                     value={searchInput}
                     onChange={(e) => setSearchInput(e.target.value)}
-                    className="w-full bg-white border border-slate-200 rounded-2xl pl-11 pr-5 py-4 text-sm text-slate-700 focus:outline-none focus:ring-4 focus:ring-theme-pale/50 focus:border-theme-blue transition-all"
+                    className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl pl-11 pr-5 py-4 text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-4 focus:ring-theme-pale/50 focus:border-theme-blue transition-all"
                 />
             </div>
 
             {/* Table */}
-            <div className="bg-white border border-slate-100 rounded-3xl shadow-sm overflow-hidden">
+            <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-3xl shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead>
@@ -237,7 +237,7 @@ const AllTransactionsPage = () => {
                                                 <p className="text-[10px] text-slate-400 font-mono mt-0.5">{t.bookId?.bookId}</p>
                                             </td>
 
-                                            {/* Status — consolidated */}
+                                            {/* Status - consolidated */}
                                             <td className="px-6 py-5">
                                                 <div className="flex flex-col items-start gap-1">
                                                     <span className={`px-2.5 py-1 text-[9px] font-black uppercase tracking-widest rounded-md border ${sc.bg} ${sc.text} ${sc.border}`}>
@@ -315,7 +315,7 @@ const AllTransactionsPage = () => {
             {/* ====== RETURN CONFIRMATION MODAL (portal to body) ====== */}
             {returnModal.open && createPortal(
                 <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm">
-                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden">
+                    <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden">
                         {/* Modal header */}
                         <div className="bg-theme-navy px-8 py-5 flex items-center justify-between">
                             <h2 className="text-white font-black text-lg uppercase tracking-wide">Return Book</h2>
@@ -392,7 +392,7 @@ const AllTransactionsPage = () => {
                                                 </svg>
                                             </div>
                                             <div>
-                                                <p className="font-bold text-red-700 text-sm">Unpaid Fine — Cannot Return</p>
+                                                <p className="font-bold text-red-700 text-sm">Unpaid Fine: Cannot Return</p>
                                                 <p className="text-xs text-red-600 mt-1">
                                                     This transaction has an unpaid fine of <strong>Rs.{returnModal.fine.fineAmount.toFixed(2)}</strong> ({returnModal.fine.daysOverdue} days overdue).
                                                     The fine must be settled before the book can be returned.
@@ -423,7 +423,7 @@ const AllTransactionsPage = () => {
                                                 </svg>
                                             </div>
                                             <div>
-                                                <p className="font-bold text-amber-700 text-sm">Overdue — No Fine Recorded Yet</p>
+                                                <p className="font-bold text-amber-700 text-sm">Overdue: No Fine Recorded Yet</p>
                                                 <p className="text-xs text-amber-600">Book is {returnModal.overdueDays} days past due. A fine may be applied by the fine management team.</p>
                                             </div>
                                         </div>

@@ -36,7 +36,7 @@ export const AuthProvider = ({ children }) => {
         try {
             await logoutUser();
         } catch {
-            // silently ignore — token may already be expired or invalid
+            // silently ignore; token may already be expired or invalid
         } finally {
             setUser(null);
             setToken(null);
@@ -52,7 +52,7 @@ export const AuthProvider = ({ children }) => {
     );
 };
 
-// Custom hook — enforces that AuthContext is only used inside AuthProvider
+// Custom hook - enforces that AuthContext is only used inside AuthProvider
 export const useAuth = () => {
     const context = useContext(AuthContext);
     if (!context) throw new Error('useAuth must be used inside AuthProvider');

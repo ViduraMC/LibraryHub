@@ -2,8 +2,10 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { AuthProvider } from './context/AuthContext.jsx';
+import { ThemeProvider } from './context/ThemeContext.jsx';
 import ProtectedRoute, { StaffBlockedRoute } from './components/ProtectedRoute.jsx';
 import MainLayout from './components/MainLayout.jsx';
+import ScrollToTop from './components/ScrollToTop.jsx';
 
 // --- Public pages ---
 import HomePage from './pages/main-site/Home.jsx';
@@ -21,7 +23,7 @@ import AdminSchoolListsPage from './pages/admin/AdminSchoolListsPage.jsx';
 // --- Librarian pages (librarian only) ---
 import LibrarianMembershipPage from './pages/librarian/LibrarianMembershipPage.jsx';
 
-// --- Transaction pages (handled in feature/frontend-transactions) ---
+// --- Transaction pages ---
 import MyTransactionsPage from './pages/transactions/MyTransactionsPage.jsx';
 import AllTransactionsPage from './pages/transactions/AllTransactionsPage.jsx';
 import BorrowBookPage from './pages/transactions/BorrowBookPage.jsx';
@@ -34,8 +36,10 @@ import MyReservationsPage from './pages/reservations/MyReservations.jsx';
 
 function App() {
     return (
+        <ThemeProvider>
         <AuthProvider>
             <Router>
+                <ScrollToTop />
                 <Routes>
                     {/* ── Public routes (no login required) ─────────────────── */}
 
@@ -87,7 +91,7 @@ function App() {
                             }
                         />
 
-                        {/* Student / Teacher routes — explicit paths instead of catch-all /* */}
+                        {/* Student / Teacher routes - explicit paths instead of catch-all /* */}
                         <Route path="/my-transactions" element={
                             <ProtectedRoute allowedRoles={['student', 'teacher']}><MyTransactionsPage /></ProtectedRoute>
                         } />
@@ -108,6 +112,7 @@ function App() {
             {/* Global toast notifications */}
             <ToastContainer position="top-right" autoClose={3000} />
         </AuthProvider>
+        </ThemeProvider>
     );
 }
 

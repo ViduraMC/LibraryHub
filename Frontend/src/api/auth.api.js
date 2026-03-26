@@ -16,7 +16,7 @@ export const setPassword = (token, password) =>
 export const logoutUser = () =>
     axiosInstance.post('/auth/logout');
 
-// POST /api/membership-request/submit (public — no auth)
+// POST /api/membership-request/submit (public, no auth)
 // Student/teacher applies for library membership.
 export const submitMembershipRequest = (data) =>
     axiosInstance.post('/membership-request/submit', data);

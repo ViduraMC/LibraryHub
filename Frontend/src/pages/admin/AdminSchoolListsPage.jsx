@@ -11,7 +11,7 @@ import {
 } from '../../api/admin.api.js';
 
 /**
- * Admin: School Lists Management — full CRUD with CSV validation.
+ * Admin: School Lists Management - full CRUD with CSV validation.
  * Upload, view, edit, delete, and clear student/teacher lists.
  */
 const AdminSchoolListsPage = () => {
@@ -220,7 +220,7 @@ const AdminSchoolListsPage = () => {
             </div>
 
             {/* Table */}
-            <div className="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden">
+            <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead>

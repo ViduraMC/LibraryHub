@@ -9,7 +9,7 @@ import {
 } from '../../api/admin.api.js';
 
 /**
- * Admin: Librarian Management — Full CRUD with toggle switch for status.
+ * Admin: Librarian Management - Full CRUD with toggle switch for status.
  * 60-30-10 theme: White backgrounds, Pale Blue accents, Navy/Blue highlights.
  */
 const AdminLibrariansPage = () => {
@@ -127,7 +127,7 @@ const AdminLibrariansPage = () => {
                         Librarians
                     </h1>
                     <p className="text-slate-500 mt-2 text-sm">
-                        Manage librarian accounts — create, edit, activate/deactivate, or remove.
+                        Manage librarian accounts: create, edit, activate/deactivate, or remove.
                     </p>
                 </div>
                 <button
@@ -162,7 +162,7 @@ const AdminLibrariansPage = () => {
                                 onChange={handleChange}
                                 required
                                 placeholder="Full Name"
-                                className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-theme-blue/20 focus:border-theme-blue transition-all"
+                                className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-theme-blue/20 focus:border-theme-blue transition-all"
                             />
                         </div>
                         <div>
@@ -176,7 +176,7 @@ const AdminLibrariansPage = () => {
                                 onChange={handleChange}
                                 required
                                 placeholder="librarian@email.com"
-                                className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-theme-blue/20 focus:border-theme-blue transition-all"
+                                className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-theme-blue/20 focus:border-theme-blue transition-all"
                             />
                         </div>
                     </div>
@@ -195,7 +195,7 @@ const AdminLibrariansPage = () => {
             )}
 
             {/* Librarians table */}
-            <div className="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden">
+            <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead>
@@ -244,7 +244,7 @@ const AdminLibrariansPage = () => {
                                         {/* Librarian ID */}
                                         <td className="px-5 py-4">
                                             <span className="text-xs font-mono font-bold text-theme-blue">
-                                                {lib.librarianId || '—'}
+                                                {lib.librarianId || '-'}
                                             </span>
                                         </td>
 
@@ -262,7 +262,7 @@ const AdminLibrariansPage = () => {
                                             )}
                                         </td>
 
-                                        {/* Status — Toggle Switch */}
+                                        {/* Status - Toggle Switch */}
                                         <td className="px-5 py-4">
                                             <div className="flex items-center gap-2">
                                                 <button

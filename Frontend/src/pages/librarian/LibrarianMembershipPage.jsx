@@ -11,7 +11,7 @@ import {
 /**
  * Librarian: Membership Request Management
  *
- * Tabs: Verified, Approved, Rejected (Pending removed — not applicable).
+ * Tabs: Verified, Approved, Rejected (Pending removed, not applicable).
  * - Verified  → Approve / Reject actions
  * - Approved  → Edit details / Remove with confirmation
  * - Rejected  → Edit details / Remove with confirmation
@@ -150,7 +150,7 @@ const LibrarianMembershipPage = () => {
                 </p>
             </div>
 
-            {/* Tab filter — Pending removed */}
+            {/* Tab filter - Pending removed */}
             <div className="flex bg-slate-50 p-1.5 rounded-2xl border border-slate-100 w-fit gap-1">
                 {['verified', 'approved', 'rejected'].map((s) => (
                     <button
@@ -176,7 +176,7 @@ const LibrarianMembershipPage = () => {
             )}
 
             {/* Requests table */}
-            <div className="bg-white border border-slate-100 rounded-3xl shadow-sm overflow-hidden">
+            <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-3xl shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead>
@@ -213,7 +213,7 @@ const LibrarianMembershipPage = () => {
                                 requests.map((req) => (
                                     <>
                                         <tr key={req._id} className="hover:bg-slate-50/30 transition-colors">
-                                            {/* Applicant Name — editable */}
+                                            {/* Applicant Name - editable */}
                                             <td className="px-6 py-5">
                                                 {editingId === req._id ? (
                                                     <input
@@ -238,7 +238,7 @@ const LibrarianMembershipPage = () => {
                                                 {req.applicantType === 'student' ? req.studentId : req.teacherId}
                                             </td>
 
-                                            {/* Email — editable */}
+                                            {/* Email - editable */}
                                             <td className="px-6 py-5">
                                                 {editingId === req._id ? (
                                                     <input
