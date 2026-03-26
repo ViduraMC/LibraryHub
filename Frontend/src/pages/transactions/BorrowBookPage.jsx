@@ -156,7 +156,7 @@ const BorrowBookPage = () => {
                 bookId: selectedBook._id,
             });
             toast.success('Book issued successfully!');
-            navigate('/transactions');
+            navigate('/librarian/transactions');
         } catch (err) {
             toast.error(err.response?.data?.message || 'Checkout failed. Please try again.');
         } finally {
