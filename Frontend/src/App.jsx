@@ -22,6 +22,7 @@ import AdminSchoolListsPage from './pages/admin/AdminSchoolListsPage.jsx';
 
 // --- Librarian pages (librarian only) ---
 import LibrarianMembershipPage from './pages/librarian/LibrarianMembershipPage.jsx';
+import LibrarianReservationPage from './pages/librarian/LibrarianReservationPage.jsx';
 
 // --- Transaction pages ---
 import MyTransactionsPage from './pages/transactions/MyTransactionsPage.jsx';
@@ -84,6 +85,7 @@ function App() {
                                         <Route path="membership-requests" element={<LibrarianMembershipPage />} />
                                         <Route path="transactions" element={<AllTransactionsPage />} />
                                         <Route path="borrow" element={<BorrowBookPage />} />
+                                        <Route path="reservations" element={<LibrarianReservationPage />} />
                                         <Route path="recycle-bin" element={<RecycleBinPage />} />
                                     </Routes>
 
