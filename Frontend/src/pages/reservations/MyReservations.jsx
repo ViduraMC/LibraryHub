@@ -343,7 +343,7 @@ const ReservationCard = ({ resv, onCancelRequest, cancelling, onHide }) => {
         {/* Action required banner */}
         {resv.isActionRequired && (
           <div className="mt-3 px-3.5 py-2 rounded-lg bg-blue-50 border-l-4 border-blue-500 text-xs text-[#1a2d6d] font-medium">
-             Please collect your book before the expiry time.
+             Please collect your book during library hours tomorrow.
           </div>
         )}
       </div>
