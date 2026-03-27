@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { getMyReservations, cancelReservation } from "../../api/bookReservation.api.js";
 
-// ── constants ─────────────────────────────────────────────────────────────────
+// constants
 const PAGE_SIZE = 4;
 
 const STATUS_CONFIG = {
@@ -13,7 +13,7 @@ const STATUS_CONFIG = {
   completed: { label: "Completed", classes: "bg-green-100 text-green-700",  dot: "bg-green-600"  },
 };
 
-// Filters only make sense in the history tab
+// Filters for tabs
 const HISTORY_FILTERS = [
   { value: "completed", label: "Completed", },
   { value: "collected", label: "Collected",  },
@@ -21,7 +21,7 @@ const HISTORY_FILTERS = [
   { value: "expired",   label: "Expired",    },
 ];
 
-// ── icons ─────────────────────────────────────────────────────────────────────
+// icons
 const BookIcon = ({ className = "w-5 h-5" }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
@@ -65,7 +65,16 @@ const ChevronRightIcon = () => (
   </svg>
 );
 
-// ── Badge ─────────────────────────────────────────────────────────────────────
+const TrashIcon = ({ className = "w-4 h-4" }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="3 6 5 6 21 6" />
+    <path d="M19 6l-1 14H6L5 6" />
+    <path d="M10 11v6M14 11v6" />
+    <path d="M9 6V4h6v2" />
+  </svg>
+);
+
+// badge
 const Badge = ({ status }) => {
   const cfg = STATUS_CONFIG[status] || STATUS_CONFIG.waiting;
   return (
@@ -76,7 +85,7 @@ const Badge = ({ status }) => {
   );
 };
 
-// ── Skeleton ──────────────────────────────────────────────────────────────────
+// skeleton
 const SkeletonCard = () => (
   <div className="bg-white rounded-2xl border border-slate-200 p-5 flex gap-4 animate-pulse">
     <div className="w-[52px] h-[68px] rounded-lg bg-slate-200 shrink-0" />
@@ -88,7 +97,7 @@ const SkeletonCard = () => (
   </div>
 );
 
-// ── Empty state ───────────────────────────────────────────────────────────────
+// empty state
 const EmptyState = ({ tab, hasFilters }) => (
   <div className="flex flex-col items-center justify-center py-20 text-slate-400">
     <div className="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center mb-4 text-blue-500">
@@ -105,7 +114,7 @@ const EmptyState = ({ tab, hasFilters }) => (
   </div>
 );
 
-// ── Cancel modal ──────────────────────────────────────────────────────────────
+// cancel modal
 const CancelModal = ({ bookName, onConfirm, onClose }) => (
   <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
     <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
@@ -140,7 +149,7 @@ const CancelModal = ({ bookName, onConfirm, onClose }) => (
   </div>
 );
 
-// ── Pagination ────────────────────────────────────────────────────────────────
+//pagination
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   if (totalPages <= 1) return null;
 
@@ -207,7 +216,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   );
 };
 
-// ── Filter pills (history tab only) ──────────────────────────────────────────
+// filters (for tabs only)
 const FilterPills = ({ activeFilters, onToggle, onClear }) => (
   <div className="flex flex-wrap items-center gap-2 mb-4">
     <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mr-1">Filter</span>
@@ -242,9 +251,10 @@ const FilterPills = ({ activeFilters, onToggle, onClear }) => (
   </div>
 );
 
-// ── Reservation card ──────────────────────────────────────────────────────────
-const ReservationCard = ({ resv, onCancelRequest, cancelling }) => {
+// reservation card
+const ReservationCard = ({ resv, onCancelRequest, cancelling, onHide }) => {
   const canCancel = resv.status === "waiting" || resv.status === "reserved";
+  const canHide= resv.status=== "cancelled" || resv.status==="expired";
 
   const fmt = (d) =>
     d ? new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "—";
@@ -290,6 +300,16 @@ const ReservationCard = ({ resv, onCancelRequest, cancelling }) => {
               ) : "Cancel"}
             </button>
           )}
+
+          {canHide && (
+            <button
+              onClick={()=> onHide(resv._id)}
+              className= "shrink-0 p-1.5 rounded-lg border border-slate-200 text-slate-400"
+              title="Hide Reservation"
+            >
+              < TrashIcon/>
+            </button>
+          )}
         </div>
 
         {/* Meta */}
@@ -323,7 +343,7 @@ const ReservationCard = ({ resv, onCancelRequest, cancelling }) => {
         {/* Action required banner */}
         {resv.isActionRequired && (
           <div className="mt-3 px-3.5 py-2 rounded-lg bg-blue-50 border-l-4 border-blue-500 text-xs text-[#1a2d6d] font-medium">
-            📌 Please collect your book before the expiry time.
+             Please collect your book before the expiry time.
           </div>
         )}
       </div>
@@ -331,7 +351,7 @@ const ReservationCard = ({ resv, onCancelRequest, cancelling }) => {
   );
 };
 
-// ── Main page ─────────────────────────────────────────────────────────────────
+// Main content page
 export default function MyReservations() {
   const [tab, setTab]                 = useState("active");
   const [data, setData]               = useState([]);
@@ -341,8 +361,12 @@ export default function MyReservations() {
   const [modalTarget, setModalTarget] = useState(null);    // { id, bookName }
   const [currentPage, setCurrentPage] = useState(1);
   const [activeFilters, setActiveFilters] = useState([]);  // e.g. ["cancelled","expired"]
+  const [hiddenIds, setHiddenIds]= useState(()=> {
+    const saved = localStorage.getItem("hiddenReservationIds");
+    return saved? new Set(JSON.parse(saved)) : new Set();
+  });
 
-  // ── fetch ───────────────────────────────────────────────────────────────────
+  // fetch
   const fetchData = async (activeTab) => {
     setLoading(true);
     setError(null);
@@ -362,9 +386,10 @@ export default function MyReservations() {
     setCurrentPage(1);
   }, [tab]);
 
-  // ── derived data ────────────────────────────────────────────────────────────
-  const actionRequired = data.filter((r) => r.isActionRequired);
-  const rest           = data.filter((r) => !r.isActionRequired);
+  // derived data
+  const visibleData    = data.filter((r)=> !hiddenIds.has(r._id));
+  const actionRequired = visibleData.filter((r) => r.isActionRequired);
+  const rest           = visibleData.filter((r) => !r.isActionRequired);
 
   // Apply status filters (only on history tab when filters are active)
   const filteredRest = useMemo(() => {
@@ -382,7 +407,7 @@ export default function MyReservations() {
   const displayCount  = isFiltered ? filteredRest.length : data.length;
   const isEmpty       = isFiltered ? filteredRest.length === 0 : data.length === 0;
 
-  // ── handlers ────────────────────────────────────────────────────────────────
+  // handlers
   const handlePageChange = (page) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -407,7 +432,7 @@ export default function MyReservations() {
     setModalTarget(null);
     setCancelling(id);
     try {
-      await cancelReservation(id);
+      cancelReservation(id);
       setData((prev) => {
         const next = prev.filter((r) => r._id !== id);
         const newTotal = Math.max(1, Math.ceil(
@@ -423,7 +448,7 @@ export default function MyReservations() {
     }
   };
 
-  // ── render ──────────────────────────────────────────────────────────────────
+  // for rendering
   return (
     <div className="min-h-screen bg-blue-50">
 
@@ -542,6 +567,11 @@ export default function MyReservations() {
                         resv={r}
                         onCancelRequest={handleCancelRequest}
                         cancelling={cancelling}
+                        onHide={(id)=> setHiddenIds((prev)=> {
+                          const next= new Set(prev).add(id);
+                          localStorage.setItem("hiddenReservationIds", JSON.stringify([...next]));
+                          return next;
+                        })}
                       />
                     ))}
                   </>
@@ -561,6 +591,11 @@ export default function MyReservations() {
                     resv={r}
                     onCancelRequest={handleCancelRequest}
                     cancelling={cancelling}
+                     onHide={(id)=> setHiddenIds((prev)=> {
+                          const next= new Set(prev).add(id);
+                          localStorage.setItem("hiddenReservationIds", JSON.stringify([...next]));
+                          return next;
+                        })}
                   />
                 ))}
 
