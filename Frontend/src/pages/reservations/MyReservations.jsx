@@ -5,12 +5,12 @@ import { getMyReservations, cancelReservation } from "../../api/bookReservation.
 const PAGE_SIZE = 4;
 
 const STATUS_CONFIG = {
-  waiting:   { label: "Waiting",   classes: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",  dot: "bg-amber-500"  },
-  reserved:  { label: "Reserved",  classes: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",      dot: "bg-blue-600"   },
-  collected: { label: "Collected", classes: "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300",  dot: "bg-green-600"  },
-  expired:   { label: "Expired",   classes: "bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400",     dot: "bg-slate-400"  },
-  cancelled: { label: "Cancelled", classes: "bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400",          dot: "bg-red-500"    },
-  completed: { label: "Completed", classes: "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300",  dot: "bg-green-600"  },
+  waiting: { label: "Waiting", classes: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300", dot: "bg-amber-500" },
+  reserved: { label: "Reserved", classes: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300", dot: "bg-blue-600" },
+  collected: { label: "Collected", classes: "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300", dot: "bg-green-600" },
+  expired: { label: "Expired", classes: "bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400", dot: "bg-slate-400" },
+  cancelled: { label: "Cancelled", classes: "bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400", dot: "bg-red-500" },
+  completed: { label: "Completed", classes: "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300", dot: "bg-green-600" },
 };
 
 // Filters for tabs
@@ -18,7 +18,7 @@ const HISTORY_FILTERS = [
   { value: "completed", label: "Completed" },
   { value: "collected", label: "Collected" },
   { value: "cancelled", label: "Cancelled" },
-  { value: "expired",   label: "Expired"   },
+  { value: "expired", label: "Expired" },
 ];
 
 // icons
@@ -108,9 +108,50 @@ const EmptyState = ({ tab, hasFilters }) => (
       {hasFilters
         ? "No reservations match the selected filters. Try adjusting or clearing them."
         : tab === "history"
-        ? "Your past reservations will appear here once you've borrowed books."
-        : "You have no active reservations right now. Browse the library to reserve a book!"}
+          ? "Your past reservations will appear here once you've borrowed books."
+          : "You have no active reservations right now. Browse the library to reserve a book!"}
     </p>
+  </div>
+);
+
+//hide modal
+const HideModal = ({ bookName, onConfirm, onClose }) => (
+  <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+    <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+
+    <div className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 max-w-sm w-full">
+      <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center mx-auto mb-4">
+        <TrashIcon className="w-6 h-6 text-slate-500" />
+      </div>
+
+      <h3 className="text-center text-[#0d1b4b] dark:text-white font-bold text-lg mb-1">
+        Hide Reservation?
+      </h3>
+
+      <p className="text-center text-slate-500 dark:text-slate-400 text-sm mb-6">
+        Are you sure you want to hide{" "}
+        <span className="font-semibold text-[#0d1b4b] dark:text-white">
+          {bookName}
+        </span>
+        ? You can’t undo this from the UI.
+      </p>
+
+      <div className="flex gap-3">
+        <button
+          onClick={onClose}
+          className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={onConfirm}
+          className="flex-1 px-4 py-2.5 rounded-xl bg-slate-800 text-white text-sm font-semibold hover:bg-slate-900 transition-colors"
+        >
+          Yes, Hide
+        </button>
+      </div>
+    </div>
   </div>
 );
 
@@ -253,7 +294,7 @@ const FilterPills = ({ activeFilters, onToggle, onClear }) => (
 // reservation card
 const ReservationCard = ({ resv, onCancelRequest, cancelling, onHide }) => {
   const canCancel = resv.status === "waiting" || resv.status === "reserved";
-  const canHide = resv.status === "cancelled" || resv.status === "expired";
+  const canHide = resv.status === "cancelled" || resv.status === "expired" || resv.status === "completed";
 
   const fmt = (d) =>
     d ? new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "—";
@@ -352,11 +393,12 @@ const ReservationCard = ({ resv, onCancelRequest, cancelling, onHide }) => {
 
 // Main content page
 export default function MyReservations() {
-  const [tab, setTab]                 = useState("active");
-  const [data, setData]               = useState([]);
-  const [loading, setLoading]         = useState(false);
-  const [error, setError]             = useState(null);
-  const [cancelling, setCancelling]   = useState(null);
+  const [tab, setTab] = useState("active");
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [hideTarget, setHideTarget] = useState(null);
+  const [error, setError] = useState(null);
+  const [cancelling, setCancelling] = useState(null);
   const [modalTarget, setModalTarget] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [activeFilters, setActiveFilters] = useState([]);
@@ -386,9 +428,9 @@ export default function MyReservations() {
   }, [tab]);
 
   // derived data
-  const visibleData    = data.filter((r) => !hiddenIds.has(r._id));
+  const visibleData = data.filter((r) => !hiddenIds.has(r._id));
   const actionRequired = visibleData.filter((r) => r.isActionRequired);
-  const rest           = visibleData.filter((r) => !r.isActionRequired);
+  const rest = visibleData.filter((r) => !r.isActionRequired);
 
   const filteredRest = useMemo(() => {
     if (tab !== "history" || activeFilters.length === 0) return rest;
@@ -396,19 +438,34 @@ export default function MyReservations() {
   }, [rest, activeFilters, tab]);
 
   const totalPages = Math.max(1, Math.ceil(filteredRest.length / PAGE_SIZE));
-  const pagedRest  = filteredRest.slice(
+  const pagedRest = filteredRest.slice(
     (currentPage - 1) * PAGE_SIZE,
     currentPage * PAGE_SIZE
   );
 
-  const isFiltered   = tab === "history" && activeFilters.length > 0;
+  const isFiltered = tab === "history" && activeFilters.length > 0;
   const displayCount = isFiltered ? filteredRest.length : data.length;
-  const isEmpty      = isFiltered ? filteredRest.length === 0 : data.length === 0;
+  const isEmpty = isFiltered ? filteredRest.length === 0 : data.length === 0;
 
   // handlers
   const handlePageChange = (page) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleHideRequest = (id, bookName) => {
+    setHideTarget({ id, bookName });
+  };
+
+  const handleHideConfirm = () => {
+    const { id } = hideTarget;
+    setHideTarget(null);
+
+    setHiddenIds((prev) => {
+      const next = new Set(prev).add(id);
+      localStorage.setItem("hiddenReservationIds", JSON.stringify([...next]));
+      return next;
+    });
   };
 
   const toggleFilter = (value) => {
@@ -430,15 +487,8 @@ export default function MyReservations() {
     setModalTarget(null);
     setCancelling(id);
     try {
-      cancelReservation(id);
-      setData((prev) => {
-        const next = prev.filter((r) => r._id !== id);
-        const newTotal = Math.max(1, Math.ceil(
-          next.filter((r) => !r.isActionRequired).length / PAGE_SIZE
-        ));
-        setCurrentPage((p) => Math.min(p, newTotal));
-        return next;
-      });
+      await cancelReservation(id);
+      await fetchData(tab);
     } catch {
       setError("Failed to cancel reservation. Please try again.");
     } finally {
@@ -457,6 +507,14 @@ export default function MyReservations() {
           onClose={() => setModalTarget(null)}
         />
       )}
+
+      {hideTarget && (
+  <HideModal
+    bookName={hideTarget.bookName || "this reservation"}
+    onConfirm={handleHideConfirm}
+    onClose={() => setHideTarget(null)}
+  />
+)}
 
       {/* ── Header — always dark navy, no dark: variants needed ── */}
       <div className="bg-[#0d1b4b] pt-10">
@@ -564,11 +622,7 @@ export default function MyReservations() {
                         resv={r}
                         onCancelRequest={handleCancelRequest}
                         cancelling={cancelling}
-                        onHide={(id) => setHiddenIds((prev) => {
-                          const next = new Set(prev).add(id);
-                          localStorage.setItem("hiddenReservationIds", JSON.stringify([...next]));
-                          return next;
-                        })}
+                        onHide={(id, name) => handleHideRequest(id, name)}
                       />
                     ))}
                   </>
@@ -588,11 +642,7 @@ export default function MyReservations() {
                     resv={r}
                     onCancelRequest={handleCancelRequest}
                     cancelling={cancelling}
-                    onHide={(id) => setHiddenIds((prev) => {
-                      const next = new Set(prev).add(id);
-                      localStorage.setItem("hiddenReservationIds", JSON.stringify([...next]));
-                      return next;
-                    })}
+                    onHide={(id, name) => handleHideRequest(id, name)}
                   />
                 ))}
 

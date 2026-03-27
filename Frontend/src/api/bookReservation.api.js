@@ -14,7 +14,7 @@ export const getReservationById= (id)=>{
 //delete a specific reservation
 export const deleteReservation= (id)=>{
   return axiosInstance.delete(`book-reservation/delete/${id}`);
-}
+};
 
 
 //STUDENT AND TEACHER 
