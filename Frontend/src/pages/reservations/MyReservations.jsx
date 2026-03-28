@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { createPortal } from "react-dom";
 import { getMyReservations, cancelReservation } from "../../api/bookReservation.api.js";
 
 // constants
@@ -114,81 +115,85 @@ const EmptyState = ({ tab, hasFilters }) => (
   </div>
 );
 
-//hide modal
-const HideModal = ({ bookName, onConfirm, onClose }) => (
-  <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-    <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+// hide modal — rendered via createPortal so it escapes any stacking context
+const HideModal = ({ bookName, onConfirm, onClose }) =>
+  createPortal(
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
 
-    <div className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 max-w-sm w-full">
-      <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center mx-auto mb-4">
-        <TrashIcon className="w-6 h-6 text-slate-500" />
+      <div className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 max-w-sm w-full">
+        <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center mx-auto mb-4">
+          <TrashIcon className="w-6 h-6 text-slate-500" />
+        </div>
+
+        <h3 className="text-center text-[#0d1b4b] dark:text-white font-bold text-lg mb-1">
+          Hide Reservation?
+        </h3>
+
+        <p className="text-center text-slate-500 dark:text-slate-400 text-sm mb-6">
+          Are you sure you want to hide{" "}
+          <span className="font-semibold text-[#0d1b4b] dark:text-white">
+            {bookName}
+          </span>
+          ? You can't undo this from the UI.
+        </p>
+
+        <div className="flex gap-3">
+          <button
+            onClick={onClose}
+            className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+          >
+            Cancel
+          </button>
+
+          <button
+            onClick={onConfirm}
+            className="flex-1 px-4 py-2.5 rounded-xl bg-slate-800 text-white text-sm font-semibold hover:bg-slate-900 transition-colors cursor-pointer"
+          >
+            Yes, Hide
+          </button>
+        </div>
       </div>
+    </div>,
+    document.body
+  );
 
-      <h3 className="text-center text-[#0d1b4b] dark:text-white font-bold text-lg mb-1">
-        Hide Reservation?
-      </h3>
-
-      <p className="text-center text-slate-500 dark:text-slate-400 text-sm mb-6">
-        Are you sure you want to hide{" "}
-        <span className="font-semibold text-[#0d1b4b] dark:text-white">
-          {bookName}
-        </span>
-        ? You can’t undo this from the UI.
-      </p>
-
-      <div className="flex gap-3">
-        <button
-          onClick={onClose}
-          className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-        >
-          Cancel
-        </button>
-
-        <button
-          onClick={onConfirm}
-          className="flex-1 px-4 py-2.5 rounded-xl bg-slate-800 text-white text-sm font-semibold hover:bg-slate-900 transition-colors"
-        >
-          Yes, Hide
-        </button>
+// cancel modal — rendered via createPortal so it escapes any stacking context
+const CancelModal = ({ bookName, onConfirm, onClose }) =>
+  createPortal(
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 max-w-sm w-full">
+        <div className="w-12 h-12 rounded-full bg-red-50 dark:bg-red-900/30 flex items-center justify-center mx-auto mb-4">
+          <svg className="w-6 h-6 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="15" y1="9" x2="9" y2="15" />
+            <line x1="9" y1="9" x2="15" y2="15" />
+          </svg>
+        </div>
+        <h3 className="text-center text-[#0d1b4b] dark:text-white font-bold text-lg mb-1">Cancel Reservation?</h3>
+        <p className="text-center text-slate-500 dark:text-slate-400 text-sm mb-6">
+          Are you sure you want to cancel your reservation for{" "}
+          <span className="font-semibold text-[#0d1b4b] dark:text-white">{bookName}</span>? This action cannot be undone.
+        </p>
+        <div className="flex gap-3">
+          <button
+            onClick={onClose}
+            className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+          >
+            Keep it
+          </button>
+          <button
+            onClick={onConfirm}
+            className="flex-1 px-4 py-2.5 rounded-xl bg-red-500 text-white text-sm font-semibold hover:bg-red-600 transition-colors cursor-pointer"
+          >
+            Yes, Cancel
+          </button>
+        </div>
       </div>
-    </div>
-  </div>
-);
-
-// cancel modal
-const CancelModal = ({ bookName, onConfirm, onClose }) => (
-  <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-    <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-    <div className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 max-w-sm w-full">
-      <div className="w-12 h-12 rounded-full bg-red-50 dark:bg-red-900/30 flex items-center justify-center mx-auto mb-4">
-        <svg className="w-6 h-6 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="10" />
-          <line x1="15" y1="9" x2="9" y2="15" />
-          <line x1="9" y1="9" x2="15" y2="15" />
-        </svg>
-      </div>
-      <h3 className="text-center text-[#0d1b4b] dark:text-white font-bold text-lg mb-1">Cancel Reservation?</h3>
-      <p className="text-center text-slate-500 dark:text-slate-400 text-sm mb-6">
-        Are you sure you want to cancel your reservation for{" "}
-        <span className="font-semibold text-[#0d1b4b] dark:text-white">{bookName}</span>? This action cannot be undone.
-      </p>
-      <div className="flex gap-3">
-        <button
-          onClick={onClose}
-          className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors cursor-pointer"
-        >
-          Keep it
-        </button>
-        <button
-          onClick={onConfirm}
-          className="flex-1 px-4 py-2.5 rounded-xl bg-red-500 text-white text-sm font-semibold hover:bg-red-600 transition-colors cursor-pointer"
-        >
-          Yes, Cancel
-        </button>
-      </div>
-    </div>
-  </div>
-);
+    </div>,
+    document.body
+  );
 
 // pagination
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
@@ -292,6 +297,7 @@ const FilterPills = ({ activeFilters, onToggle, onClear }) => (
 );
 
 // reservation card
+// onHide is called as onHide(id, bookName) — both args forwarded to handleHideRequest
 const ReservationCard = ({ resv, onCancelRequest, cancelling, onHide }) => {
   const canCancel = resv.status === "waiting" || resv.status === "reserved";
   const canHide = resv.status === "cancelled" || resv.status === "expired" || resv.status === "completed";
@@ -341,9 +347,10 @@ const ReservationCard = ({ resv, onCancelRequest, cancelling, onHide }) => {
             </button>
           )}
 
+          {/* Pass both id AND book name so handleHideRequest receives the full context */}
           {canHide && (
             <button
-              onClick={() => onHide(resv._id)}
+              onClick={() => onHide(resv._id, resv.bookId?.name)}
               className="shrink-0 p-1.5 rounded-lg border border-slate-200 dark:border-slate-600 text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors cursor-pointer"
               title="Hide Reservation"
             >
@@ -453,6 +460,7 @@ export default function MyReservations() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  // Receives (id, bookName) forwarded from ReservationCard's onHide call
   const handleHideRequest = (id, bookName) => {
     setHideTarget({ id, bookName });
   };
@@ -508,13 +516,14 @@ export default function MyReservations() {
         />
       )}
 
+      {/* Hide modal */}
       {hideTarget && (
-  <HideModal
-    bookName={hideTarget.bookName || "this reservation"}
-    onConfirm={handleHideConfirm}
-    onClose={() => setHideTarget(null)}
-  />
-)}
+        <HideModal
+          bookName={hideTarget.bookName || "this reservation"}
+          onConfirm={handleHideConfirm}
+          onClose={() => setHideTarget(null)}
+        />
+      )}
 
       {/* ── Header — always dark navy, no dark: variants needed ── */}
       <div className="bg-[#0d1b4b] pt-10">
@@ -622,7 +631,7 @@ export default function MyReservations() {
                         resv={r}
                         onCancelRequest={handleCancelRequest}
                         cancelling={cancelling}
-                        onHide={(id, name) => handleHideRequest(id, name)}
+                        onHide={handleHideRequest}
                       />
                     ))}
                   </>
@@ -642,7 +651,7 @@ export default function MyReservations() {
                     resv={r}
                     onCancelRequest={handleCancelRequest}
                     cancelling={cancelling}
-                    onHide={(id, name) => handleHideRequest(id, name)}
+                    onHide={handleHideRequest}
                   />
                 ))}
 
