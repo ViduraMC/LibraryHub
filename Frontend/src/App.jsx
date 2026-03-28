@@ -23,6 +23,7 @@ import AdminSchoolListsPage from './pages/admin/AdminSchoolListsPage.jsx';
 // --- Librarian pages (librarian only) ---
 import LibrarianMembershipPage from './pages/librarian/LibrarianMembershipPage.jsx';
 import FineManagementPage from './pages/librarian/FineManagementPage.jsx';
+import LibrarianReservationPage from './pages/librarian/LibrarianReservationPage.jsx';
 
 // --- Transaction pages ---
 import MyTransactionsPage from './pages/transactions/MyTransactionsPage.jsx';
