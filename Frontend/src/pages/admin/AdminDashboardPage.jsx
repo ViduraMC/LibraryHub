@@ -2,40 +2,76 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getAllLibrarians, getStudentList, getTeacherList } from '../../api/admin.api.js';
 import { getMembershipRequests } from '../../api/membership.api.js';
+import { getReports } from '../../api/reports.api.js';
+import {
+    DocumentPlusIcon,
+    ChartBarIcon,
+    ClipboardDocumentListIcon,
+} from '@heroicons/react/24/outline';
 
-/**
- * Admin Dashboard - system overview with stats, distribution chart, and recent activity.
- * Follows 60-30-10 color theme: White 60%, Pale Blue (#DBEAFE) 30%, Navy (#0A2463) 10%.
- */
 const AdminDashboardPage = () => {
     const [stats, setStats] = useState({
         librarians: null,
         students: null,
         teachers: null,
         pendingRequests: null,
+        reports: null,
     });
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                const [libRes, stuRes, tchRes, reqRes] = await Promise.allSettled([
+                const results = await Promise.allSettled([
                     getAllLibrarians(),
                     getStudentList(),
                     getTeacherList(),
                     getMembershipRequests({ status: 'verified' }),
+                    getReports(false),
+                    getReports(true),
                 ]);
 
+                const libRes = results[0];
+                const stuRes = results[1];
+                const tchRes = results[2];
+                const reqRes = results[3];
+                const activeReportsRes = results[4];
+                const archivedReportsRes = results[5];
+
+                const activeReportCount =
+                    activeReportsRes.status === 'fulfilled'
+                        ? activeReportsRes.value.reports?.length ?? 0
+                        : 0;
+
+                const archivedReportCount =
+                    archivedReportsRes.status === 'fulfilled'
+                        ? archivedReportsRes.value.reports?.length ?? 0
+                        : 0;
+
                 setStats({
-                    librarians: libRes.status === 'fulfilled' ? libRes.value.data.librarians?.length ?? 0 : '-',
-                    students:   stuRes.status === 'fulfilled' ? stuRes.value.data.students?.length ?? 0 : '-',
-                    teachers:   tchRes.status === 'fulfilled' ? tchRes.value.data.teachers?.length ?? 0 : '-',
-                    pendingRequests: reqRes.status === 'fulfilled' ? reqRes.value.data.requests?.length ?? 0 : '-',
+                    librarians:
+                        libRes.status === 'fulfilled'
+                            ? libRes.value.data.librarians?.length ?? 0
+                            : '-',
+                    students:
+                        stuRes.status === 'fulfilled'
+                            ? stuRes.value.data.students?.length ?? 0
+                            : '-',
+                    teachers:
+                        tchRes.status === 'fulfilled'
+                            ? tchRes.value.data.teachers?.length ?? 0
+                            : '-',
+                    pendingRequests:
+                        reqRes.status === 'fulfilled'
+                            ? reqRes.value.data.requests?.length ?? 0
+                            : '-',
+                    reports: activeReportCount + archivedReportCount,
                 });
             } finally {
                 setLoading(false);
             }
         };
+
         fetchStats();
     }, []);
 
@@ -45,7 +81,12 @@ const AdminDashboardPage = () => {
             value: stats.librarians,
             icon: (
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={1.5}
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    />
                 </svg>
             ),
             link: '/admin/librarians',
@@ -57,7 +98,12 @@ const AdminDashboardPage = () => {
             value: stats.students,
             icon: (
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={1.5}
+                        d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                    />
                 </svg>
             ),
             link: '/admin/school-lists',
@@ -69,7 +115,12 @@ const AdminDashboardPage = () => {
             value: stats.teachers,
             icon: (
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+                    <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={1.5}
+                        d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"
+                    />
                 </svg>
             ),
             link: '/admin/school-lists',
@@ -81,40 +132,90 @@ const AdminDashboardPage = () => {
             value: stats.pendingRequests,
             icon: (
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={1.5}
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
                 </svg>
             ),
             link: null,
             accent: 'bg-amber-500',
             iconBg: 'bg-amber-50 text-amber-600',
         },
+        {
+            label: 'Reports',
+            value: stats.reports,
+            icon: <ClipboardDocumentListIcon className="h-5 w-5" />,
+            link: '/admin/reports',
+            accent: 'bg-theme-blue',
+            iconBg: 'bg-theme-blue/10 text-theme-blue',
+        },
     ];
 
-    // Calculate max for bar chart scale
-    const totalMembers = (typeof stats.students === 'number' ? stats.students : 0) +
-                         (typeof stats.teachers === 'number' ? stats.teachers : 0);
+    const totalMembers =
+        (typeof stats.students === 'number' ? stats.students : 0) +
+        (typeof stats.teachers === 'number' ? stats.teachers : 0);
+
     const maxBar = Math.max(totalMembers, 1);
+
+    const quickActions = [
+        {
+            to: '/admin/librarians',
+            icon: '👤',
+            title: 'Add Librarian',
+            desc: 'Create a new librarian account',
+        },
+        {
+            to: '/admin/school-lists',
+            icon: '📋',
+            title: 'Upload School List',
+            desc: 'Import student or teacher CSV',
+        },
+        {
+            to: '/admin/school-lists',
+            icon: '🔍',
+            title: 'View School Lists',
+            desc: 'Browse registered students & teachers',
+        },
+        {
+            to: '/admin/reports/create',
+            icon: <DocumentPlusIcon className="w-6 h-6 text-theme-navy" />,
+            title: 'Create Report',
+            desc: 'Generate a new library report',
+        },
+        {
+            to: '/admin/reports/analysis',
+            icon: <ChartBarIcon className="w-6 h-6 text-theme-navy" />,
+            title: 'View Analysis',
+            desc: 'Charts and insights on reports',
+        },
+        {
+            to: '/admin/reports',
+            icon: <ClipboardDocumentListIcon className="w-6 h-6 text-theme-navy" />,
+            title: 'Reports Hub',
+            desc: 'Open all reports and filters',
+        },
+    ];
 
     return (
         <div className="space-y-8">
-            {/* Header */}
             <div>
                 <h1 className="text-4xl font-black text-theme-navy tracking-tight uppercase">
                     Dashboard
                 </h1>
                 <p className="text-slate-500 mt-2 text-sm">
-                    System overview. Monitor librarians, membership registers, and approvals.
+                    System overview. Monitor librarians, membership registers, approvals, and reports.
                 </p>
             </div>
 
-            {/* Stat Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-5">
                 {statCards.map(({ label, value, icon, link, accent, iconBg }) => (
                     <div
                         key={label}
                         className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow group relative overflow-hidden"
                     >
-                        {/* Top accent bar */}
                         <div className={`absolute top-0 left-0 right-0 h-1 ${accent}`} />
 
                         <div className="flex items-start justify-between mb-3 pt-1">
@@ -131,7 +232,11 @@ const AdminDashboardPage = () => {
                             )}
                         </div>
 
-                        <p className={`text-4xl font-black ${loading ? 'text-slate-200 animate-pulse' : 'text-theme-navy'} mb-1`}>
+                        <p
+                            className={`text-4xl font-black ${
+                                loading ? 'text-slate-200 animate-pulse' : 'text-theme-navy'
+                            } mb-1`}
+                        >
                             {loading ? '-' : value}
                         </p>
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
@@ -141,10 +246,7 @@ const AdminDashboardPage = () => {
                 ))}
             </div>
 
-            {/* Distribution + Summary Row */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-
-                {/* Membership Distribution Chart */}
                 <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-6 shadow-sm">
                     <h2 className="text-xs font-black text-theme-navy uppercase tracking-widest mb-5">
                         Membership Distribution
@@ -157,7 +259,6 @@ const AdminDashboardPage = () => {
                         </div>
                     ) : (
                         <div className="space-y-4">
-                            {/* Students bar */}
                             <div>
                                 <div className="flex items-center justify-between mb-1.5">
                                     <span className="text-xs font-bold text-slate-600">Students</span>
@@ -168,7 +269,7 @@ const AdminDashboardPage = () => {
                                         className="h-full bg-theme-blue rounded-lg transition-all duration-700 ease-out flex items-center pl-3"
                                         style={{ width: `${Math.max((stats.students / maxBar) * 100, 2)}%` }}
                                     >
-                                        {stats.students > 0 && (
+                                        {stats.students > 0 && totalMembers > 0 && (
                                             <span className="text-[10px] font-bold text-white">
                                                 {Math.round((stats.students / totalMembers) * 100)}%
                                             </span>
@@ -177,7 +278,6 @@ const AdminDashboardPage = () => {
                                 </div>
                             </div>
 
-                            {/* Teachers bar */}
                             <div>
                                 <div className="flex items-center justify-between mb-1.5">
                                     <span className="text-xs font-bold text-slate-600">Teachers</span>
@@ -188,7 +288,7 @@ const AdminDashboardPage = () => {
                                         className="h-full bg-theme-navy rounded-lg transition-all duration-700 ease-out flex items-center pl-3"
                                         style={{ width: `${Math.max((stats.teachers / maxBar) * 100, 2)}%` }}
                                     >
-                                        {stats.teachers > 0 && (
+                                        {stats.teachers > 0 && totalMembers > 0 && (
                                             <span className="text-[10px] font-bold text-white">
                                                 {Math.round((stats.teachers / totalMembers) * 100)}%
                                             </span>
@@ -197,7 +297,6 @@ const AdminDashboardPage = () => {
                                 </div>
                             </div>
 
-                            {/* Librarians bar */}
                             <div>
                                 <div className="flex items-center justify-between mb-1.5">
                                     <span className="text-xs font-bold text-slate-600">Librarians</span>
@@ -209,13 +308,14 @@ const AdminDashboardPage = () => {
                                         style={{ width: `${Math.max((stats.librarians / maxBar) * 100, 2)}%` }}
                                     >
                                         {stats.librarians > 0 && (
-                                            <span className="text-[10px] font-bold text-white">{stats.librarians}</span>
+                                            <span className="text-[10px] font-bold text-white">
+                                                {stats.librarians}
+                                            </span>
                                         )}
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Total */}
                             <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
                                 <span className="text-xs font-bold text-slate-400">Total on Register</span>
                                 <span className="text-lg font-black text-theme-navy">{totalMembers}</span>
@@ -224,7 +324,6 @@ const AdminDashboardPage = () => {
                     )}
                 </div>
 
-                {/* System Summary */}
                 <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-6 shadow-sm">
                     <h2 className="text-xs font-black text-theme-navy uppercase tracking-widest mb-5">
                         System Summary
@@ -256,39 +355,90 @@ const AdminDashboardPage = () => {
                             color="text-amber-600"
                             highlight={typeof stats.pendingRequests === 'number' && stats.pendingRequests > 0}
                         />
+                        <SummaryRow
+                            label="Total Reports"
+                            value={loading ? '-' : stats.reports}
+                            link="/admin/reports"
+                            color="text-theme-navy"
+                        />
                     </div>
 
-                    {/* Manage links */}
                     <div className="mt-6 pt-4 border-t border-slate-100 flex flex-wrap gap-2">
                         <Link
                             to="/admin/librarians"
                             className="inline-flex items-center gap-1.5 text-xs font-bold text-theme-navy bg-theme-pale px-4 py-2 rounded-lg hover:bg-theme-pale/70 transition-all"
                         >
                             <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                                />
                             </svg>
                             Manage Librarians
                         </Link>
+
                         <Link
                             to="/admin/school-lists"
                             className="inline-flex items-center gap-1.5 text-xs font-bold text-theme-navy bg-theme-pale px-4 py-2 rounded-lg hover:bg-theme-pale/70 transition-all"
                         >
                             <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                                />
                             </svg>
                             School Lists
                         </Link>
+
+                        <Link
+                            to="/admin/reports"
+                            className="inline-flex items-center gap-1.5 text-xs font-bold text-theme-navy bg-theme-pale px-4 py-2 rounded-lg hover:bg-theme-pale/70 transition-all"
+                        >
+                            <ClipboardDocumentListIcon className="h-3.5 w-3.5" />
+                            Reports Hub
+                        </Link>
                     </div>
+                </div>
+            </div>
+
+            <div>
+                <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-4">
+                    Quick Actions
+                </h2>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                    {quickActions.map(({ to, icon, title, desc }) => (
+                        <Link
+                            key={title}
+                            to={to}
+                            className="flex items-start gap-4 p-5 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl hover:border-theme-blue/30 hover:shadow-sm transition-all group"
+                        >
+                            <span className="text-2xl">{icon}</span>
+                            <div>
+                                <p className="font-bold text-slate-800 dark:text-slate-100 group-hover:text-theme-blue transition-colors">
+                                    {title}
+                                </p>
+                                <p className="text-xs text-slate-400 mt-0.5">{desc}</p>
+                            </div>
+                        </Link>
+                    ))}
                 </div>
             </div>
         </div>
     );
 };
 
-// Reusable summary row component
 const SummaryRow = ({ label, value, link, color, highlight }) => (
-    <div className={`flex items-center justify-between p-3 rounded-xl ${highlight ? 'bg-amber-50 border border-amber-100' : 'bg-slate-50/50'}`}>
-        <span className="text-xs font-semibold text-slate-500">{label}</span>
+    <div
+        className={`flex items-center justify-between p-3 rounded-xl ${
+            highlight ? 'bg-amber-50 border border-amber-100' : 'bg-slate-50/50 dark:bg-slate-700/30'
+        }`}
+    >
+        <span className="text-xs font-semibold text-slate-500 dark:text-slate-300">{label}</span>
         <div className="flex items-center gap-3">
             <span className={`text-lg font-black ${color}`}>{value}</span>
             {link && (

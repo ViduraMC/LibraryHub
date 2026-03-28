@@ -3,10 +3,6 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { useTheme } from '../context/ThemeContext.jsx';
 import { toast } from 'react-toastify';
 
-/**
- * Role-based navigation bar with dark mode toggle.
- * Each role sees its own set of nav links.
- */
 const Navbar = () => {
     const { user, logout } = useAuth();
     const { theme, toggleTheme } = useTheme();
@@ -18,22 +14,20 @@ const Navbar = () => {
         navigate('/login');
     };
 
-    // Where the logo click should go, based on role
     const homeRoutes = {
         admin: '/admin/dashboard',
-        librarian: '/librarian/transactions',
+        librarian: '/transactions',
         student: '/',
         teacher: '/',
     };
+
     const homePath = user ? (homeRoutes[user.role] || '/') : '/';
 
-    // Active link style
     const linkClass = ({ isActive }) =>
         isActive
             ? 'text-sm font-bold text-theme-blue dark:text-theme-pale'
             : 'text-sm font-semibold text-slate-600 dark:text-slate-400 hover:text-theme-blue dark:hover:text-theme-pale transition-colors';
 
-    // Guest links
     const guestLinks = [
         { to: '/', label: 'Home' },
         { to: '/about', label: 'About' },
@@ -41,19 +35,19 @@ const Navbar = () => {
         { to: '/login', label: 'Books' },
     ];
 
-    // Nav links per role
     const navLinks = {
         admin: [
             { to: '/admin/dashboard', label: 'Dashboard' },
             { to: '/admin/librarians', label: 'Librarians' },
             { to: '/admin/school-lists', label: 'School Lists' },
+            { to: '/admin/reports', label: 'Reports' },
         ],
         librarian: [
-            { to: '/librarian/transactions', label: 'Transactions' },
-            { to: '/librarian/borrow', label: 'New Borrow' },
-            { to: '/librarian/membership-requests', label: 'Membership Requests' },
+            { to: '/transactions', label: 'Transactions' },
+            { to: '/borrow', label: 'New Borrow' },
+            { to: '/membership-requests', label: 'Membership Requests' },
             { to: '/librarian/reservations', label: 'Reservations' },
-            { to: '/librarian/recycle-bin', label: 'Recycle Bin' },
+            { to: '/recycle-bin', label: 'Recycle Bin' },
         ],
         student: [
             { to: '/', label: 'Home' },
@@ -77,7 +71,6 @@ const Navbar = () => {
 
     return (
         <nav className="bg-theme-white dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700 px-6 py-4 flex items-center justify-between sticky top-0 z-50 transition-colors duration-300">
-            {/* Brand + Nav links */}
             <div className="flex items-center gap-8">
                 <Link to={homePath} className="flex items-center gap-2 group">
                     <div className="w-8 h-8 bg-theme-navy rounded-lg flex items-center justify-center overflow-hidden transition-transform group-hover:rotate-6">
@@ -97,9 +90,7 @@ const Navbar = () => {
                 </div>
             </div>
 
-            {/* Right side: theme toggle + user info */}
             <div className="flex items-center gap-3">
-                {/* Dark mode toggle */}
                 <button
                     onClick={toggleTheme}
                     className="p-2 rounded-xl text-slate-400 dark:text-slate-500 hover:text-theme-navy dark:hover:text-theme-pale hover:bg-slate-100 dark:hover:bg-slate-700 transition-all"
@@ -107,16 +98,22 @@ const Navbar = () => {
                     aria-label="Toggle theme"
                 >
                     {theme === 'dark' ? (
-                        /* Sun icon - shown in dark mode */
                         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+                            />
                         </svg>
                     ) : (
-                        /* Moon icon - shown in light mode */
                         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+                            />
                         </svg>
                     )}
                 </button>
@@ -140,8 +137,12 @@ const Navbar = () => {
                             title="Sign Out"
                         >
                             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                                />
                             </svg>
                         </button>
                     </>
