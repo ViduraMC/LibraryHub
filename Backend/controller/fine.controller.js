@@ -9,10 +9,11 @@ export const calculateOverdueFines = async (req, res) => {
         const currentDate = new Date();
 
         const lateTransactions = await BookTransaction.find({
-            isLate: true,
             returnDate: null,
             status: { $in: ["active", "overdue"] },
+            dueDate: { $lt: currentDate },
         }).populate("userId bookId");
+
 
         console.log(`📊 Found ${lateTransactions.length} late transactions for fine calculation`);
 
@@ -170,7 +171,7 @@ export const getFineById = async (req, res) => {
 
         //Take the fineId value from the URL and store it in a variable called fineId ==>> http://localhost:5000/fine/12345
         //const fineId = req.params.fineId;
-        const { fineId } = req.params;  
+        const { fineId } = req.params;
 
         const fine = await Fine.findById(fineId)
             .populate("userId")
