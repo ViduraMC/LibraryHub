@@ -34,6 +34,9 @@ import ReportsDashboardPage from './pages/reports/ReportsDashboardPage.jsx';
 import LibrarianMembershipPage from './pages/librarian/LibrarianMembershipPage.jsx';
 import FineManagementPage from './pages/librarian/FineManagementPage.jsx';
 import LibrarianReservationPage from './pages/librarian/LibrarianReservationPage.jsx';
+import BookManagementPage from './pages/librarian/BookManagementPage.jsx';
+import BookDetailsPage from './pages/librarian/BookDetailsPage.jsx';
+import BookFormPage from './pages/librarian/BookFormPage.jsx';
 
 // --- Transaction pages ---
 import MyTransactionsPage from './pages/transactions/MyTransactionsPage.jsx';
@@ -212,6 +215,38 @@ function App() {
                                 element={
                                     <ProtectedRoute allowedRoles={['librarian']}>
                                         <FineManagementPage />
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route
+                                path="/librarian/books"
+                                element={
+                                    <ProtectedRoute allowedRoles={['librarian']}>
+                                        <BookManagementPage />
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route 
+                                path="librarian/books/new"
+                                element={
+                                    <ProtectedRoute allowedRoles={['librarian']}>
+                                        <BookFormPage />
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route
+                                path="librarian/books/:id"
+                                element={
+                                    <ProtectedRoute allowedRoles={['librarian']}>
+                                        <BookDetailsPage />
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route
+                                path="librarian/books/:id/edit"
+                                element={
+                                    <ProtectedRoute allowedRoles={['librarian']}>
+                                        <BookFormPage />
                                     </ProtectedRoute>
                                 }
                             />
