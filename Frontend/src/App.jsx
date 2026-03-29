@@ -32,6 +32,7 @@ import ReportsDashboardPage from './pages/reports/ReportsDashboardPage.jsx';
 
 // --- Librarian pages ---
 import LibrarianMembershipPage from './pages/librarian/LibrarianMembershipPage.jsx';
+import FineManagementPage from './pages/librarian/FineManagementPage.jsx';
 import LibrarianReservationPage from './pages/librarian/LibrarianReservationPage.jsx';
 
 // --- Transaction pages ---
@@ -51,9 +52,9 @@ function App() {
             <AuthProvider>
                 <Router>
                     <ScrollToTop />
-
                     <Routes>
-                        {/* ── Public auth routes ───────────────────────────── */}
+                        {/* ── Public routes (no login required) ─────────────────── */}
+
                         <Route path="/login" element={<LoginPage />} />
                         <Route path="/register" element={<RegisterPage />} />
                         <Route path="/set-password" element={<SetPasswordPage />} />
@@ -244,6 +245,7 @@ function App() {
                     </Routes>
                 </Router>
 
+                {/* Global toast notifications */}
                 <ToastContainer position="top-right" autoClose={3000} />
             </AuthProvider>
         </ThemeProvider>
