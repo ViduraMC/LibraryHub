@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext.jsx';
 
 const STAFF_HOME = {
     admin: '/admin/dashboard',
-    librarian: '/librarian/transactions',
+    librarian: '/transactions',
 };
 
 // Blocks staff from accessing public/student pages

@@ -200,10 +200,18 @@ function App() {
                                 }
                             />
                             <Route
-                                path="/recycle-bin"
+                                path="/librarian/recycle-bin"
                                 element={
                                     <ProtectedRoute allowedRoles={['librarian', 'admin']}>
                                         <RecycleBinPage />
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route
+                                path="/librarian/fines"
+                                element={
+                                    <ProtectedRoute allowedRoles={['librarian']}>
+                                        <FineManagementPage />
                                     </ProtectedRoute>
                                 }
                             />
