@@ -11,7 +11,7 @@ import { loginUser } from '../../api/auth.api.js';
  *
  * After successful login, each role is redirected to its dedicated dashboard:
  *   admin     → /admin/dashboard
- *   librarian → /librarian/transactions
+ *   librarian → /transactions
  *   student   → /my-transactions
  *   teacher   → /my-transactions
  */
@@ -43,7 +43,7 @@ const LoginPage = () => {
             if (user.role === 'admin') {
                 navigate('/admin/dashboard');
             } else if (user.role === 'librarian') {
-                navigate('/librarian/transactions');
+                navigate('/transactions');
             } else {
                 // student or teacher
                 navigate('/');
