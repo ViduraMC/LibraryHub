@@ -15,14 +15,22 @@ export const calculateOverdueFines = async (req, res) => {
         }).populate("userId bookId");
 
 
-        console.log(`📊 Found ${lateTransactions.length} late transactions for fine calculation`);
+        console.log(`Found ${lateTransactions.length} late transactions for fine calculation`);
 
         let finesCreated = 0;
         let finesUpdated = 0;
+        let statusesUpdated = 0;
         const results = [];
 
         for (const transaction of lateTransactions) {
             try {
+                // Bug #2 fix: flip "active" → "overdue" so the Overdue tab works
+                if (transaction.status === "active") {
+                    transaction.status = "overdue";
+                    await transaction.save();
+                    statusesUpdated++;
+                }
+
                 const existingFine = await Fine.findOne({
                     bookTransactionId: transaction._id,
                 });
@@ -34,6 +42,16 @@ export const calculateOverdueFines = async (req, res) => {
                 const fineAmount = daysOverdue * DAILY_FINE_RATE;
 
                 if (existingFine) {
+                    // Bug #3 fix: never touch a fine that has already been settled
+                    if (existingFine.fineStatus !== "unpaid") {
+                        results.push({
+                            action: "skipped",
+                            fineId: existingFine._id,
+                            reason: `Fine already ${existingFine.fineStatus}`,
+                        });
+                        continue;
+                    }
+
                     if (
                         existingFine.daysOverdue !== daysOverdue ||
                         existingFine.fineAmount !== fineAmount
@@ -72,7 +90,7 @@ export const calculateOverdueFines = async (req, res) => {
                     });
                 }
             } catch (error) {
-                console.error(`❌ Error processing transaction ${transaction._id}:`, error.message);
+                console.error(`Error processing transaction ${transaction._id}:`, error.message);
                 results.push({
                     action: "error",
                     bookTransactionId: transaction._id,
@@ -83,11 +101,12 @@ export const calculateOverdueFines = async (req, res) => {
 
         res.status(200).json({
             success: true,
-            message: `✅ Fine calculation completed. ${finesCreated} new, ${finesUpdated} updated`,
+            message: `Fine calculation completed. ${finesCreated} new, ${finesUpdated} updated, ${statusesUpdated} marked overdue`,
             summary: {
                 totalProcessed: lateTransactions.length,
                 finesCreated,
                 finesUpdated,
+                statusesUpdated,
             },
             results,
         });
@@ -319,7 +338,7 @@ export const markFinePaid = async (req, res) => {
         const userName = fine.userId.fullName;
 
         const emailHtml = `
-            <h2>💳 Fine Payment Confirmation</h2>
+            <h2>Fine Payment Confirmation</h2>
             <p>Dear ${userName},</p>
             <p>Your library fine has been successfully paid and recorded.</p>
             <hr>
@@ -328,10 +347,10 @@ export const markFinePaid = async (req, res) => {
                 <li><strong>Fine Amount:</strong> Rs. ${fine.fineAmount}</li>
                 <li><strong>Days Overdue:</strong> ${fine.daysOverdue}</li>
                 <li><strong>Payment Date:</strong> ${fine.paymentDate.toLocaleDateString()}</li>
-                <li><strong>Status:</strong> ✅ PAID</li>
+                <li><strong>Status:</strong> PAID</li>
             </ul>
             <hr>
-            <p>✅ Your account is now clear. You can borrow books again without any restrictions.</p>
+            <p>Your account is now clear. You can borrow books again without any restrictions.</p>
             <br>
             <p>Thank you for your cooperation!</p>
             <p>Best regards,<br>📚 LibraryHub</p>
@@ -341,7 +360,7 @@ export const markFinePaid = async (req, res) => {
 
         res.status(200).json({
             success: true,
-            message: "✅ Fine marked as paid successfully",
+            message: "Fine marked as paid successfully",
             fine,
         });
     } catch (error) {
@@ -401,7 +420,7 @@ export const cancelFine = async (req, res) => {
         const userName = fine.userId.fullName;
 
         const emailHtml = `
-            <h2>📋 Fine Cancellation Notice</h2>
+            <h2>Fine Cancellation Notice</h2>
             <p>Dear ${userName},</p>
             <p>Your library fine has been cancelled and waived.</p>
             <hr>
@@ -411,10 +430,10 @@ export const cancelFine = async (req, res) => {
                 <li><strong>Days Overdue:</strong> ${fine.daysOverdue}</li>
                 <li><strong>Cancellation Date:</strong> ${fine.cancellationDate.toLocaleDateString()}</li>
                 <li><strong>Reason:</strong> ${cancellationReason}</li>
-                <li><strong>Status:</strong> ✅ CANCELLED (Waived)</li>
+                <li><strong>Status:</strong> CANCELLED (Waived)</li>
             </ul>
             <hr>
-            <p>✅ Your account is now clear. You can borrow books again.</p>
+            <p>Your account is now clear. You can borrow books again.</p>
             <br>
             <p>Best regards,<br>📚 LibraryHub</p>
         `;
@@ -423,7 +442,7 @@ export const cancelFine = async (req, res) => {
 
         res.status(200).json({
             success: true,
-            message: "✅ Fine cancelled successfully",
+            message: "Fine cancelled successfully",
             fine,
         });
     } catch (error) {
@@ -484,7 +503,7 @@ export const refundFine = async (req, res) => {
         const userName = fine.userId.fullName;
 
         const emailHtml = `
-            <h2>💰 Fine Refund Confirmation</h2>
+            <h2>Fine Refund Confirmation</h2>
             <p>Dear ${userName},</p>
             <p>Your refund has been processed successfully.</p>
             <hr>
@@ -493,7 +512,7 @@ export const refundFine = async (req, res) => {
                 <li><strong>Original Fine:</strong> Rs. ${fine.fineAmount}</li>
                 <li><strong>Refund Amount:</strong> Rs. ${refundAmount}</li>
                 <li><strong>Refund Date:</strong> ${fine.refundDate.toLocaleDateString()}</li>
-                <li><strong>Status:</strong> ✅ REFUNDED</li>
+                <li><strong>Status:</strong> REFUNDED</li>
             </ul>
             <hr>
             <p>The refund will be credited to your account within 3-5 business days.</p>
@@ -506,7 +525,7 @@ export const refundFine = async (req, res) => {
 
         res.status(200).json({
             success: true,
-            message: "✅ Refund processed successfully",
+            message: "Refund processed successfully",
             fine,
         });
     } catch (error) {
@@ -539,11 +558,11 @@ export const deleteFine = async (req, res) => {
             });
         }
 
-        console.warn(`⚠️ ADMIN: Fine ${fineId} was permanently deleted by ${req.user._id}`);
+        console.warn(`ADMIN: Fine ${fineId} was permanently deleted by ${req.user._id}`);
 
         res.status(200).json({
             success: true,
-            message: "⚠️ Fine permanently deleted",
+            message: "Fine permanently deleted",
             deletedFine: fine,
         });
     } catch (error) {

@@ -87,17 +87,6 @@ const fineSchema = new mongoose.Schema(
             default: null,
         },
 
-        paymentDate: {
-            type: Date,
-            default: null,
-        },
-
-        paidBy: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User",
-            default: null,
-        },
-
         bookId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Book",

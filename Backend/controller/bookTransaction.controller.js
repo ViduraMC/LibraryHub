@@ -50,6 +50,13 @@ export const unifiedCheckout = async (req, res) => {
             // mark reservation as collected
             reservation.status = "collected";
             await reservation.save({ session });
+
+            // Bug #6 fix: decrement availableCopies on reservation pickup
+            // (the copy was not held during reservation, only during borrow)
+            if (book.availableCopies > 0) {
+                book.availableCopies -= 1;
+                await book.save({ session });
+            }
         } else {
             // walk-in borrow flow
             // check if someone else is waiting in the queue
@@ -143,9 +150,24 @@ export const returnBook = async (req, res) => {
             session.endSession();
             return res.status(400).json({
                 success: false,
-                message: `Cannot return — unpaid fine of Rs.${unpaidFine.fineAmount.toFixed(2)}. Fine must be settled first.`,
+                message: `Cannot return: unpaid fine of Rs.${unpaidFine.fineAmount.toFixed(2)}. Fine must be settled first.`,
                 fine: unpaidFine,
             });
+        }
+
+        // Bug #5 fix: finalize fine amounts at the actual return moment
+        // If a fine exists (paid/cancelled) for this transaction, lock in the final overdue days
+        const settledFine = await Fine.findOne({
+            bookTransactionId: id,
+            fineStatus: { $in: ["paid", "cancelled"] },
+        }).session(session);
+
+        if (settledFine) {
+            const actualDays = Math.floor((new Date() - transaction.dueDate) / (1000 * 60 * 60 * 24));
+            if (actualDays > 0) {
+                settledFine.daysOverdue = actualDays;
+                await settledFine.save({ session });
+            }
         }
 
         // set return date and check if late
@@ -250,7 +272,15 @@ export const renewBook = async (req, res) => {
         if (transaction.status !== "active") {
             return res.status(400).json({
                 success: false,
-                message: `Cannot renew — transaction status is "${transaction.status}"`,
+                message: `Cannot renew: transaction status is "${transaction.status}"`,
+            });
+        }
+
+        // Bug #4 fix: block renewal if the book is already past its due date
+        if (new Date() > transaction.dueDate) {
+            return res.status(400).json({
+                success: false,
+                message: "Cannot renew: this book is already overdue. Please return it to the library.",
             });
         }
 
@@ -439,6 +469,19 @@ export const softDeleteTransaction = async (req, res) => {
                 { _id: transaction.userId },
                 { $inc: { noOfBorrowedBooks: -1 } }
             );
+
+            // Bug #7 fix: cancel any orphaned unpaid fine for this transaction
+            const orphanedFine = await Fine.findOne({
+                bookTransactionId: transaction._id,
+                fineStatus: "unpaid",
+            });
+            if (orphanedFine) {
+                orphanedFine.fineStatus = "cancelled";
+                orphanedFine.cancellationReason = "Transaction soft-deleted by librarian";
+                orphanedFine.cancelledBy = req.user._id;
+                orphanedFine.cancellationDate = new Date();
+                await orphanedFine.save();
+            }
         }
 
         transaction.isDeleted = true;
