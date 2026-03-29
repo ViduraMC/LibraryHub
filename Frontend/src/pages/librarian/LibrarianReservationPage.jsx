@@ -295,7 +295,7 @@ const DetailModal = ({ reservation, onClose }) => {
             {[
               { label: "Reserved On", value: fmt(reservation.createdAt) },
               { label: "Expires", value: fmt(reservation.expiredDate) },
-              { label: "Collected On", value: fmt(reservation.collectedDate) },
+              { label: "Collected On", value: fmt(reservation.collectedAt) },
               { label: "Reservation ID", value: reservation._id?.slice(-8)?.toUpperCase() },
             ].map(({ label, value }) => (
               <div key={label} className="bg-slate-50 dark:bg-slate-700 rounded-xl px-3 py-2.5">

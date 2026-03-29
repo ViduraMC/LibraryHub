@@ -49,6 +49,7 @@ export const unifiedCheckout = async (req, res) => {
         if (reservation) {
             // mark reservation as collected
             reservation.status = "collected";
+            reservation.collectedAt = new Date();
             await reservation.save({ session });
 
             // Bug #6 fix: decrement availableCopies on reservation pickup

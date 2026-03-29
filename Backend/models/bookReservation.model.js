@@ -28,6 +28,10 @@ const bookReservationSchema = new mongoose.Schema({
   reservedAt: {
     type: Date
   },
+  collectedAt: {
+  type: Date,
+  default: null,
+  },
 
   //24hrs after status changed to reserved
   expiredDate: {
