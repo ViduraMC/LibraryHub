@@ -227,7 +227,7 @@ function App() {
                                 }
                             />
                             <Route 
-                                path="librarian/books/new"
+                                path="/librarian/books/new"
                                 element={
                                     <ProtectedRoute allowedRoles={['librarian']}>
                                         <BookFormPage />
@@ -235,7 +235,7 @@ function App() {
                                 }
                             />
                             <Route
-                                path="librarian/books/:id"
+                                path="/librarian/books/:id"
                                 element={
                                     <ProtectedRoute allowedRoles={['librarian']}>
                                         <BookDetailsPage />
@@ -243,7 +243,7 @@ function App() {
                                 }
                             />
                             <Route
-                                path="librarian/books/:id/edit"
+                                path="/librarian/books/:id/edit"
                                 element={
                                     <ProtectedRoute allowedRoles={['librarian']}>
                                         <BookFormPage />
