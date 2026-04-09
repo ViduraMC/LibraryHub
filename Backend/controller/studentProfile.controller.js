@@ -17,7 +17,7 @@ export const getMyProfile = async (req, res) => {
 
 // PATCH /api/student/profile
 export const updateMyProfile = async (req, res) => {
-    const allowedFields = ["phone", "address", "profileImageURL"];
+    const allowedFields = ["phone", "address"];
     const updates = {};
 
     for (const key of allowedFields) {
@@ -33,7 +33,7 @@ export const updateMyProfile = async (req, res) => {
             req.user._id,
             { $set: updates },
             { new: true, runValidators: true }
-        ).select("fullName email phone address profileImageURL");
+        ).select("fullName email phone address");
 
         if (!student) return res.status(404).json({ message: "Student not found" });
 
