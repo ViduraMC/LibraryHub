@@ -48,6 +48,7 @@ import RecycleBinPage from './pages/transactions/RecycleBinPage.jsx';
 import ResourcesPage from './pages/main-site/Resources.jsx';
 import BooksPage from './pages/main-site/Books.jsx';
 import MyReservationsPage from './pages/reservations/MyReservations.jsx';
+import StudentProfile from './pages/student/StudentProfile.jsx';
 
 function App() {
     return (
@@ -226,7 +227,7 @@ function App() {
                                     </ProtectedRoute>
                                 }
                             />
-                            <Route 
+                            <Route
                                 path="/librarian/books/new"
                                 element={
                                     <ProtectedRoute allowedRoles={['librarian']}>
@@ -284,6 +285,11 @@ function App() {
                                     </ProtectedRoute>
                                 }
                             />
+                            <Route path='/my-profile' element={
+                                <ProtectedRoute allowedRoles={['student']}>
+                                    <StudentProfile />
+                                </ProtectedRoute>
+                            } />
                         </Route>
                     </Routes>
                 </Router>
