@@ -24,7 +24,14 @@ const Navbar = () => {
         teacher: '/',
     };
 
+    // Route to the correct profile page per role
+    const profileRoutes = {
+        student: '/my-profile',
+        teacher: '/teacher-profile',
+    };
+
     const homePath = user ? (homeRoutes[user.role] || '/') : '/';
+    const profilePath = user ? (profileRoutes[user.role] || null) : null;
 
     const linkClass = ({ isActive }) =>
         isActive
@@ -82,6 +89,24 @@ const Navbar = () => {
     const initials = user?.fullName
         ? user.fullName.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase()
         : '?';
+
+    // Avatar — renders as a Link if the role has a profile page, plain div otherwise
+    const AvatarButton = ({ onClick, className }) => {
+        const inner = user?.profileImageURL ? (
+            <img src={user.profileImageURL} alt={user.fullName} className="w-full h-full object-cover" />
+        ) : (
+            <span className="text-[11px] font-extrabold text-white tracking-wide select-none">{initials}</span>
+        );
+
+        if (profilePath) {
+            return (
+                <Link to={profilePath} title="My Profile" onClick={onClick} className={className}>
+                    {inner}
+                </Link>
+            );
+        }
+        return <div className={className}>{inner}</div>;
+    };
 
     return (
         <nav className="bg-theme-white dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700 sticky top-0 z-50 transition-colors duration-300">
@@ -143,25 +168,15 @@ const Navbar = () => {
 
                             <div className="hidden lg:block h-8 w-px bg-slate-100 dark:bg-slate-700 mx-1"></div>
 
-                            {/* Profile avatar — student only, desktop */}
-                            {user.role === 'student' && (
-                                <Link
-                                    to="/my-profile"
-                                    title="My Profile"
+                            {/* Profile avatar — student & teacher, desktop */}
+                            {profilePath && (
+                                <AvatarButton
                                     className="hidden md:flex w-9 h-9 rounded-xl bg-theme-navy dark:bg-slate-700 items-center justify-center shrink-0 overflow-hidden
                                                ring-2 ring-transparent hover:ring-theme-blue dark:hover:ring-theme-pale transition-all"
-                                >
-                                    {user.profileImageURL ? (
-                                        <img src={user.profileImageURL} alt={user.fullName} className="w-full h-full object-cover" />
-                                    ) : (
-                                        <span className="text-[11px] font-extrabold text-white tracking-wide select-none">
-                                            {initials}
-                                        </span>
-                                    )}
-                                </Link>
+                                />
                             )}
 
-                            {/* Logout — desktop only */}
+                            {/* Logout — desktop */}
                             <button
                                 onClick={handleLogout}
                                 className="hidden md:flex p-2.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all"
@@ -172,7 +187,7 @@ const Navbar = () => {
                                 </svg>
                             </button>
 
-                            {/* Hamburger — mobile only */}
+                            {/* Hamburger — mobile */}
                             <button
                                 onClick={() => setMenuOpen((o) => !o)}
                                 className="md:hidden p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all"
@@ -191,16 +206,10 @@ const Navbar = () => {
                         </>
                     ) : (
                         <>
-                            <Link
-                                to="/register"
-                                className="px-5 py-2 text-theme-navy dark:text-slate-300 text-sm font-bold rounded-xl hover:text-theme-blue dark:hover:text-white transition-colors"
-                            >
+                            <Link to="/register" className="px-5 py-2 text-theme-navy dark:text-slate-300 text-sm font-bold rounded-xl hover:text-theme-blue dark:hover:text-white transition-colors">
                                 Membership
                             </Link>
-                            <Link
-                                to="/login"
-                                className="px-5 py-2 bg-theme-navy text-white text-sm font-bold rounded-xl hover:bg-theme-blue transition-colors"
-                            >
+                            <Link to="/login" className="px-5 py-2 bg-theme-navy text-white text-sm font-bold rounded-xl hover:bg-theme-blue transition-colors">
                                 Login
                             </Link>
                         </>
@@ -214,23 +223,10 @@ const Navbar = () => {
 
                     {/* User info pill */}
                     <div className="flex items-center gap-3 px-4 py-3 mb-2 mt-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
-                        {user.role === 'student' ? (
-                            <Link
-                                to="/my-profile"
-                                onClick={() => setMenuOpen(false)}
-                                className="w-9 h-9 rounded-xl bg-theme-navy dark:bg-slate-600 flex items-center justify-center shrink-0 overflow-hidden"
-                            >
-                                {user.profileImageURL ? (
-                                    <img src={user.profileImageURL} alt={user.fullName} className="w-full h-full object-cover" />
-                                ) : (
-                                    <span className="text-[11px] font-extrabold text-white select-none">{initials}</span>
-                                )}
-                            </Link>
-                        ) : (
-                            <div className="w-9 h-9 rounded-xl bg-theme-navy dark:bg-slate-600 flex items-center justify-center shrink-0">
-                                <span className="text-[11px] font-extrabold text-white select-none">{initials}</span>
-                            </div>
-                        )}
+                        <AvatarButton
+                            onClick={() => setMenuOpen(false)}
+                            className="w-9 h-9 rounded-xl bg-theme-navy dark:bg-slate-600 flex items-center justify-center shrink-0 overflow-hidden"
+                        />
                         <div className="min-w-0">
                             <p className="text-sm font-bold text-slate-800 dark:text-slate-200 truncate">{user.fullName}</p>
                             <p className="text-[10px] font-bold text-theme-blue dark:text-theme-pale uppercase tracking-widest">{user.role}</p>
@@ -240,29 +236,20 @@ const Navbar = () => {
                     {/* Nav links */}
                     <div className="flex flex-col gap-0.5">
                         {links.map(({ to, label }) => (
-                            <NavLink
-                                key={label}
-                                to={to}
-                                className={mobileLinkClass}
-                                onClick={() => setMenuOpen(false)}
-                            >
+                            <NavLink key={label} to={to} className={mobileLinkClass} onClick={() => setMenuOpen(false)}>
                                 {label}
                             </NavLink>
                         ))}
 
-                        {/* My Profile link — student only */}
-                        {user.role === 'student' && (
-                            <NavLink
-                                to="/my-profile"
-                                className={mobileLinkClass}
-                                onClick={() => setMenuOpen(false)}
-                            >
+                        {/* My Profile link — student & teacher */}
+                        {profilePath && (
+                            <NavLink to={profilePath} className={mobileLinkClass} onClick={() => setMenuOpen(false)}>
                                 My Profile
                             </NavLink>
                         )}
                     </div>
 
-                    {/* Divider + Logout */}
+                    {/* Logout */}
                     <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700">
                         <button
                             onClick={handleLogout}
