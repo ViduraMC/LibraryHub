@@ -49,6 +49,7 @@ import ResourcesPage from './pages/main-site/Resources.jsx';
 import BooksPage from './pages/main-site/Books.jsx';
 import MyReservationsPage from './pages/reservations/MyReservations.jsx';
 import StudentProfile from './pages/student/StudentProfile.jsx';
+import TeacherProfile from './pages/teacher/TeacherProfile.jsx';
 
 function App() {
     return (
@@ -290,6 +291,13 @@ function App() {
                                     <StudentProfile />
                                 </ProtectedRoute>
                             } />
+
+                            <Route path='/teacher-profile' element={
+                                <ProtectedRoute allowedRoles={['teacher']}>
+                                    <TeacherProfile />
+                                </ProtectedRoute>
+                            } />
+
                         </Route>
                     </Routes>
                 </Router>
