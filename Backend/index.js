@@ -22,6 +22,7 @@ import fineRoutes from "./routes/fine.routes.js";
 import bookReservationRoutes from "./routes/bookReservation.routes.js";
 import studentProfileRoutes from "./routes/studentProfile.routes.js";
 import teacherProfileRoutes from "./routes/teacherProfile.routes.js";
+import adminProfileRoutes from "./routes/adminProfile.routes.js";
 
 //This is the moment the server is born. app is the main object that represents your entire backend application.
 const app = express();
@@ -52,6 +53,7 @@ app.use("/api/fines", fineRoutes);
 app.use("/api/book-reservation", bookReservationRoutes);
 app.use("/api/student", studentProfileRoutes);
 app.use("/api/teacher", teacherProfileRoutes);
+app.use("/api/admin-profile", adminProfileRoutes);
 
 //sanity check
 app.get("/", (req, res) => {
