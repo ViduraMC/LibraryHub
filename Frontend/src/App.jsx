@@ -21,6 +21,7 @@ import UnauthorizedPage from './pages/auth/UnauthorizedPage.jsx';
 import AdminDashboardPage from './pages/admin/AdminDashboardPage.jsx';
 import AdminLibrariansPage from './pages/admin/AdminLibrariansPage.jsx';
 import AdminSchoolListsPage from './pages/admin/AdminSchoolListsPage.jsx';
+import AdminProfilePage from './pages/admin/AdminProfilePage.jsx';
 
 // --- Report pages (admin only) ---
 import ReportsListPage from './pages/reports/ReportsListPage.jsx';
@@ -116,6 +117,14 @@ function App() {
                                 element={
                                     <ProtectedRoute allowedRoles={['admin']}>
                                         <AdminSchoolListsPage />
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route
+                                path="/admin/profile"
+                                element={
+                                    <ProtectedRoute allowedRoles={['admin']}>
+                                        <AdminProfilePage />
                                     </ProtectedRoute>
                                 }
                             />

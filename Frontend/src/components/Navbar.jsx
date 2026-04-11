@@ -29,6 +29,7 @@ const Navbar = () => {
         student: '/my-profile',
         teacher: '/teacher-profile',
         librarian: '/librarian/profile',
+        admin: '/admin/profile',
     };
 
     const homePath = user ? (homeRoutes[user.role] || '/') : '/';
