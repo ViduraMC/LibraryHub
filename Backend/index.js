@@ -43,7 +43,12 @@ connectDB().then(() => {
 
 //setting up Global Middlewares/ground rules
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: process.env.CORS_ORIGIN
+    ? process.env.CORS_ORIGIN.split(',')
+    : '*',
+  credentials: true,
+}));
 
 // Serve uploaded files (PDFs, covers) as static assets
 app.use("/uploads", express.static(path.join(__esDirname, "uploads")));
