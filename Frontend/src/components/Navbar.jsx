@@ -58,6 +58,7 @@ const Navbar = () => {
             { to: '/admin/reports', label: 'Reports' },
         ],
         librarian: [
+            { to: '/librarian/profile', label: 'My Profile' },
             { to: '/transactions', label: 'Transactions' },
             { to: '/borrow', label: 'New Borrow' },
             { to: '/membership-requests', label: 'Membership Requests' },

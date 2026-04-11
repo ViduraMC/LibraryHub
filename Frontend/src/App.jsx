@@ -32,6 +32,7 @@ import ReportsDashboardPage from './pages/reports/ReportsDashboardPage.jsx';
 
 // --- Librarian pages ---
 import LibrarianMembershipPage from './pages/librarian/LibrarianMembershipPage.jsx';
+import LibrarianProfilePage from './pages/librarian/LibrarianProfilePage.jsx';
 import FineManagementPage from './pages/librarian/FineManagementPage.jsx';
 import LibrarianReservationPage from './pages/librarian/LibrarianReservationPage.jsx';
 import BookManagementPage from './pages/librarian/BookManagementPage.jsx';
