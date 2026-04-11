@@ -43,10 +43,10 @@ const MyTransactionsPage = () => {
     // Returns the right colour classes depending on the borrow status
     const statusStyle = (status) => {
         switch (status) {
-            case 'active':   return 'bg-blue-100 text-blue-700 border-blue-200';
-            case 'overdue':  return 'bg-red-100 text-red-700 border-red-200';
-            case 'returned': return 'bg-emerald-100 text-emerald-700 border-emerald-200';
-            default:         return 'bg-slate-100 text-slate-700 border-slate-200';
+            case 'active':   return 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/40 dark:text-blue-300 dark:border-blue-800';
+            case 'overdue':  return 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/40 dark:text-red-300 dark:border-red-800';
+            case 'returned': return 'bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-300 dark:border-emerald-800';
+            default:         return 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:border-slate-600';
         }
     };
 
@@ -60,18 +60,18 @@ const MyTransactionsPage = () => {
             {/* Page header with active borrow count */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
-                    <h1 className="text-4xl font-black text-theme-navy tracking-tight uppercase">
+                    <h1 className="text-4xl font-black text-theme-navy dark:text-white tracking-tight uppercase">
                         My Borrows
                     </h1>
-                    <p className="text-slate-500 mt-2 text-sm">
+                    <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm">
                         Keep track of your issued books and due dates.
                     </p>
                 </div>
-                <div className="px-5 py-3 bg-theme-pale rounded-2xl border border-blue-100 text-center">
-                    <p className="text-[10px] font-bold text-theme-blue uppercase tracking-widest mb-1">
+                <div className="px-5 py-3 bg-theme-pale dark:bg-slate-800 rounded-2xl border border-blue-100 dark:border-slate-700 text-center">
+                    <p className="text-[10px] font-bold text-theme-blue dark:text-blue-400 uppercase tracking-widest mb-1">
                         Currently Out
                     </p>
-                    <p className="text-2xl font-black text-theme-navy">{activeCount}</p>
+                    <p className="text-2xl font-black text-theme-navy dark:text-white">{activeCount}</p>
                 </div>
             </div>
 
@@ -79,20 +79,20 @@ const MyTransactionsPage = () => {
             {loading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {[1, 2, 3].map((i) => (
-                        <div key={i} className="h-64 bg-slate-50 border border-slate-100 rounded-3xl animate-pulse" />
+                        <div key={i} className="h-64 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-3xl animate-pulse" />
                     ))}
                 </div>
             ) : transactions.length === 0 ? (
                 /* Empty state */
-                <div className="bg-theme-pale/30 border-2 border-dashed border-theme-pale rounded-3xl p-20 text-center">
-                    <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
-                        <svg className="h-10 w-10 text-theme-pale" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div className="bg-theme-pale/30 dark:bg-slate-800 border-2 border-dashed border-theme-pale dark:border-slate-700 rounded-3xl p-20 text-center">
+                    <div className="w-20 h-20 bg-white dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
+                        <svg className="h-10 w-10 text-theme-pale dark:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                                 d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                         </svg>
                     </div>
-                    <h3 className="text-2xl font-bold text-theme-navy mb-2">No borrows yet</h3>
-                    <p className="text-slate-500 max-w-sm mx-auto text-sm">
+                    <h3 className="text-2xl font-bold text-theme-navy dark:text-white mb-2">No borrows yet</h3>
+                    <p className="text-slate-500 dark:text-slate-400 max-w-sm mx-auto text-sm">
                         You have no borrow history. Visit the library to check out a book!
                     </p>
                 </div>
@@ -102,7 +102,7 @@ const MyTransactionsPage = () => {
                     {transactions.map((t) => (
                         <div
                             key={t._id}
-                            className="bg-white border border-slate-100 rounded-3xl p-6 shadow-xl shadow-slate-200/40 relative overflow-hidden group hover:border-theme-pale transition-all duration-300"
+                            className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-3xl p-6 shadow-xl shadow-slate-200/40 dark:shadow-none relative overflow-hidden group hover:border-theme-pale dark:hover:border-slate-600 transition-all duration-300"
                         >
                             {/* Status + Renewed badge */}
                             <div className="flex justify-between items-start mb-6">
@@ -110,7 +110,7 @@ const MyTransactionsPage = () => {
                                     {t.status}
                                 </span>
                                 {t.renewed && (
-                                    <span className="text-[10px] font-bold text-theme-blue bg-blue-50 px-2 py-1 rounded-md uppercase">
+                                    <span className="text-[10px] font-bold text-theme-blue dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded-md uppercase">
                                         Renewed
                                     </span>
                                 )}
@@ -118,25 +118,25 @@ const MyTransactionsPage = () => {
 
                             {/* Book info */}
                             <div className="space-y-1 mb-6">
-                                <h3 className="text-xl font-bold text-slate-800 line-clamp-1 group-hover:text-theme-navy transition-colors">
+                                <h3 className="text-xl font-bold text-slate-800 dark:text-white line-clamp-1 group-hover:text-theme-navy dark:group-hover:text-theme-pale transition-colors">
                                     {t.bookId?.name || 'Unknown Title'}
                                 </h3>
-                                <p className="text-sm text-slate-500 font-medium">
+                                <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
                                     By {t.bookId?.author || 'Unknown Author'}
                                 </p>
                             </div>
 
                             {/* Dates */}
-                            <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-50">
+                            <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-50 dark:border-slate-700">
                                 <div>
-                                    <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">Issued</p>
-                                    <p className="text-xs font-bold text-slate-700">
+                                    <p className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 tracking-wider mb-1">Issued</p>
+                                    <p className="text-xs font-bold text-slate-700 dark:text-slate-300">
                                         {new Date(t.borrowDate).toLocaleDateString()}
                                     </p>
                                 </div>
                                 <div>
-                                    <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">Due Date</p>
-                                    <p className={`text-xs font-bold ${t.status === 'overdue' ? 'text-red-600' : 'text-slate-700'}`}>
+                                    <p className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 tracking-wider mb-1">Due Date</p>
+                                    <p className={`text-xs font-bold ${t.status === 'overdue' ? 'text-red-600 dark:text-red-400' : 'text-slate-700 dark:text-slate-300'}`}>
                                         {new Date(t.dueDate).toLocaleDateString()}
                                     </p>
                                 </div>
@@ -149,7 +149,7 @@ const MyTransactionsPage = () => {
                                     <button
                                         onClick={() => handleRenew(t._id)}
                                         disabled={processingId === t._id}
-                                        className="w-full py-3 bg-theme-pale text-theme-blue rounded-2xl font-bold text-sm hover:bg-theme-blue hover:text-white transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                                        className="w-full py-3 bg-theme-pale dark:bg-blue-900/30 text-theme-blue dark:text-blue-400 rounded-2xl font-bold text-sm hover:bg-theme-blue hover:text-white dark:hover:bg-blue-600 dark:hover:text-white transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
                                     >
                                         {processingId === t._id ? (
                                             <span className="w-4 h-4 border-2 border-theme-blue border-t-white rounded-full animate-spin" />
@@ -167,13 +167,13 @@ const MyTransactionsPage = () => {
 
                                 {/* Already renewed - show a disabled info label */}
                                 {t.status === 'active' && t.renewed && (
-                                    <div className="w-full py-3 bg-slate-50 text-slate-400 rounded-2xl font-bold text-sm text-center border border-slate-100">
+                                    <div className="w-full py-3 bg-slate-50 dark:bg-slate-700 text-slate-400 dark:text-slate-500 rounded-2xl font-bold text-sm text-center border border-slate-100 dark:border-slate-600">
                                         Renewal already used
                                     </div>
                                 )}
 
                                 {t.status === 'returned' && (
-                                    <div className="w-full py-3 bg-slate-50 text-slate-400 rounded-2xl font-bold text-sm text-center border border-slate-100">
+                                    <div className="w-full py-3 bg-slate-50 dark:bg-slate-700 text-slate-400 dark:text-slate-500 rounded-2xl font-bold text-sm text-center border border-slate-100 dark:border-slate-600">
                                         Returned on {new Date(t.returnDate).toLocaleDateString()}
                                         {t.isLate && (
                                             <span className="ml-2 text-[10px] text-red-400 font-bold uppercase">(Late)</span>
@@ -182,7 +182,7 @@ const MyTransactionsPage = () => {
                                 )}
 
                                 {t.status === 'overdue' && (
-                                    <div className="w-full py-3 bg-red-50 text-red-600 rounded-2xl font-bold text-sm text-center border border-red-100">
+                                    <div className="w-full py-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-2xl font-bold text-sm text-center border border-red-100 dark:border-red-800">
                                         Please return this book to the library
                                     </div>
                                 )}

@@ -168,10 +168,10 @@ const BorrowBookPage = () => {
         <div className="max-w-2xl mx-auto space-y-8">
             {/* Header */}
             <div className="text-center">
-                <h1 className="text-4xl font-black text-theme-navy tracking-tight uppercase">
+                <h1 className="text-4xl font-black text-theme-navy dark:text-white tracking-tight uppercase">
                     Issue Book
                 </h1>
-                <p className="text-slate-500 mt-2 text-sm">
+                <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm">
                     Search for a member and a book by name or ID, then confirm the issue.
                 </p>
             </div>
@@ -183,7 +183,7 @@ const BorrowBookPage = () => {
 
                     {/* Step 1: Member search */}
                     <div ref={memberRef} className="relative">
-                        <label className="block text-sm font-bold text-slate-700 mb-2">
+                        <label className="block text-sm font-bold text-slate-700 dark:text-slate-200 mb-2">
                             Step 1: Find Member
                         </label>
                         <div className="relative">
@@ -206,13 +206,13 @@ const BorrowBookPage = () => {
                                     }
                                 }}
                                 placeholder="Type member name or membership ID (e.g. 'John' or 'ST-26-0001')"
-                                className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-11 pr-12 py-4 text-slate-700 focus:outline-none focus:ring-4 focus:ring-theme-blue/10 focus:border-theme-blue transition-all"
+                                className="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-2xl pl-11 pr-12 py-4 text-slate-700 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-4 focus:ring-theme-blue/10 focus:border-theme-blue transition-all"
                             />
                             {selectedMember && (
                                 <button
                                     type="button"
                                     onClick={clearMember}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 bg-slate-200 hover:bg-red-100 text-slate-500 hover:text-red-500 rounded-full flex items-center justify-center transition-all text-xs font-bold"
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 bg-slate-200 dark:bg-slate-600 hover:bg-red-100 dark:hover:bg-red-900/30 text-slate-500 dark:text-slate-300 hover:text-red-500 rounded-full flex items-center justify-center transition-all text-xs font-bold cursor-pointer"
                                 >
                                     ✕
                                 </button>
@@ -232,10 +232,10 @@ const BorrowBookPage = () => {
                                         key={u._id}
                                         type="button"
                                         onClick={() => selectMember(u)}
-                                        className="w-full px-5 py-3 text-left hover:bg-theme-pale/50 transition-colors flex items-center justify-between gap-3 border-b border-slate-50 last:border-0"
+                                        className="w-full px-5 py-3 text-left hover:bg-theme-pale/50 dark:hover:bg-slate-700 transition-colors flex items-center justify-between gap-3 border-b border-slate-50 dark:border-slate-700 last:border-0 cursor-pointer"
                                     >
                                         <div>
-                                            <p className="font-bold text-sm text-slate-800">{u.fullName}</p>
+                                            <p className="font-bold text-sm text-slate-800 dark:text-white">{u.fullName}</p>
                                             <p className="text-[11px] text-slate-400 uppercase tracking-wide">{u.role} · {u.membershipId}</p>
                                         </div>
                                         {!u.isActive && (
@@ -254,14 +254,14 @@ const BorrowBookPage = () => {
 
                         {/* Selected member preview */}
                         {selectedMember && (
-                            <div className="mt-3 bg-emerald-50 border border-emerald-100 rounded-2xl px-5 py-3 flex items-center gap-3">
+                            <div className="mt-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800 rounded-2xl px-5 py-3 flex items-center gap-3">
                                 <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600">
                                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                     </svg>
                                 </div>
                                 <div>
-                                    <p className="text-sm font-bold text-slate-800">{selectedMember.fullName}</p>
+                                    <p className="text-sm font-bold text-slate-800 dark:text-white">{selectedMember.fullName}</p>
                                     <p className="text-xs text-emerald-600 uppercase font-bold">{selectedMember.role} · {selectedMember.membershipId}</p>
                                 </div>
                             </div>
@@ -270,7 +270,7 @@ const BorrowBookPage = () => {
 
                     {/* Step 2: Book search */}
                     <div ref={bookRef} className="relative">
-                        <label className="block text-sm font-bold text-slate-700 mb-2">
+                        <label className="block text-sm font-bold text-slate-700 dark:text-slate-200 mb-2">
                             Step 2: Find Book
                         </label>
                         <div className="relative">
@@ -293,13 +293,13 @@ const BorrowBookPage = () => {
                                     }
                                 }}
                                 placeholder="Type book title, author, or book ID (e.g. 'Harry Potter' or 'BK001')"
-                                className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-11 pr-12 py-4 text-slate-700 focus:outline-none focus:ring-4 focus:ring-theme-blue/10 focus:border-theme-blue transition-all"
+                                className="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-2xl pl-11 pr-12 py-4 text-slate-700 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-4 focus:ring-theme-blue/10 focus:border-theme-blue transition-all"
                             />
                             {selectedBook && (
                                 <button
                                     type="button"
                                     onClick={clearBook}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 bg-slate-200 hover:bg-red-100 text-slate-500 hover:text-red-500 rounded-full flex items-center justify-center transition-all text-xs font-bold"
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 bg-slate-200 dark:bg-slate-600 hover:bg-red-100 dark:hover:bg-red-900/30 text-slate-500 dark:text-slate-300 hover:text-red-500 rounded-full flex items-center justify-center transition-all text-xs font-bold cursor-pointer"
                                 >
                                     ✕
                                 </button>
@@ -319,10 +319,10 @@ const BorrowBookPage = () => {
                                         key={b._id}
                                         type="button"
                                         onClick={() => selectBook(b)}
-                                        className="w-full px-5 py-3 text-left hover:bg-theme-pale/50 transition-colors flex items-center justify-between gap-3 border-b border-slate-50 last:border-0"
+                                        className="w-full px-5 py-3 text-left hover:bg-theme-pale/50 dark:hover:bg-slate-700 transition-colors flex items-center justify-between gap-3 border-b border-slate-50 dark:border-slate-700 last:border-0 cursor-pointer"
                                     >
                                         <div className="min-w-0">
-                                            <p className="font-bold text-sm text-slate-800 truncate">{b.name}</p>
+                                            <p className="font-bold text-sm text-slate-800 dark:text-white truncate">{b.name}</p>
                                             <p className="text-[11px] text-slate-400">
                                                 By {b.author} · <span className="font-mono">{b.bookId}</span> · {b.availableCopies}/{b.totalCopies} available
                                             </p>
@@ -343,14 +343,14 @@ const BorrowBookPage = () => {
 
                         {/* Selected book preview */}
                         {selectedBook && (
-                            <div className="mt-3 bg-emerald-50 border border-emerald-100 rounded-2xl px-5 py-3 flex items-center gap-3">
+                            <div className="mt-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800 rounded-2xl px-5 py-3 flex items-center gap-3">
                                 <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600">
                                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                     </svg>
                                 </div>
                                 <div>
-                                    <p className="text-sm font-bold text-slate-800">{selectedBook.name}</p>
+                                    <p className="text-sm font-bold text-slate-800 dark:text-white">{selectedBook.name}</p>
                                     <p className="text-xs text-emerald-600 font-bold">
                                         By {selectedBook.author} · <span className="font-mono">{selectedBook.bookId}</span> · {selectedBook.availableCopies} {selectedBook.availableCopies === 1 ? 'copy' : 'copies'} available
                                     </p>
@@ -360,9 +360,9 @@ const BorrowBookPage = () => {
                     </div>
 
                     {/* Pre-issue checklist */}
-                    <div className="bg-theme-pale/50 border border-theme-pale rounded-2xl px-5 py-4 text-sm text-theme-navy">
+                    <div className="bg-theme-pale/50 dark:bg-slate-700/50 border border-theme-pale dark:border-slate-600 rounded-2xl px-5 py-4 text-sm text-theme-navy dark:text-theme-pale">
                         <p className="font-bold mb-1">Before confirming:</p>
-                        <ul className="text-slate-600 text-xs space-y-1 list-disc list-inside">
+                        <ul className="text-slate-600 dark:text-slate-400 text-xs space-y-1 list-disc list-inside">
                             <li>Verify the member's physical ID card matches the name shown above</li>
                             <li>Confirm the book copy is in hand and ready to issue</li>
                             <li>Due date will be set to 14 days from today</li>
@@ -374,7 +374,7 @@ const BorrowBookPage = () => {
                         <button
                             type="button"
                             onClick={() => navigate('/transactions')}
-                            className="flex-1 py-4 bg-slate-50 text-slate-500 rounded-2xl font-bold hover:bg-slate-100 transition-all border border-slate-200"
+                            className="flex-1 py-4 bg-slate-50 dark:bg-slate-700 text-slate-500 dark:text-slate-300 rounded-2xl font-bold hover:bg-slate-100 dark:hover:bg-slate-600 transition-all border border-slate-200 dark:border-slate-600 cursor-pointer"
                         >
                             Cancel
                         </button>

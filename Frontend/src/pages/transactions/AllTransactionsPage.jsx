@@ -135,10 +135,10 @@ const AllTransactionsPage = () => {
 
     // Status config
     const statusConfig = {
-        active:   { label: 'Borrowed',  bg: 'bg-blue-50',     text: 'text-blue-600',    border: 'border-blue-100' },
-        overdue:  { label: 'Overdue',   bg: 'bg-red-50',      text: 'text-red-600',     border: 'border-red-100' },
-        returned: { label: 'Returned',  bg: 'bg-emerald-50',  text: 'text-emerald-600', border: 'border-emerald-100' },
-        lost:     { label: 'Lost',      bg: 'bg-orange-50',   text: 'text-orange-600',  border: 'border-orange-100' },
+        active:   { label: 'Borrowed',  bg: 'bg-blue-50 dark:bg-blue-900/30',     text: 'text-blue-600 dark:text-blue-400',    border: 'border-blue-100 dark:border-blue-800' },
+        overdue:  { label: 'Overdue',   bg: 'bg-red-50 dark:bg-red-900/30',      text: 'text-red-600 dark:text-red-400',     border: 'border-red-100 dark:border-red-800' },
+        returned: { label: 'Returned',  bg: 'bg-emerald-50 dark:bg-emerald-900/30',  text: 'text-emerald-600 dark:text-emerald-400', border: 'border-emerald-100 dark:border-emerald-800' },
+        lost:     { label: 'Lost',      bg: 'bg-orange-50 dark:bg-orange-900/30',   text: 'text-orange-600 dark:text-orange-400',  border: 'border-orange-100 dark:border-orange-800' },
     };
 
     return (
@@ -146,15 +146,15 @@ const AllTransactionsPage = () => {
             {/* Header + tabs */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
-                    <h1 className="text-4xl font-black text-theme-navy tracking-tight uppercase">
+                    <h1 className="text-4xl font-black text-theme-navy dark:text-white tracking-tight uppercase">
                         Transactions
                     </h1>
-                    <p className="text-slate-500 mt-2 text-sm">
+                    <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm">
                         Manage all borrow records across the library system.
                     </p>
                 </div>
 
-                <div className="flex bg-slate-50 p-1.5 rounded-2xl border border-slate-100 gap-1">
+                <div className="flex bg-slate-50 dark:bg-slate-800 p-1.5 rounded-2xl border border-slate-100 dark:border-slate-700 gap-1">
                     {tabConfig.map(({ key, label }) => (
                         <button
                             key={key}
@@ -162,7 +162,7 @@ const AllTransactionsPage = () => {
                             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all uppercase tracking-widest ${
                                 statusFilter === key
                                     ? 'bg-theme-navy text-white shadow-md'
-                                    : 'text-slate-400 hover:text-slate-600'
+                                    : 'text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300'
                             }`}
                         >
                             {label}
@@ -190,23 +190,23 @@ const AllTransactionsPage = () => {
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr className="bg-slate-50/50">
+                            <tr className="bg-slate-50/50 dark:bg-slate-700/50">
                                 {['Member', 'Book', 'Status', 'Borrowed', 'Due / Returned', 'Actions'].map((h) => (
                                     <th
                                         key={h}
-                                        className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 border-b border-slate-100"
+                                        className="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500 border-b border-slate-100 dark:border-slate-700"
                                     >
                                         {h}
                                     </th>
                                 ))}
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-50">
+                        <tbody className="divide-y divide-slate-50 dark:divide-slate-700">
                             {loading ? (
                                 [1, 2, 3].map((i) => (
                                     <tr key={i} className="animate-pulse">
                                         <td colSpan={6} className="px-6 py-8">
-                                            <div className="h-4 bg-slate-50 rounded w-full" />
+                                            <div className="h-4 bg-slate-50 dark:bg-slate-700 rounded w-full" />
                                         </td>
                                     </tr>
                                 ))
@@ -222,10 +222,10 @@ const AllTransactionsPage = () => {
                                     const daysLabel = getDaysLabel(t);
 
                                     return (
-                                        <tr key={t._id} className="hover:bg-slate-50/30 transition-colors">
+                                        <tr key={t._id} className="hover:bg-slate-50/30 dark:hover:bg-slate-700/30 transition-colors">
                                             {/* Member */}
                                             <td className="px-6 py-5">
-                                                <p className="font-bold text-slate-800 text-sm">{t.userId?.fullName}</p>
+                                                <p className="font-bold text-slate-800 dark:text-white text-sm">{t.userId?.fullName}</p>
                                                 <p className="text-[10px] text-theme-blue font-bold uppercase tracking-widest mt-0.5">
                                                     {t.userId?.membershipId}
                                                 </p>
@@ -233,8 +233,8 @@ const AllTransactionsPage = () => {
 
                                             {/* Book */}
                                             <td className="px-6 py-5">
-                                                <p className="font-bold text-slate-800 text-sm line-clamp-1">{t.bookId?.name}</p>
-                                                <p className="text-[10px] text-slate-400 font-mono mt-0.5">{t.bookId?.bookId}</p>
+                                                <p className="font-bold text-slate-800 dark:text-white text-sm line-clamp-1">{t.bookId?.name}</p>
+                                                <p className="text-[10px] text-slate-400 dark:text-slate-500 font-mono mt-0.5">{t.bookId?.bookId}</p>
                                             </td>
 
                                             {/* Status - consolidated */}
@@ -254,7 +254,7 @@ const AllTransactionsPage = () => {
 
                                             {/* Borrowed date */}
                                             <td className="px-6 py-5">
-                                                <p className="text-xs text-slate-600">{fmtDate(t.borrowDate)}</p>
+                                                <p className="text-xs text-slate-600 dark:text-slate-300">{fmtDate(t.borrowDate)}</p>
                                             </td>
 
                                             {/* Due / Returned date */}
@@ -266,7 +266,7 @@ const AllTransactionsPage = () => {
                                                     </div>
                                                 ) : (
                                                     <div>
-                                                        <p className={`text-xs font-bold ${t.status === 'overdue' ? 'text-red-600' : 'text-slate-600'}`}>
+                                                        <p className={`text-xs font-bold ${t.status === 'overdue' ? 'text-red-600 dark:text-red-400' : 'text-slate-600 dark:text-slate-300'}`}>
                                                             {fmtDate(t.dueDate)}
                                                         </p>
                                                         {daysLabel && (
@@ -284,7 +284,7 @@ const AllTransactionsPage = () => {
                                                     {(t.status === 'active' || t.status === 'overdue') && (
                                                         <button
                                                             onClick={() => openReturnModal(t)}
-                                                            className="px-4 py-2 bg-theme-navy text-white rounded-xl text-xs font-bold hover:bg-slate-800 transition-all"
+                                                            className="px-4 py-2 bg-theme-navy text-white rounded-xl text-xs font-bold hover:bg-slate-800 transition-all cursor-pointer"
                                                         >
                                                             Return
                                                         </button>
@@ -336,42 +336,42 @@ const AllTransactionsPage = () => {
                                         </svg>
                                     </div>
                                     <div>
-                                        <p className="font-bold text-slate-800">{returnModal.transaction.userId?.fullName}</p>
-                                        <p className="text-xs text-theme-blue font-bold uppercase">{returnModal.transaction.userId?.role} · {returnModal.transaction.userId?.membershipId}</p>
+                                        <p className="font-bold text-slate-800 dark:text-white">{returnModal.transaction.userId?.fullName}</p>
+                                        <p className="text-xs text-theme-blue dark:text-blue-400 font-bold uppercase">{returnModal.transaction.userId?.role} · {returnModal.transaction.userId?.membershipId}</p>
                                     </div>
                                 </div>
 
                                 {/* Book info */}
-                                <div className="bg-slate-50 rounded-2xl p-5">
-                                    <p className="font-bold text-slate-800">{returnModal.transaction.bookId?.name}</p>
-                                    <p className="text-xs text-slate-500 mt-1">By {returnModal.transaction.bookId?.author}</p>
+                                <div className="bg-slate-50 dark:bg-slate-700/50 rounded-2xl p-5">
+                                    <p className="font-bold text-slate-800 dark:text-white">{returnModal.transaction.bookId?.name}</p>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">By {returnModal.transaction.bookId?.author}</p>
                                     <div className="flex gap-4 mt-3 text-xs">
-                                        <span className="text-slate-400">ID: <span className="font-mono font-bold text-slate-600">{returnModal.transaction.bookId?.bookId}</span></span>
-                                        <span className="text-slate-400">Available: <span className="font-bold text-slate-600">{returnModal.transaction.bookId?.availableCopies}/{returnModal.transaction.bookId?.totalCopies}</span></span>
+                                        <span className="text-slate-400 dark:text-slate-500">ID: <span className="font-mono font-bold text-slate-600 dark:text-slate-300">{returnModal.transaction.bookId?.bookId}</span></span>
+                                        <span className="text-slate-400 dark:text-slate-500">Available: <span className="font-bold text-slate-600 dark:text-slate-300">{returnModal.transaction.bookId?.availableCopies}/{returnModal.transaction.bookId?.totalCopies}</span></span>
                                     </div>
                                 </div>
 
                                 {/* Transaction details grid */}
                                 <div className="grid grid-cols-2 gap-4">
-                                    <div className="bg-slate-50 rounded-xl p-4">
-                                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Borrowed</p>
-                                        <p className="text-sm font-bold text-slate-700">{fmtDate(returnModal.transaction.borrowDate)}</p>
+                                    <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4">
+                                        <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-widest mb-1">Borrowed</p>
+                                        <p className="text-sm font-bold text-slate-700 dark:text-slate-200">{fmtDate(returnModal.transaction.borrowDate)}</p>
                                     </div>
-                                    <div className="bg-slate-50 rounded-xl p-4">
-                                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Due Date</p>
-                                        <p className={`text-sm font-bold ${returnModal.overdueDays > 0 ? 'text-red-600' : 'text-slate-700'}`}>
+                                    <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4">
+                                        <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-widest mb-1">Due Date</p>
+                                        <p className={`text-sm font-bold ${returnModal.overdueDays > 0 ? 'text-red-600 dark:text-red-400' : 'text-slate-700 dark:text-slate-200'}`}>
                                             {fmtDate(returnModal.transaction.dueDate)}
                                         </p>
                                     </div>
-                                    <div className="bg-slate-50 rounded-xl p-4">
-                                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Renewed</p>
-                                        <p className="text-sm font-bold text-slate-700">
+                                    <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4">
+                                        <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-widest mb-1">Renewed</p>
+                                        <p className="text-sm font-bold text-slate-700 dark:text-slate-200">
                                             {returnModal.transaction.renewed ? `Yes (${fmtDate(returnModal.transaction.renewedAt)})` : 'No'}
                                         </p>
                                     </div>
-                                    <div className="bg-slate-50 rounded-xl p-4">
-                                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Status</p>
-                                        <p className={`text-sm font-bold ${returnModal.overdueDays > 0 ? 'text-red-600' : 'text-emerald-600'}`}>
+                                    <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4">
+                                        <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-widest mb-1">Status</p>
+                                        <p className={`text-sm font-bold ${returnModal.overdueDays > 0 ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
                                             {returnModal.overdueDays > 0 ? `Overdue (${returnModal.overdueDays} days)` : 'On time'}
                                         </p>
                                     </div>
@@ -379,12 +379,12 @@ const AllTransactionsPage = () => {
 
                                 {/* Fine / status section */}
                                 {returnModal.loading ? (
-                                    <div className="bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 flex items-center gap-3">
+                                    <div className="bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-2xl px-5 py-4 flex items-center gap-3">
                                         <span className="w-4 h-4 border-2 border-theme-blue/30 border-t-theme-blue rounded-full animate-spin" />
-                                        <p className="text-sm text-slate-500">Checking fine status…</p>
+                                        <p className="text-sm text-slate-500 dark:text-slate-400">Checking fine status…</p>
                                     </div>
                                 ) : returnModal.fine && returnModal.fine.fineStatus === 'unpaid' ? (
-                                    <div className="bg-red-50 border border-red-200 rounded-2xl px-5 py-4">
+                                    <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl px-5 py-4">
                                         <div className="flex items-start gap-3">
                                             <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center shrink-0 mt-0.5">
                                                 <svg className="h-4 w-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -392,8 +392,8 @@ const AllTransactionsPage = () => {
                                                 </svg>
                                             </div>
                                             <div>
-                                                <p className="font-bold text-red-700 text-sm">Unpaid Fine: Cannot Return</p>
-                                                <p className="text-xs text-red-600 mt-1">
+                                                <p className="font-bold text-red-700 dark:text-red-400 text-sm">Unpaid Fine: Cannot Return</p>
+                                                <p className="text-xs text-red-600 dark:text-red-400 mt-1">
                                                     This transaction has an unpaid fine of <strong>Rs.{returnModal.fine.fineAmount.toFixed(2)}</strong> ({returnModal.fine.daysOverdue} days overdue).
                                                     The fine must be settled before the book can be returned.
                                                 </p>
@@ -401,7 +401,7 @@ const AllTransactionsPage = () => {
                                         </div>
                                     </div>
                                 ) : returnModal.fine && returnModal.fine.fineStatus === 'paid' ? (
-                                    <div className="bg-emerald-50 border border-emerald-200 rounded-2xl px-5 py-4">
+                                    <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-2xl px-5 py-4">
                                         <div className="flex items-center gap-3">
                                             <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center">
                                                 <svg className="h-4 w-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -409,13 +409,13 @@ const AllTransactionsPage = () => {
                                                 </svg>
                                             </div>
                                             <div>
-                                                <p className="font-bold text-emerald-700 text-sm">Fine Paid</p>
-                                                <p className="text-xs text-emerald-600">Rs.{returnModal.fine.fineAmount.toFixed(2)} settled. Ready to return.</p>
+                                                <p className="font-bold text-emerald-700 dark:text-emerald-400 text-sm">Fine Paid</p>
+                                                <p className="text-xs text-emerald-600 dark:text-emerald-400">Rs.{returnModal.fine.fineAmount.toFixed(2)} settled. Ready to return.</p>
                                             </div>
                                         </div>
                                     </div>
                                 ) : returnModal.overdueDays > 0 ? (
-                                    <div className="bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4">
+                                    <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-2xl px-5 py-4">
                                         <div className="flex items-center gap-3">
                                             <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center">
                                                 <svg className="h-4 w-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -423,8 +423,8 @@ const AllTransactionsPage = () => {
                                                 </svg>
                                             </div>
                                             <div>
-                                                <p className="font-bold text-amber-700 text-sm">Overdue: No Fine Recorded Yet</p>
-                                                <p className="text-xs text-amber-600">Book is {returnModal.overdueDays} days past due. A fine may be applied by the fine management team.</p>
+                                                <p className="font-bold text-amber-700 dark:text-amber-400 text-sm">Overdue: No Fine Recorded Yet</p>
+                                                <p className="text-xs text-amber-600 dark:text-amber-400">Book is {returnModal.overdueDays} days past due. A fine may be applied by the fine management team.</p>
                                             </div>
                                         </div>
                                     </div>
@@ -434,7 +434,7 @@ const AllTransactionsPage = () => {
                                 <div className="flex gap-3 pt-2">
                                     <button
                                         onClick={closeReturnModal}
-                                        className="flex-1 py-3.5 bg-slate-100 text-slate-500 rounded-2xl font-bold text-sm hover:bg-slate-200 transition-all"
+                                        className="flex-1 py-3.5 bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 rounded-2xl font-bold text-sm hover:bg-slate-200 dark:hover:bg-slate-600 transition-all cursor-pointer"
                                     >
                                         Cancel
                                     </button>
@@ -445,7 +445,7 @@ const AllTransactionsPage = () => {
                                             processingId === returnModal.transaction._id ||
                                             (returnModal.fine && returnModal.fine.fineStatus === 'unpaid')
                                         }
-                                        className="flex-[2] py-3.5 bg-emerald-500 text-white rounded-2xl font-bold text-sm hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-200/40 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                        className="flex-[2] py-3.5 bg-emerald-500 text-white rounded-2xl font-bold text-sm hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-200/40 dark:shadow-none disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
                                     >
                                         {processingId === returnModal.transaction._id ? (
                                             <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
