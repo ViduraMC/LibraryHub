@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { toast } from 'react-toastify';
 import { listEbooks, uploadEbook, updateEbook, deleteEbook } from '../../api/ebook.api.js';
@@ -57,13 +57,39 @@ const Modal = ({ open, onClose, title, children, wide }) => {
     );
 };
 
+// ── Reusable form components (must be outside the main component to avoid re-creation) ──
+const InputField = ({ label, value, onChange, placeholder, type = 'text', rows }) => (
+    <div className="flex flex-col gap-1.5">
+        <label className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{label}</label>
+        {rows ? (
+            <textarea value={value} onChange={onChange} placeholder={placeholder} rows={rows}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm text-slate-800 dark:text-white placeholder-slate-300 dark:placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all resize-none" />
+        ) : (
+            <input type={type} value={value} onChange={onChange} placeholder={placeholder}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm text-slate-800 dark:text-white placeholder-slate-300 dark:placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all" />
+        )}
+    </div>
+);
+
+const SelectField = ({ label, value, onChange, options }) => (
+    <div className="flex flex-col gap-1.5">
+        <label className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{label}</label>
+        <select value={value} onChange={onChange}
+            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all cursor-pointer">
+            {options.map((o) => <option key={o} value={o}>{o}</option>)}
+        </select>
+    </div>
+);
+
 // ── Main Page ─────────────────────────────────────────────────────────────────
 export default function EbookManagementPage() {
     const [ebooks, setEbooks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
     const [catFilter, setCatFilter] = useState('');
     const [meta, setMeta] = useState({ total: 0, page: 1, limit: 20 });
+    const searchTimer = useRef(null);
 
     // Upload modal
     const [showUpload, setShowUpload] = useState(false);
@@ -85,7 +111,7 @@ export default function EbookManagementPage() {
         setLoading(true);
         try {
             const params = { page: meta.page, limit: meta.limit, showInactive: 'true' };
-            if (search) params.q = search;
+            if (debouncedSearch) params.q = debouncedSearch;
             if (catFilter) params.category = catFilter;
             const res = await listEbooks(params);
             setEbooks(res.data.data);
@@ -95,9 +121,19 @@ export default function EbookManagementPage() {
         } finally {
             setLoading(false);
         }
-    }, [search, catFilter, meta.page, meta.limit]);
+    }, [debouncedSearch, catFilter, meta.page, meta.limit]);
 
     useEffect(() => { fetchEbooks(); }, [fetchEbooks]);
+
+    // Debounce search input
+    const handleSearchChange = (val) => {
+        setSearch(val);
+        if (searchTimer.current) clearTimeout(searchTimer.current);
+        searchTimer.current = setTimeout(() => {
+            setDebouncedSearch(val);
+            setMeta((m) => ({ ...m, page: 1 }));
+        }, 400);
+    };
 
     // ── Upload handler ────────────────────────────────────────────────────────
     const handleUpload = async () => {
@@ -157,29 +193,6 @@ export default function EbookManagementPage() {
         }
     };
 
-    const InputField = ({ label, value, onChange, placeholder, type = 'text', rows }) => (
-        <div className="flex flex-col gap-1.5">
-            <label className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{label}</label>
-            {rows ? (
-                <textarea value={value} onChange={onChange} placeholder={placeholder} rows={rows}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm text-slate-800 dark:text-white placeholder-slate-300 dark:placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all resize-none" />
-            ) : (
-                <input type={type} value={value} onChange={onChange} placeholder={placeholder}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm text-slate-800 dark:text-white placeholder-slate-300 dark:placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all" />
-            )}
-        </div>
-    );
-
-    const SelectField = ({ label, value, onChange, options }) => (
-        <div className="flex flex-col gap-1.5">
-            <label className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{label}</label>
-            <select value={value} onChange={onChange}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all cursor-pointer">
-                {options.map((o) => <option key={o} value={o}>{o}</option>)}
-            </select>
-        </div>
-    );
-
     return (
         <div className="min-h-screen bg-blue-50 dark:bg-slate-900">
             {/* Header */}
@@ -196,7 +209,7 @@ export default function EbookManagementPage() {
                 <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-4 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
                     <div className="relative flex-1">
                         <SearchIcon className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                        <input value={search} onChange={(e) => { setSearch(e.target.value); setMeta((m) => ({ ...m, page: 1 })); }} placeholder="Search by title, author..."
+                        <input value={search} onChange={(e) => handleSearchChange(e.target.value)} placeholder="Search by title, author..."
                             className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all" />
                     </div>
                     <select value={catFilter} onChange={(e) => { setCatFilter(e.target.value); setMeta((m) => ({ ...m, page: 1 })); }}
