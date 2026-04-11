@@ -138,6 +138,28 @@ describe('Authenticated API Calls', () => {
         expect(res.status).toBe(200);
     });
 
+    it('GET /api/reports — should return reports list with admin auth', async () => {
+        if (!authToken) return;
+
+        const res = await request
+            .get('/api/reports')
+            .set('Authorization', `Bearer ${authToken}`);
+
+        expect(res.status).toBe(200);
+        expect(res.body).toBeDefined();
+    });
+
+    it('POST /api/reports — should reject report creation with missing fields', async () => {
+        if (!authToken) return;
+
+        const res = await request
+            .post('/api/reports')
+            .set('Authorization', `Bearer ${authToken}`)
+            .send({ title: 'Incomplete Report' }); // missing type, dates, counts
+
+        expect([400, 500]).toContain(res.status);
+    });
+
     it('POST /api/auth/logout — should logout successfully', async () => {
         if (!authToken) return;
 
@@ -146,5 +168,54 @@ describe('Authenticated API Calls', () => {
             .set('Authorization', `Bearer ${authToken}`);
 
         expect([200, 201]).toContain(res.status);
+    });
+});
+
+// ═══════════════════════════════════════════════════════════════
+// Book Reservation — Protected Endpoints
+// ═══════════════════════════════════════════════════════════════
+describe('Book Reservation API — Auth Protection', () => {
+    it('GET /api/book-reservation — should return 401 without auth token', async () => {
+        const res = await request.get('/api/book-reservation');
+        expect(res.status).toBe(401);
+    });
+
+    it('POST /api/book-reservation — should return 401 without auth token', async () => {
+        const res = await request
+            .post('/api/book-reservation')
+            .send({ bookId: '000000000000000000000000' });
+        expect(res.status).toBe(401);
+    });
+
+    it('GET /api/book-reservation/my-reservations — should return 401 without auth token', async () => {
+        const res = await request.get('/api/book-reservation/my-reservations');
+        expect(res.status).toBe(401);
+    });
+});
+
+// ═══════════════════════════════════════════════════════════════
+// Report Management — Protected Endpoints
+// ═══════════════════════════════════════════════════════════════
+describe('Report Management API — Auth Protection', () => {
+    it('GET /api/reports — should return 401 without auth token', async () => {
+        const res = await request.get('/api/reports');
+        expect(res.status).toBe(401);
+    });
+
+    it('POST /api/reports — should return 401 without auth token', async () => {
+        const res = await request
+            .post('/api/reports')
+            .send({ title: 'Unauthorized Report' });
+        expect(res.status).toBe(401);
+    });
+
+    it('GET /api/reports/nonexistent-id — should return 401 without auth token', async () => {
+        const res = await request.get('/api/reports/000000000000000000000000');
+        expect(res.status).toBe(401);
+    });
+
+    it('DELETE /api/reports/some-id — should return 401 without auth token', async () => {
+        const res = await request.delete('/api/reports/000000000000000000000000');
+        expect(res.status).toBe(401);
     });
 });
