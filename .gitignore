@@ -4,6 +4,9 @@
 # Ignore .env files in any subfolder
 **/.env
 
+# But DO track .env.production (no secrets, just public API URL)
+!**/.env.production
+
 # Specific paths 
 Backend/node_modules/
 Frontend/node_modules/
