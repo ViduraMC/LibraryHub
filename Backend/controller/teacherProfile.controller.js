@@ -1,10 +1,10 @@
 import Teacher from "../models/user/teacher.model.js";
-import User from "../models/user/user.model.js";
+
 
 //GET 
 export const getMyProfile = async (req, res)=> {
   try {
-    const teacher = await Teacher.findById(req.user.id).select(
+    const teacher = await Teacher.findById(req.user._id).select(
       "fullName email phone address profileImageURL teacherId membershipId subject"
     );
 

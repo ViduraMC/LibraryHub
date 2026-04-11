@@ -187,6 +187,14 @@ function App() {
                                     </ProtectedRoute>
                                 }
                             />
+                            <Route
+                                path="/librarian/profile"
+                                element={
+                                    <ProtectedRoute allowedRoles={['librarian']}>
+                                        <LibrarianProfilePage />
+                                    </ProtectedRoute>
+                                }
+                            />
 
                             {/* Staff shared routes */}
                             <Route
