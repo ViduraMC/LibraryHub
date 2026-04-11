@@ -67,6 +67,7 @@ const Navbar = () => {
             { to: '/librarian/recycle-bin', label: 'Recycle Bin' },
             { to: '/librarian/fines', label: 'Fine Management' },
             { to: '/librarian/books', label: 'Book Management' },
+            { to: '/librarian/ebooks', label: 'E-Books' },
         ],
         student: [
             { to: '/', label: 'Home' },

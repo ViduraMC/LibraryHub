@@ -6,6 +6,8 @@ import { startComputerStatusSync } from "./config/computerSync.js";
 import initReservation from "./config/initReservationCron.js";
 import "dotenv/config";
 import cors from "cors";
+import path from "path";
+import { fileURLToPath } from "url";
 
 // routes
 import authRoutes from "./routes/auth.routes.js";
@@ -23,6 +25,11 @@ import bookReservationRoutes from "./routes/bookReservation.routes.js";
 import studentProfileRoutes from "./routes/studentProfile.routes.js";
 import teacherProfileRoutes from "./routes/teacherProfile.routes.js";
 import adminProfileRoutes from "./routes/adminProfile.routes.js";
+import ebookRoutes from "./routes/ebook.routes.js";
+
+// __dirname for ES modules
+const __esFilename = fileURLToPath(import.meta.url);
+const __esDirname = path.dirname(__esFilename);
 
 //This is the moment the server is born. app is the main object that represents your entire backend application.
 const app = express();
@@ -37,6 +44,9 @@ connectDB().then(() => {
 //setting up Global Middlewares/ground rules
 app.use(express.json());
 app.use(cors());
+
+// Serve uploaded files (PDFs, covers) as static assets
+app.use("/uploads", express.static(path.join(__esDirname, "uploads")));
 
 // api routes
 app.use("/api/auth", authRoutes);
@@ -54,6 +64,7 @@ app.use("/api/book-reservation", bookReservationRoutes);
 app.use("/api/student", studentProfileRoutes);
 app.use("/api/teacher", teacherProfileRoutes);
 app.use("/api/admin-profile", adminProfileRoutes);
+app.use("/api/ebooks", ebookRoutes);
 
 //sanity check
 app.get("/", (req, res) => {
