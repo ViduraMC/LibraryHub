@@ -88,6 +88,16 @@ const AlertIcon = ({ className = "w-4 h-4" }) => (
   </svg>
 );
 
+// ── Phone validation helper ───────────────────────────────────────────────────
+// Strips spaces, dashes, parentheses then checks for exactly 10 digits
+const validatePhone = (value) => {
+  if (!value || value.trim() === "") return null; // optional — blank is allowed
+  const digits = value.replace(/[\s\-().+]/g, "");
+  if (!/^\d+$/.test(digits)) return "Phone number must contain digits only.";
+  if (digits.length !== 10) return "Phone number must be exactly 10 digits.";
+  return null;
+};
+
 // ── Reusable sub-components ───────────────────────────────────────────────────
 
 const InfoRow = ({ icon: Icon, label, value }) => (
@@ -104,7 +114,7 @@ const InfoRow = ({ icon: Icon, label, value }) => (
   </div>
 );
 
-const InputField = ({ label, id, value, onChange, placeholder, type = "text", disabled = false, hint }) => (
+const InputField = ({ label, id, value, onChange, placeholder, type = "text", disabled = false, hint, error }) => (
   <div className="flex flex-col gap-1.5">
     <label htmlFor={id} className="text-[12px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
       {label}
@@ -116,13 +126,20 @@ const InputField = ({ label, id, value, onChange, placeholder, type = "text", di
       onChange={onChange}
       placeholder={placeholder}
       disabled={disabled}
-      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800
+      className={`w-full px-3.5 py-2.5 rounded-xl border bg-white dark:bg-slate-800
                  text-[14px] text-[#0d1b4b] dark:text-white placeholder-slate-300 dark:placeholder-slate-600
-                 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400
+                 focus:outline-none focus:ring-2 focus:ring-blue-500/30
                  disabled:bg-slate-50 dark:disabled:bg-slate-800/50 disabled:text-slate-400 dark:disabled:text-slate-500 disabled:cursor-not-allowed
-                 transition-all duration-150"
+                 transition-all duration-150
+                 ${error
+                   ? "border-red-400 dark:border-red-500 focus:border-red-400 focus:ring-red-500/20"
+                   : "border-slate-200 dark:border-slate-600 focus:border-blue-400"
+                 }`}
     />
-    {hint && <p className="text-[11px] text-slate-400 dark:text-slate-500">{hint}</p>}
+    {error
+      ? <p className="text-[11px] text-red-500 dark:text-red-400 flex items-center gap-1"><AlertIcon className="w-3 h-3 shrink-0" />{error}</p>
+      : hint && <p className="text-[11px] text-slate-400 dark:text-slate-500">{hint}</p>
+    }
   </div>
 );
 
@@ -222,6 +239,7 @@ export default function StudentProfile() {
   const [isEditing, setIsEditing]       = useState(false);
   const [phone, setPhone]               = useState("");
   const [address, setAddress]           = useState("");
+  const [phoneError, setPhoneError]     = useState(null);
   const [profileSaving, setProfileSaving] = useState(false);
   const [profileError, setProfileError] = useState(null);
 
@@ -258,16 +276,30 @@ export default function StudentProfile() {
 
   useEffect(() => { fetchProfile(); }, []);
 
-  // cancel edit — reset fields to current profile values
+  // validate phone on change
+  const handlePhoneChange = (e) => {
+    const val = e.target.value;
+    setPhone(val);
+    setPhoneError(validatePhone(val));
+  };
+
+  // cancel edit
   const handleCancelEdit = () => {
     setPhone(profile?.phone || "");
     setAddress(profile?.address || "");
+    setPhoneError(null);
     setProfileError(null);
     setIsEditing(false);
   };
 
   // save profile
   const handleSaveProfile = async () => {
+    // re-validate before submitting
+    const phoneErr = validatePhone(phone);
+    if (phoneErr) {
+      setPhoneError(phoneErr);
+      return;
+    }
     setProfileSaving(true);
     setProfileError(null);
     try {
@@ -378,11 +410,11 @@ export default function StudentProfile() {
             {/* ── Academic Info ── */}
             <SectionCard title="Academic Info" icon={IdCardIcon}>
               <div className="divide-y divide-slate-100 dark:divide-slate-700/60">
-                <InfoRow icon={IdCardIcon} label="Student ID"    value={profile.studentId} />
-                <InfoRow icon={MailIcon}   label="Email"         value={profile.email} />
-                <InfoRow icon={UserIcon}   label="Grade"         value={profile.grade} />
-                <InfoRow icon={UserIcon}   label="Classroom"     value={profile.classRoom} />
-                <InfoRow icon={UserIcon}   label="Guardian"      value={profile.guardianName} />
+                <InfoRow icon={IdCardIcon} label="Student ID"     value={profile.studentId} />
+                <InfoRow icon={MailIcon}   label="Email"          value={profile.email} />
+                <InfoRow icon={UserIcon}   label="Grade"          value={profile.grade} />
+                <InfoRow icon={UserIcon}   label="Classroom"      value={profile.classRoom} />
+                <InfoRow icon={UserIcon}   label="Guardian"       value={profile.guardianName} />
                 <InfoRow icon={PhoneIcon}  label="Guardian Phone" value={profile.guardianPhone} />
               </div>
             </SectionCard>
@@ -410,9 +442,10 @@ export default function StudentProfile() {
                     id="phone"
                     label="Phone"
                     value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="e.g. +94 77 123 4567"
-                    hint="Your mobile or home phone number"
+                    onChange={handlePhoneChange}
+                    placeholder="e.g. 0771234567"
+                    hint="Must be exactly 10 digits"
+                    error={phoneError}
                   />
                   <InputField
                     id="address"
@@ -433,7 +466,7 @@ export default function StudentProfile() {
                   <div className="flex gap-2.5 pt-1">
                     <button
                       onClick={handleSaveProfile}
-                      disabled={profileSaving}
+                      disabled={profileSaving || !!phoneError}
                       className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#0d1b4b] text-white text-sm font-semibold
                                  hover:bg-[#162660] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-150 cursor-pointer"
                     >
