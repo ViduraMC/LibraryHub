@@ -115,18 +115,10 @@ const SectionCard = ({ title, icon: Icon, children }) => (
     </div>
 );
 
-const StatCard = ({ label, value, color = 'blue', sub }) => {
-    const colorMap = {
-        blue: 'from-blue-500 to-blue-600',
-        emerald: 'from-emerald-500 to-emerald-600',
-        amber: 'from-amber-500 to-amber-600',
-        red: 'from-red-500 to-red-600',
-        purple: 'from-purple-500 to-purple-600',
-        slate: 'from-slate-500 to-slate-600',
-    };
+const StatCard = ({ label, value, sub }) => {
     return (
         <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-5 flex items-center gap-4">
-            <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${colorMap[color]} flex items-center justify-center shrink-0`}>
+            <div className="w-12 h-12 rounded-xl bg-theme-navy flex items-center justify-center shrink-0">
                 <span className="text-white text-lg font-extrabold">{value}</span>
             </div>
             <div className="min-w-0">
@@ -310,14 +302,14 @@ export default function AdminProfilePage() {
                         {stats && (
                             <SectionCard title="System Overview" icon={ShieldIcon}>
                                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                                    <StatCard label="Total Users" value={stats.users.total} color="blue" sub={`${stats.users.students} students, ${stats.users.teachers} teachers`} />
-                                    <StatCard label="Librarians" value={stats.users.librarians} color="purple" />
-                                    <StatCard label="Total Books" value={stats.books.total} color="emerald" />
-                                    <StatCard label="Active Borrows" value={stats.transactions.active} color="blue" sub={`${stats.transactions.total} total`} />
-                                    <StatCard label="Overdue" value={stats.transactions.overdue} color="red" />
-                                    <StatCard label="Unpaid Fines" value={stats.fines.unpaid} color="amber" sub={`Rs. ${stats.fines.unpaidAmount}`} />
-                                    <StatCard label="Pending Memberships" value={stats.pendingMemberships} color="purple" />
-                                    <StatCard label="Active Reservations" value={stats.activeReservations} color="emerald" />
+                                    <StatCard label="Total Users" value={stats.users.total} sub={`${stats.users.students} students, ${stats.users.teachers} teachers`} />
+                                    <StatCard label="Librarians" value={stats.users.librarians} />
+                                    <StatCard label="Total Books" value={stats.books.total} />
+                                    <StatCard label="Active Borrows" value={stats.transactions.active} sub={`${stats.transactions.total} total`} />
+                                    <StatCard label="Overdue" value={stats.transactions.overdue} />
+                                    <StatCard label="Unpaid Fines" value={stats.fines.unpaid} sub={`Rs. ${stats.fines.unpaidAmount}`} />
+                                    <StatCard label="Pending Memberships" value={stats.pendingMemberships} />
+                                    <StatCard label="Active Reservations" value={stats.activeReservations} />
                                 </div>
                             </SectionCard>
                         )}
