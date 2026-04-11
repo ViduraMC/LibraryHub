@@ -5,12 +5,14 @@ import {
     calculateOverdueFines,
     getUserFines,
     getAllUnpaidFines,
+    getAllFines,
     getFineById,
     getFineStatistics,
     checkUnpaidFines,
     markFinePaid,
     cancelFine,
     refundFine,
+    updateFine,
     deleteFine,
 } from "../controller/fine.controller.js";
 
@@ -49,6 +51,14 @@ router.get(
     getAllUnpaidFines
 );
 
+// GET /api/fines/all?status=paid (all fines, optional status filter)
+router.get(
+    "/all",
+    auth,
+    roleAuth("admin", "librarian"),
+    getAllFines
+);
+
 router.get(
     "/user/:userId",
     auth,
@@ -83,6 +93,14 @@ router.patch(
     auth,
     roleAuth("admin"),
     refundFine
+);
+
+// PUT /api/fines/:fineId (edit fine amount/days)
+router.put(
+    "/:fineId",
+    auth,
+    roleAuth("admin", "librarian"),
+    updateFine
 );
 
 // DELETE
