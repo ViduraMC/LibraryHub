@@ -185,6 +185,103 @@ export const getAllUnpaidFines = async (req, res) => {
     }
 };
 
+// Get all fines with optional status filter (?status=paid, ?status=cancelled, etc.)
+export const getAllFines = async (req, res) => {
+    try {
+        const { status } = req.query;
+
+        const filter = {};
+        if (status) filter.fineStatus = status;
+
+        const fines = await Fine.find(filter)
+            .populate("userId")
+            .populate("bookTransactionId")
+            .populate("bookId")
+            .populate("paidBy")
+            .populate("cancelledBy")
+            .sort({ createdAt: -1 });
+
+        const totalAmount = fines.reduce((sum, f) => sum + f.fineAmount, 0);
+
+        res.status(200).json({
+            success: true,
+            count: fines.length,
+            totalAmount,
+            fines,
+        });
+    } catch (error) {
+        console.error("Get all fines error:", error.message);
+        res.status(500).json({
+            success: false,
+            message: "Server error",
+        });
+    }
+};
+
+// Update a fine's amount or days overdue (librarian/admin)
+export const updateFine = async (req, res) => {
+    try {
+        const { fineId } = req.params;
+        const { fineAmount, daysOverdue } = req.body;
+
+        const fine = await Fine.findById(fineId);
+
+        if (!fine) {
+            return res.status(404).json({
+                success: false,
+                message: "Fine not found",
+            });
+        }
+
+        // only unpaid fines can be edited
+        if (fine.fineStatus !== "unpaid") {
+            return res.status(400).json({
+                success: false,
+                message: `Cannot edit a fine that is already ${fine.fineStatus}`,
+            });
+        }
+
+        if (fineAmount !== undefined) {
+            if (fineAmount < 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Fine amount cannot be negative",
+                });
+            }
+            fine.fineAmount = fineAmount;
+        }
+
+        if (daysOverdue !== undefined) {
+            if (daysOverdue < 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Days overdue cannot be negative",
+                });
+            }
+            fine.daysOverdue = daysOverdue;
+        }
+
+        await fine.save();
+
+        const updatedFine = await Fine.findById(fineId)
+            .populate("userId")
+            .populate("bookTransactionId")
+            .populate("bookId");
+
+        res.status(200).json({
+            success: true,
+            message: "Fine updated successfully",
+            fine: updatedFine,
+        });
+    } catch (error) {
+        console.error("Update fine error:", error.message);
+        res.status(500).json({
+            success: false,
+            message: "Server error",
+        });
+    }
+};
+
 export const getFineById = async (req, res) => {
     try {
 
