@@ -39,6 +39,7 @@ import LibrarianReservationPage from './pages/librarian/LibrarianReservationPage
 import BookManagementPage from './pages/librarian/BookManagementPage.jsx';
 import BookDetailsPage from './pages/librarian/BookDetailsPage.jsx';
 import BookFormPage from './pages/librarian/BookFormPage.jsx';
+import EbookManagementPage from './pages/librarian/EbookManagementPage.jsx';
 
 // --- Transaction pages ---
 import MyTransactionsPage from './pages/transactions/MyTransactionsPage.jsx';
@@ -267,6 +268,14 @@ function App() {
                                 element={
                                     <ProtectedRoute allowedRoles={['librarian']}>
                                         <BookFormPage />
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route
+                                path="/librarian/ebooks"
+                                element={
+                                    <ProtectedRoute allowedRoles={['librarian']}>
+                                        <EbookManagementPage />
                                     </ProtectedRoute>
                                 }
                             />
