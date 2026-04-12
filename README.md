@@ -159,14 +159,14 @@ The system auto-seeds an admin account on first startup:
 | `EMAIL_USER` | Gmail for sending emails | `libraryhub@gmail.com` |
 | `EMAIL_PASS` | Gmail app password | `xxxx xxxx xxxx xxxx` |
 | `FRONTEND_URL` | Frontend URL (for email links) | `http://localhost:5173` |
-| `CORS_ORIGIN` | Allowed CORS origins (comma-separated) | `http://localhost:5173,https://libraryhub.vercel.app` |
+| `CORS_ORIGIN` | Allowed CORS origins (comma-separated) | `http://localhost:5173,https://libraryhub-seven.vercel.app` |
 | `NODE_ENV` | Environment mode | `development` |
 
 ### Frontend (`Frontend/.env.production`)
 
 | Variable | Description | Example |
 |---|---|---|
-| `VITE_API_URL` | Backend API base URL | `https://libraryhub-api.onrender.com/api` |
+| `VITE_API_URL` | Backend API base URL | `https://libraryhub-mt4s.onrender.com/api` |
 
 ---
 
@@ -381,8 +381,8 @@ POST /api/auth/login
 
 | Component | Platform | URL | Tier |
 |---|---|---|---|
-| **Backend API** | Render | `https://libraryhub-api.onrender.com` | Free |
-| **Frontend App** | Vercel | `https://libraryhub.vercel.app` | Free |
+| **Backend API** | Render | `https://libraryhub-mt4s.onrender.com` | Free |
+| **Frontend App** | Vercel | `https://libraryhub-seven.vercel.app` | Free |
 | **Database** | MongoDB Atlas | Cloud cluster | Free (M0) |
 
 ### Pre-Deployment Changes Made
@@ -662,11 +662,11 @@ Frontend/
 
 | Member | Module | Responsibilities |
 |---|---|---|
-| **Vidura MC** | Project Lead, Book Management, E-Books | System architecture, book CRUD, e-book upload/download, deployment, testing infra |
-| **Member 2** | Book Transactions | Borrow/return/renew, recycle bin, transaction history |
-| **Member 3** | Book Reservations | Waiting queue, auto-expiry, reservation management |
-| **Member 4** | Fine Management | Overdue fine calculation, pay/cancel/refund workflow |
-| **Member 5** | Report Management | Report generation, CSV export, archive/restore |
+| **S.A.V.M. Chandrasekara** (IT23724402) | Project Lead, Book Management, E-Books | System architecture, book CRUD, e-book upload/download, deployment, testing infra |
+| **L.D.B. Madigasekara** (IT23616042) | Book Transactions | Borrow/return/renew, recycle bin, transaction history |
+| **H.D. Cabraal** (IT23693340) | Book Reservations | Waiting queue, auto-expiry, reservation management |
+| **M.M.Y.K. Bandara** (IT23571198) | Fine Management | Overdue fine calculation, pay/cancel/refund workflow |
+| **N.A. Jeewaraja** (IT23654358) | Report Management | Report generation, CSV export, archive/restore |
 
 ---
 
@@ -717,5 +717,5 @@ LibraryHub/
 ---
 
 <p align="center">
-  <b>LibraryHub</b> — Built with ❤️ by Group [Your Group Number]
+  <b>LibraryHub</b> — Built with ❤️ by SE3040 Group
 </p>
