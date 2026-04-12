@@ -1,0 +1,43 @@
+config:
+  target: "http://localhost:5000"
+  phases:
+    - duration: 30
+      arrivalRate: 10
+      name: "Warm up — 10 users/sec for 30s"
+    - duration: 60
+      arrivalRate: 50
+      name: "Ramp up — 50 users/sec for 60s"
+    - duration: 30
+      arrivalRate: 100
+      name: "Peak load — 100 users/sec for 30s"
+  defaults:
+    headers:
+      Content-Type: "application/json"
+
+scenarios:
+  - name: "Health check"
+    weight: 40
+    flow:
+      - get:
+          url: "/"
+
+  - name: "Login attempt"
+    weight: 30
+    flow:
+      - post:
+          url: "/api/auth/login"
+          json:
+            email: "admin@libraryhub.com"
+            password: "Admin@123"
+
+  - name: "Unauthorized book list"
+    weight: 20
+    flow:
+      - get:
+          url: "/api/books"
+
+  - name: "Unauthorized ebook list"
+    weight: 10
+    flow:
+      - get:
+          url: "/api/ebooks"
