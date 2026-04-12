@@ -1,21 +1,89 @@
 import express from "express";
 import connectDB from "./config/mongodb.js"
+import seedAdmin from "./config/adminSeed.js";
+import startOverdueChecker from "./config/overdueChecker.js";
+import { startComputerStatusSync } from "./config/computerSync.js";
+import initReservation from "./config/initReservationCron.js";
 import "dotenv/config";
 import cors from "cors";
+import path from "path";
+import { fileURLToPath } from "url";
 
+// routes
+import authRoutes from "./routes/auth.routes.js";
+import adminRoutes from "./routes/admin.routes.js";
+import schoolListRoutes from "./routes/schoolList.routes.js";
+import membershipRequestRoutes from "./routes/membershipRequest.routes.js";
+import bookTransactionRoutes from "./routes/bookTransaction.routes.js";
+import computerRoutes from "./routes/computer.routes.js";
+import timeSlotRoutes from "./routes/timeSlot.routes.js";
+import computerReservationRoutes from "./routes/computerReservation.routes.js";
+import reportRoutes from "./routes/report.routes.js";
+import bookRoutes from "./routes/book.routes.js";
+import fineRoutes from "./routes/fine.routes.js";
+import bookReservationRoutes from "./routes/bookReservation.routes.js";
+import studentProfileRoutes from "./routes/studentProfile.routes.js";
+import teacherProfileRoutes from "./routes/teacherProfile.routes.js";
+import adminProfileRoutes from "./routes/adminProfile.routes.js";
+import ebookRoutes from "./routes/ebook.routes.js";
 
-const app= express();
+// __dirname for ES modules
+const __esFilename = fileURLToPath(import.meta.url);
+const __esDirname = path.dirname(__esFilename);
 
-connectDB();
+//This is the moment the server is born. app is the main object that represents your entire backend application.
+const app = express();
+
+connectDB().then(() => {
+  seedAdmin();
+  startOverdueChecker();
+  startComputerStatusSync();
+  initReservation();
+});
+
+//setting up Global Middlewares/ground rules
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: process.env.CORS_ORIGIN
+    ? process.env.CORS_ORIGIN.split(',')
+    : '*',
+  credentials: true,
+}));
 
-app.get("/", (req,res)=>{
+// Serve uploaded files (PDFs, covers) as static assets
+app.use("/uploads", express.static(path.join(__esDirname, "uploads")));
+
+// api routes
+app.use("/api/auth", authRoutes);
+app.use("/api/admin", adminRoutes);
+app.use("/api/school-list", schoolListRoutes);
+app.use("/api/membership-request", membershipRequestRoutes);
+app.use("/api/transactions", bookTransactionRoutes);
+app.use("/api/computer", computerRoutes);
+app.use("/api/time-slot", timeSlotRoutes);
+app.use("/api/computer-reservation", computerReservationRoutes);
+app.use("/api/reports", reportRoutes);
+app.use("/api/books", bookRoutes);
+app.use("/api/fines", fineRoutes);
+app.use("/api/book-reservation", bookReservationRoutes);
+app.use("/api/student", studentProfileRoutes);
+app.use("/api/teacher", teacherProfileRoutes);
+app.use("/api/admin-profile", adminProfileRoutes);
+app.use("/api/ebooks", ebookRoutes);
+
+//sanity check
+app.get("/", (req, res) => {
   res.send("API working");
 });
 
 
-const PORT= process.env.PORT || 3000;
-app.listen(PORT, ()=> {
-  console.log(`Server running on port: ${PORT}`);
-});
+const PORT = process.env.PORT || 3000;
+
+// Only listen when run directly (not when imported by tests)
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => {
+    console.log(`Server running on port: ${PORT}`);
+  });
+}
+
+export default app;

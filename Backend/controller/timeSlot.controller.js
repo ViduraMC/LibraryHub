@@ -1,0 +1,141 @@
+import TimeSlot from "../models/computer-reservation/timeSlot.model.js";
+import ComputerReservation from "../models/computer-reservation/computerReservation.model.js";
+
+
+export const initializeSchoolSchedule = async (req, res)=> {
+  try {
+   const {startHour, startMinute, endHour, endMinute, slotDuration}= req.body;
+
+    if(startHour===undefined || startMinute===undefined || endHour===undefined
+      || endMinute===undefined || !slotDuration
+    ){
+      return res.status(400).json({error: "All time fields and slot durations required!"});
+    }
+
+   let currentPos= startHour *60 + startMinute;
+   const endPos= endHour * 60 + endMinute;
+   const totalAvailableMinutes= endPos - currentPos;
+
+  if(totalAvailableMinutes <=0){
+    return res.status(400).json({error: "End time must be after start time"});
+  }
+
+  if (slotDuration <= 0) {
+    return res.status(400).json({ error: "Slot duration must be greater than 0." });
+  } 
+
+  const potentialSlotCount= Math.floor(totalAvailableMinutes /slotDuration);
+  if(potentialSlotCount >60){
+    return res.status(400).json({error: `This would generate ${potentialSlotCount} slots, Duration too short!`});
+  }
+
+  const activeBookings= await ComputerReservation.findOne({
+    status: {$in : ["reserved", "in-use"]},
+    slotStartTime: {$gte: new Date()}
+   });
+
+   if(activeBookings){
+    return res.status(400).json({error: "Cannot overhaul schedule. Active reservations exist for current/future slots!"});
+   }
+
+   const slotsToCreate=[];
+   let counter=1;
+
+   while(currentPos + slotDuration <= endPos){
+    slotsToCreate.push({
+      slotNumber: counter,
+      startHour: Math.floor(currentPos/60),
+      startMinute: currentPos % 60,
+      durationMinutes: slotDuration
+    });
+
+    currentPos+= slotDuration;
+    counter++;
+   }
+   await TimeSlot.deleteMany({});
+   const created = await TimeSlot.insertMany(slotsToCreate);
+
+   return res.status(201).json({message: "Schedule Generated!", data: created});
+
+  } catch (error) {
+    return res.status(400).json({error: "Error initializing schedule"});
+  }
+};
+
+export const createTimeSlot= async (req, res)=>{
+  try {
+    const {slotNumber, startHour, startMinute, durationMinutes}= req.body;
+
+    const existing= await TimeSlot.findOne({slotNumber});
+    if(existing) return res.status(400).json({message: "Slot number already implemented!"});
+
+    const newSlot = await TimeSlot.create({
+      slotNumber,
+      startHour,
+      startMinute,
+      durationMinutes
+    });
+    return res.status(201).json({message: "Slots added successfully", data: newSlot});
+
+  } catch (error) {
+    return res.status(500).json({error: "Error in time slots", error});
+  }
+};
+
+export const getAllTimeSlots = async(req, res)=> {
+  try {
+    const slots = await TimeSlot.find().sort({slotNumber:1});
+
+    if(!slots|| slots.length===0){
+      return res.status(200).json({message: "No time slots found", data: []});
+    }
+    return res.status(200).json({message: "Fetched time slots successfully!", data: slots});
+  } catch (error) {
+    return res.status(500).json({error: "Error in time slots", error});
+  }
+};
+
+export const updateTimeSlot = async (req, res)=> {
+  try {
+    const {id}= req.params;
+
+    const updatedSlot= await TimeSlot.findByIdAndUpdate(
+      id,
+      req.body,
+      {returnDocument: 'after', runValidators: true}
+    );
+
+    if(!updatedSlot) return res.status(400).json({message: "Slot not found!", error});
+
+    return res.status(200).json({message: "Slot updated successfully!", data: updatedSlot});
+
+  } catch (error) {
+    return res.status(500).json({error: "Error in time slots", error});
+  }
+};
+
+export const deleteTimeSlot = async (req, res)=> {
+  try {
+    const {id}= req.params;
+
+    const slot= await TimeSlot.findById(id);
+    if(!slot) return res.status(404).json({message:"Time slot not found!"});
+
+    //check for active or upcoming reservations which are reserved or in-use
+    const activeReservations = await ComputerReservation.findOne({
+      slotNumber: slot.slotNumber,
+      status: {$in: ["reserved", "in-use"]},
+      slotStartTime: {$gte: new Date()} //check future or current ones
+    });
+
+    if(activeReservations){
+      return res.status(400).json({message: "Cannot delete slot. Students have active reservations!"});
+    }
+
+    await TimeSlot.findByIdAndDelete(id);
+    return res.status(200).json({message: "Time slot deleted successfully!"});
+
+  } catch (error) {
+    return res.status(500).json({error: "Error in time slots", error});
+  }
+};
